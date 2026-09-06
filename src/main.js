@@ -611,52 +611,6 @@ ipcMain.handle('delete-file', async (event, filePath) => {
   return { success: true }
 })
 
-// ── 原生输入对话框（解决 confirm/prompt 导致焦点丢失）──
-ipcMain.handle('show-input-dialog', async (event, { title, message, placeholder }) => {
-  // Electron 没有内置 prompt，用自定义输入窗口
-  const inputWin = new BrowserWindow({
-    width: 400, height: 200, parent: mainWindow, modal: true, resizable: false,
-    title: title || '输入',
-    webPreferences: { nodeIntegration: true, contextIsolation: false }
-  })
-  return new Promise((resolve) => {
-    const html = `<html><body style="margin:0;background:#1a2130;font-family:-apple-system,sans-serif;display:flex;flex-direction:column;padding:20px;gap:12px">
-      <div style="font-size:13px;color:#fff;font-weight:500">${title||''}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5)">${message||''}</div>
-      <input id="inp" type="text" placeholder="${placeholder||''}" autofocus
-        style="background:rgba(255,255,255,0.08);border:1px solid rgba(83,74,183,0.6);border-radius:6px;padding:8px 10px;font-size:13px;color:#fff;outline:none;width:100%;box-sizing:border-box">
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button onclick="require('electron').ipcRenderer.send('input-dialog-done',null)" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:12px">取消</button>
-        <button onclick="require('electron').ipcRenderer.send('input-dialog-done',document.getElementById('inp').value)" style="padding:6px 14px;border-radius:6px;border:none;background:#534ab7;color:#fff;cursor:pointer;font-size:12px">确认</button>
-      </div>
-      <script>
-        document.getElementById('inp').addEventListener('keydown', e => {
-          if(e.key==='Enter') require('electron').ipcRenderer.send('input-dialog-done',document.getElementById('inp').value)
-          if(e.key==='Escape') require('electron').ipcRenderer.send('input-dialog-done',null)
-        })
-        document.getElementById('inp').focus()
-      </script></body></html>`
-    inputWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
-    const { ipcMain: ipc2 } = require('electron')
-    const handler = (e, val) => { resolve({ value: val }); try { inputWin.close() } catch(_){} ipc2.removeListener('input-dialog-done', handler) }
-    ipc2.once('input-dialog-done', handler)
-    inputWin.on('closed', () => { resolve({ value: null }); ipc2.removeListener('input-dialog-done', handler) })
-  })
-})
-
-// ── 原生确认对话框（避免 confirm() 导致焦点丢失）──
-ipcMain.handle('show-confirm-dialog', async (event, { title, message }) => {
-  const result = await dialog.showMessageBox(mainWindow, {
-    type: 'warning',
-    buttons: ['取消', '确认'],
-    defaultId: 1,
-    cancelId: 0,
-    title: title || '确认',
-    message: message || '确认操作？'
-  })
-  return { confirmed: result.response === 1 }
-})
-
 // ── 新建文件夹 ──
 ipcMain.handle('create-folder', async (event, { parentPath, folderName }) => {
   try {

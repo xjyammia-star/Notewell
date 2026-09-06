@@ -76,8 +76,6 @@ contextBridge.exposeInMainWorld('api', {
   getFolderMdFiles:  (folderPath)=> ipcRenderer.invoke('get-folder-md-files', folderPath),
   createFolder:      (args)      => ipcRenderer.invoke('create-folder', args),
   deleteFolder:      (args)      => ipcRenderer.invoke('delete-folder', args),
-  showConfirmDialog: (args)      => ipcRenderer.invoke('show-confirm-dialog', args),
-  showInputDialog:   (args)      => ipcRenderer.invoke('show-input-dialog', args),
   selectAudioFile:   ()          => ipcRenderer.invoke('select-audio-file'),
   aiAudioToNote:     (args)      => ipcRenderer.invoke('ai-audio-to-note', args),
   onAudioNoteProgress:(cb)       => ipcRenderer.on('audio-note-progress', (_e, data) => cb(data)),
