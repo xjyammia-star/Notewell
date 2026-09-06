@@ -5434,19 +5434,24 @@ async function nwLoadFilesByType(type, label) {
   const titleEl = document.getElementById('folder-files-title')
   if (!filesEl) return
   if (titleEl) titleEl.textContent = label
-  filesEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(255,255,255,0.25);text-align:center">Loading…</div>'
+  filesEl.innerHTML = '<div class="loading">加载中...</div>'
   try {
     const res = await window.api.listFilesByType({ vaultPath: currentVaultPath, type })
     if (!res.success || !res.files.length) {
-      filesEl.innerHTML = `<div style="padding:12px;font-size:11px;color:rgba(255,255,255,0.25);text-align:center">No ${label} found</div>`
+      filesEl.innerHTML = `<div class="empty-tip">没有找到${label}</div>`
       return
     }
     filesEl.innerHTML = res.files.map(f => {
+      const icon = fileIcon(f.name)
       const ep = esc(f.path)
-      return `<div class="nw-file-row" onclick="window.api.openFile('${ep}')">
-        <span class="nw-file-row-icon">${fileIcon(f.name)}</span>
-        <span class="nw-file-row-name" title="${f.name}">${f.name}</span>
-        <span class="nw-file-row-date">${f.mtime||''}</span>
+      return `<div class="folder-file-item">
+        <span class="ff-icon">${icon}</span>
+        <span class="ff-name" title="${f.name}">${f.name}</span>
+        <span class="ff-meta">${f.mtime||''}</span>
+        <span class="ff-actions">
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+        </span>
       </div>`
     }).join('')
   } catch(e) {}
