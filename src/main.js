@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog, shell, Notification } = require('el
 const path = require('path')
 const fs = require('fs')
 const https = require('https')
+const { pathToFileURL } = require('url')
 const Store = require('electron-store')
 const { autoUpdater } = require('electron-updater')
 if (typeof globalThis.DOMMatrix === 'undefined') {
@@ -2854,12 +2855,13 @@ ipcMain.handle('study-save-note', async (event, { title, content, aiPolish, outp
   const langInstruction = outputLang === '英文'
     ? 'Please write the entire output in English only. Do not use any Chinese.'
     : '请用中文输出全部内容。'
+  const mathInstruction = '所有数学、物理、化学等公式，必须只用标准 LaTeX 语法表示一次（行内公式用 \\( ... \\)，独立公式用 \\[ ... \\]），不要额外用文字、Unicode 符号（如单独的"√"）或 "---" 分隔线去模拟或重复画一遍同一个公式/计算步骤，也不要把公式拆成多行手绘效果。'
 
   if (aiPolish) {
     if (!settings.apiKey || !settings.modelId) {
       return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
     }
-    const polishPrompt = `你是一个笔记整理助手。${langInstruction}
+    const polishPrompt = `你是一个笔记整理助手。${langInstruction}${mathInstruction}
 请对以下笔记内容进行整理：
 1. 纠正错别字和明显的语法错误
 2. 适当调整语句使其更通顺
@@ -2927,8 +2929,9 @@ ipcMain.handle('study-expand-knowledge', async (event, { title, description, age
   const langInstruction = outputLang === '英文'
     ? 'IMPORTANT: Write the entire output in English only. Do not use any Chinese characters.'
     : '请用中文输出全部内容。'
+  const mathInstruction = '所有数学、物理、化学等公式，必须只用标准 LaTeX 语法表示一次（行内公式用 \\( ... \\)，独立公式用 \\[ ... \\]），不要额外用文字、Unicode 符号（如单独的"√"）或 "---" 分隔线去模拟或重复画一遍同一个公式/计算步骤，也不要把公式拆成多行手绘效果。'
 
-  const expandPrompt = `你是一位专业的教育内容创作者。${langInstruction}
+  const expandPrompt = `你是一位专业的教育内容创作者。${langInstruction}${mathInstruction}
 请根据以下信息，对知识点进行系统性扩充和完善。
 
 知识点标题：${title}
@@ -2976,6 +2979,7 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
   const langInstruction = outputLang === '英文'
     ? 'IMPORTANT: Write the entire output in English only. Do not use any Chinese characters.'
     : '请用中文输出全部内容。'
+  const mathInstruction = '所有数学、物理、化学等公式，必须只用标准 LaTeX 语法表示一次（行内公式用 \\( ... \\)，独立公式用 \\[ ... \\]），不要额外用文字、Unicode 符号（如单独的"√"）或 "---" 分隔线去模拟或重复画一遍同一个公式/计算步骤，也不要把公式拆成多行手绘效果。'
 
   // 读取所有文件内容
   const fileSummaries = []
@@ -3027,7 +3031,7 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
 - 对应每道题给出正确答案和详细解析`
   }
 
-  const reviewPrompt = `你是一位专业的学习辅导老师。${langInstruction}
+  const reviewPrompt = `你是一位专业的学习辅导老师。${langInstruction}${mathInstruction}
 请根据以下知识库资料，为学生生成学习辅助内容。
 
 ${userRequirements ? `学生特别要求：${userRequirements}\n` : ''}
@@ -3154,23 +3158,13 @@ ${contentSnippet}
   }
 }
 
-// ── 学习助手：导出 PDF（用 Electron BrowserWindow printToPDF）──
-ipcMain.handle('study-export-pdf', async (event, { htmlBody, title }) => {
-  try {
-    const { BrowserWindow: BW, dialog } = require('electron')
-
-    // 弹出保存对话框
-    const saveResult = await dialog.showSaveDialog(mainWindow, {
-      title: '保存 PDF 文件',
-      defaultPath: (title || '学习资料') + '.pdf',
-      filters: [{ name: 'PDF 文件', extensions: ['pdf'] }]
-    })
-    if (saveResult.canceled || !saveResult.filePath) return { success: false, error: '已取消' }
-
-    const savePath = saveResult.filePath
-
-    // 构建完整 HTML
-    const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+// ── PDF 导出：公用 HTML 模板（内嵌本地 KaTeX 样式，保证公式正确显示）──
+// htmlBody 必须是已经用 KaTeX 渲染过公式的 HTML（渲染在渲染进程完成，这里只负责拼页面+加载样式）
+function buildPdfHtmlDocument(htmlBody, title) {
+  const katexCssPath = path.join(__dirname, 'katex', 'katex.min.css')
+  const katexCssHref = pathToFileURL(katexCssPath).href
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link rel="stylesheet" href="${katexCssHref}">
 <style>
   body{font-family:'Microsoft YaHei',Arial,sans-serif;margin:28px 36px;line-height:1.9;color:#222;font-size:14px}
   h1{font-size:20px;color:#2c2c2a;border-bottom:2px solid #534ab7;padding-bottom:6px;margin-bottom:16px}
@@ -3180,31 +3174,167 @@ ipcMain.handle('study-export-pdf', async (event, { htmlBody, title }) => {
   p{margin:6px 0}
   strong{font-weight:600;color:#1a1a1a}
   hr{border:none;border-top:1px solid #ddd;margin:16px 0}
+  .katex-display-wrap{margin:12px 0}
+  .katex-display{overflow-x:auto}
 </style>
 <title>${title || '学习资料'}</title>
 </head><body>
 <h1>${title || '学习资料'}</h1>
 <div>${htmlBody}</div>
 </body></html>`
+}
 
-    // 用隐藏的 BrowserWindow 渲染后导出 PDF
-    const win = new BW({ show: false, webPreferences: { nodeIntegration: false } })
-    await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(fullHtml))
+// ── PDF 导出：公用渲染逻辑（隐藏 BrowserWindow + printToPDF）──
+// 注意：不能用 data: 地址加载页面——浏览器会把它当成和本地字体文件不同的来源，
+// 可能悄悄加载字体失败并换成系统字体（不报错，但根号等符号会因此变形错位）。
+// 改为把 HTML 写入一个临时文件，用和软件主界面一样的 file:// 方式加载，避免这个问题。
+async function renderHtmlToPdfBuffer(htmlBody, title) {
+  const { BrowserWindow: BW } = require('electron')
+  const fullHtml = buildPdfHtmlDocument(htmlBody, title)
+  const os = require('os')
+  const tempPath = path.join(os.tmpdir(), 'notewell-pdf-' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.html')
+  fs.writeFileSync(tempPath, fullHtml, 'utf-8')
 
+  const win = new BW({ show: false, webPreferences: { nodeIntegration: false } })
+  try {
+    await win.loadFile(tempPath)
+    // 等待 KaTeX 专用字体真正加载完成，否则公式里的根号/上下标会用替代字体的错误宽度排版，导致错位乱码
+    try {
+      await win.webContents.executeJavaScript('document.fonts.ready.then(() => true)')
+    } catch (_) {}
+    // 字体加载完成后再多等一小段时间，确保页面完成重新排版
+    await new Promise(resolve => setTimeout(resolve, 300))
     const pdfBuffer = await win.webContents.printToPDF({
       marginsType: 1,
       pageSize: 'A4',
       printBackground: false,
       landscape: false
     })
+    return pdfBuffer
+  } finally {
     win.destroy()
+    try { fs.unlinkSync(tempPath) } catch (_) {}
+  }
+}
 
+// ── 学习助手：导出 PDF（用户手动点击"下载 PDF"，弹出另存为对话框）──
+ipcMain.handle('study-export-pdf', async (event, { htmlBody, title }) => {
+  try {
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: '保存 PDF 文件',
+      defaultPath: (title || '学习资料') + '.pdf',
+      filters: [{ name: 'PDF 文件', extensions: ['pdf'] }]
+    })
+    if (saveResult.canceled || !saveResult.filePath) return { success: false, error: '已取消' }
+
+    const savePath = saveResult.filePath
+    const pdfBuffer = await renderHtmlToPdfBuffer(htmlBody, title)
     fs.writeFileSync(savePath, pdfBuffer)
-    // 打开文件夹定位到文件
     shell.showItemInFolder(savePath)
     return { success: true, path: savePath }
   } catch (err) {
     return { success: false, error: err.message }
+  }
+})
+
+// ── 含公式内容保存为 PDF：按文件名用 AI 语义判断应归入哪个知识库文件夹 ──
+// （只把文件名交给 AI，不读取 PDF 正文内容）
+async function matchFolderByFilenameAI(filename, vaultFolders, settings) {
+  const folderList = (vaultFolders || [])
+    .map(f => f.label)
+    .filter(l => l && l !== '（根目录）')
+    .join('、')
+
+  if (!folderList || !settings || !settings.apiKey || !settings.modelId) return ''
+
+  const prompt = `你是一个知识库文件归类助手。
+知识库现有文件夹：${folderList}
+
+请根据下面这个文件名，判断它在语义上最应该归入上面哪一个文件夹（不是按文字是否相同匹配，而是理解文件名所代表的学科/主题含义，例如"勾股定理.pdf"应归入数学类文件夹）。
+如果找不到合适的文件夹，输出空字符串。
+
+文件名：${filename}
+
+请严格按以下 JSON 格式回复，不要加任何其他文字：
+{"folder":"xxx"}`
+
+  try {
+    const replyObj = await callVolcanoAI(settings.apiKey, settings.modelId, settings.endpoint,
+      [{ role: 'user', content: prompt }], 200)
+    recordTokenUsage('save', 'text', replyObj.usage.prompt_tokens || 0, replyObj.usage.completion_tokens || 0)
+    const clean = (replyObj.content || '').replace(/```json|```/g, '').trim()
+    const aiResult = JSON.parse(clean)
+    const aiFolder = (aiResult.folder || '').trim()
+    if (!aiFolder) return ''
+    const matched = (vaultFolders || []).find(f =>
+      f.label && f.label.replace(/\\/g, '/') === aiFolder.replace(/\\/g, '/')
+    )
+    return matched && matched.value ? matched.value : ''
+  } catch (_) {
+    return ''
+  }
+}
+
+// ── 检测到公式后，用户选择"保存为 PDF"：渲染 PDF + AI 按文件名归类 + 写入知识库 ──
+ipcMain.handle('pdf-smart-save', async (event, { htmlBody, filename, sourceTitle, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
+  const settings = store.get('aiSettings', {})
+
+  const safeName = (filename || sourceTitle || '未命名笔记').replace(/[\\/:*?"<>|]/g, '_').trim().slice(0, 60) || '未命名笔记'
+
+  let targetDir = await matchFolderByFilenameAI(safeName, vaultFolders, settings)
+  let usedInbox = false
+  let noMatch = false
+
+  if (!targetDir) {
+    noMatch = true
+    if (inboxFolder) {
+      targetDir = inboxFolder
+      usedInbox = true
+    } else if (inboxPath) {
+      targetDir = inboxPath
+      usedInbox = true
+    } else {
+      return { success: false, error: '没有匹配的文件夹，且未设置临时文件夹，请先在系统设置中配置。' }
+    }
+  }
+
+  try {
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+  } catch (e) {
+    return { success: false, error: '目标文件夹创建失败：' + e.message }
+  }
+
+  let pdfBuffer
+  try {
+    pdfBuffer = await renderHtmlToPdfBuffer(htmlBody, sourceTitle || safeName)
+  } catch (e) {
+    return { success: false, error: 'PDF 生成失败：' + e.message }
+  }
+
+  let finalFilename = safeName
+  let savePath = path.join(targetDir, finalFilename + '.pdf')
+  let i = 2
+  while (fs.existsSync(savePath)) {
+    finalFilename = safeName + '_' + i
+    savePath = path.join(targetDir, finalFilename + '.pdf')
+    i++
+  }
+
+  try {
+    fs.writeFileSync(savePath, pdfBuffer)
+  } catch (e) {
+    return { success: false, error: '文件写入失败：' + e.message }
+  }
+
+  try { updateHubFile(targetDir, vaultPath, settings) } catch (_) {}
+
+  return {
+    success: true,
+    path: savePath,
+    filename: finalFilename + '.pdf',
+    folder: noMatch ? '（临时文件夹）' : path.basename(targetDir),
+    usedInbox,
+    noMatch
   }
 })
 ipcMain.handle('read-file-content', async (event, filePath) => {

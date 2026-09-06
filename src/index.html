@@ -3254,9 +3254,40 @@ function selectTemplate(name, el) {
 async function doCreateNote() {
   const title = document.getElementById('note-title').value.trim()
   const body  = document.getElementById('note-body').value.trim()
+  const el = document.getElementById('note-result'); el.classList.remove('hidden')
+
+  // 检测公式：若检测到，询问用户是否改存 PDF
+  if (nwDetectFormula(body)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    if (choice === 'pdf') {
+      if (!currentVaultPath) { alert('请先在知识库概览页选择知识库路径'); return }
+      el.className = 'import-result'
+      el.innerHTML = '⏳ 正在生成 PDF，AI 正在按文件名匹配文件夹...'
+      const pdfFilename = title || ('笔记_' + new Date().toISOString().slice(0, 10))
+      let res
+      try {
+        res = await nwSaveContentAsPdf(body, pdfFilename, { vaultPath: currentVaultPath, inboxPath: currentInboxPath })
+      } catch (e) {
+        el.className = 'import-result error'; el.innerHTML = '❌ 保存失败：' + e.message
+        return
+      }
+      if (res && res.success) {
+        el.className = 'import-result success'
+        const where = res.noMatch ? '临时文件夹' : ('「' + res.folder + '」')
+        el.innerHTML = `✅ 笔记已保存为 PDF，存入${where}。<button class="open-btn" style="margin-left:8px" onclick="openFile('${esc(res.path)}')">📂 文件管理器查看</button>`
+        document.getElementById('note-title').value = ''; document.getElementById('note-body').value = ''
+        loadOverview()
+      } else {
+        el.className = 'import-result error'; el.innerHTML = '❌ 保存失败：' + (res ? res.error : '未知错误')
+      }
+      return
+    }
+    // choice === 'md'：继续走下面原有的 MD 保存流程
+  }
+
   const targetDir = currentInboxPath || currentVaultPath
   const res = await window.api.createNote({ vaultPath: currentVaultPath, targetDir, title, template: currentTemplate, body })
-  const el = document.getElementById('note-result'); el.classList.remove('hidden')
   if (res.success) {
     lastCreatedNotePath = res.path
     const dest = currentInboxPath ? '待处理文件库' : '知识库根目录'
@@ -3443,6 +3474,52 @@ function copyAnalyzeResult() {
 */
 async function smartSaveNote(content, sourceType, sourceTitle, msgEl, onDone) {
   if (!currentVaultPath) { alert('请先在知识库概览页选择知识库路径'); return }
+
+  // 检测公式：若检测到，询问用户是否改存 PDF
+  if (nwDetectFormula(content)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    if (choice === 'pdf') {
+      if (msgEl) {
+        msgEl.style.display = 'block'
+        msgEl.style.background = '#f5f4f0'
+        msgEl.style.color = '#888780'
+        msgEl.textContent = '正在生成 PDF，AI 正在按文件名匹配文件夹...'
+      }
+      let res
+      try {
+        res = await nwSaveContentAsPdf(content, sourceTitle, { vaultPath: currentVaultPath, inboxPath: currentInboxPath })
+      } catch (e) {
+        if (msgEl) {
+          msgEl.style.background = '#fdecea'
+          msgEl.style.color = '#a32d2d'
+          msgEl.textContent = '❌ 保存失败：' + e.message
+        }
+        return
+      }
+      if (!res || !res.success) {
+        if (msgEl) {
+          msgEl.style.background = '#fdecea'
+          msgEl.style.color = '#a32d2d'
+          msgEl.textContent = '❌ 保存失败：' + (res ? res.error : '未知错误')
+        }
+        return
+      }
+      let msg = res.noMatch
+        ? '⚠️ 未找到匹配文件夹，已存入临时文件夹：' + res.path
+        : '✅ 已保存到「' + res.folder + '」：' + res.path
+      if (msgEl) {
+        msgEl.style.background = res.noMatch ? '#fff8e1' : '#e8f5e9'
+        msgEl.style.color      = res.noMatch ? '#7a5c00' : '#2e6b3a'
+        msgEl.innerHTML = msg +
+          ' <button class="open-btn" style="margin-left:8px" onclick="openFile(\'' + esc(res.path) + '\')">📂 查看</button>'
+      }
+      if (typeof onDone === 'function') onDone(res)
+      return
+    }
+    // choice === 'md'：继续走下面原有的 MD 保存流程
+  }
+
   const settings = await window.api.getAiSettings()
   const inboxFolder = settings.inboxFolder || null
   const inboxPath   = currentInboxPath || null
@@ -4604,6 +4681,37 @@ async function studySaveNote() {
   const btn = document.getElementById('study-note-save-btn')
   const msgEl = document.getElementById('study-note-msg')
 
+  // 检测公式：若检测到，询问用户是否改存 PDF
+  if (nwDetectFormula(content)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    if (choice === 'pdf') {
+      btn.disabled = true
+      btn.textContent = '⏳ 生成 PDF 中...'
+      msgEl.style.display = 'none'
+      try {
+        const result = await nwSaveContentAsPdf(content, title || '学习笔记')
+        if (result.success) {
+          const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
+          msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
+          msgEl.style.display = 'block'
+          document.getElementById('study-note-content').value = ''
+          document.getElementById('study-note-title').value = ''
+        } else {
+          msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
+          msgEl.style.display = 'block'
+        }
+      } catch(e) {
+        msgEl.innerHTML = '<div class="study-save-err">❌ 错误：' + e.message + '</div>'
+        msgEl.style.display = 'block'
+      }
+      btn.disabled = false
+      btn.textContent = '💾 保存笔记'
+      return
+    }
+    // choice === 'md'：继续走下面原有的 MD 保存流程
+  }
+
   btn.disabled = true
   btn.textContent = aiPolish ? '⏳ AI 整理中...' : '⏳ 保存中...'
   msgEl.style.display = 'none'
@@ -4696,6 +4804,36 @@ async function studyExpandSave() {
 
   const btn = document.getElementById('study-expand-save-btn')
   const msgEl = document.getElementById('study-expand-msg')
+
+  // 检测公式：若检测到，询问用户是否改存 PDF
+  if (nwDetectFormula(studyExpandResultContent)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    if (choice === 'pdf') {
+      btn.disabled = true
+      btn.textContent = '⏳ 生成 PDF 中...'
+      msgEl.style.display = 'none'
+      try {
+        const result = await nwSaveContentAsPdf(studyExpandResultContent, title + labelSuffix)
+        if (result.success) {
+          const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
+          msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
+          msgEl.style.display = 'block'
+        } else {
+          msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
+          msgEl.style.display = 'block'
+        }
+      } catch(e) {
+        msgEl.innerHTML = '<div class="study-save-err">❌ 错误：' + e.message + '</div>'
+        msgEl.style.display = 'block'
+      }
+      btn.disabled = false
+      btn.textContent = '📂 保存到知识库'
+      return
+    }
+    // choice === 'md'：继续走下面原有的 MD 保存流程
+  }
+
   btn.disabled = true
   btn.textContent = '⏳ 保存中...'
   msgEl.style.display = 'none'
@@ -4875,6 +5013,38 @@ async function studyReviewSave() {
   if (!studyReviewResultContent) return
   const btn = document.getElementById('study-review-save-btn')
   const msgEl = document.getElementById('study-review-msg')
+
+  // 检测公式：若检测到，询问用户是否改存 PDF
+  if (nwDetectFormula(studyReviewResultContent)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    if (choice === 'pdf') {
+      const generateTypeForPdf = document.querySelector('input[name="study-gen-type"]:checked')?.value || 'review'
+      const pdfTypeLabel = generateTypeForPdf === 'quiz' ? '练习题' : (generateTypeForPdf === 'both' ? '复习资料与练习题' : '复习资料')
+      btn.disabled = true
+      btn.textContent = '⏳ 生成 PDF 中...'
+      msgEl.style.display = 'none'
+      try {
+        const result = await nwSaveContentAsPdf(studyReviewResultContent, pdfTypeLabel)
+        if (result.success) {
+          const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
+          msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
+          msgEl.style.display = 'block'
+        } else {
+          msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
+          msgEl.style.display = 'block'
+        }
+      } catch(e) {
+        msgEl.innerHTML = '<div class="study-save-err">❌ 错误：' + e.message + '</div>'
+        msgEl.style.display = 'block'
+      }
+      btn.disabled = false
+      btn.textContent = '📂 保存到知识库（md）'
+      return
+    }
+    // choice === 'md'：继续走下面原有的 MD 保存流程
+  }
+
   btn.disabled = true
   btn.textContent = '⏳ 保存中...'
   msgEl.style.display = 'none'
@@ -4912,11 +5082,8 @@ async function studyReviewSave() {
   btn.textContent = '📂 保存到知识库（md）'
 }
 
-// ── 学习助手结果渲染（Markdown + KaTeX 数学公式）──
-function studyRenderResult(elId, mdText) {
-  const el = document.getElementById(elId)
-  if (!el) return
-
+// ── Markdown + KaTeX 数学公式 → 渲染后的 HTML 字符串（不操作 DOM，供预览和 PDF 导出共用）──
+function nwMdToKatexHtml(mdText) {
   // Step 1: 先把公式块提取出来，用占位符保护，避免被 Markdown 处理破坏
   const mathBlocks = []
   let text = mdText
@@ -4987,7 +5154,74 @@ function studyRenderResult(elId, mdText) {
     html = html.split(placeholder).join(wrapped)
   })
 
-  el.innerHTML = html
+  return html
+}
+
+// ── 学习助手结果渲染（Markdown + KaTeX 数学公式）──
+function studyRenderResult(elId, mdText) {
+  const el = document.getElementById(elId)
+  if (!el) return
+  el.innerHTML = nwMdToKatexHtml(mdText)
+}
+
+// ══ 保存时的公式检测 + PDF/MD 选择弹窗（供所有保存入口共用）══
+
+// 检测原始文字内容中是否含有高置信度的数学/物理/化学公式信号
+function nwDetectFormula(text) {
+  if (!text) return false
+  const patterns = [
+    /\\\[[\s\S]*?\\\]/,                 // \[ ... \]
+    /\\\([\s\S]*?\\\)/,                 // \( ... \)
+    /\$\$[\s\S]*?\$\$/,                 // $$ ... $$
+    /\\(frac|sqrt|times|cdot|pi|sum|int|boxed|leq|geq|neq|infty|alpha|beta|gamma|theta|delta|Delta|div|pm|approx|sin|cos|tan|log|ln|lim|partial|nabla|vec|hat|overline|underline|binom|begin\{)/,
+    /\^\{[^}]*\}/,                      // 上标 ^{...}
+    /_\{[^}]*\}/                        // 下标 _{...}
+  ]
+  return patterns.some(p => p.test(text))
+}
+
+// 检测到公式后弹出三选一提示框，返回 Promise<'pdf'|'md'|'cancel'>
+function nwShowSaveChoiceDialog() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;justify-content:center'
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:24px 26px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);font-family:inherit">
+        <div style="font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:8px">检测到数学/物理/化学等公式</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;margin-bottom:18px">建议保存为 PDF 格式，以确保公式能正确显示。若保存为 Markdown（.md），在不支持公式渲染的软件中打开可能会看到原始公式代码。</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button data-choice="pdf" style="padding:10px;border:none;border-radius:8px;background:#534ab7;color:#fff;font-size:13px;cursor:pointer;font-weight:600">📄 保存为 PDF（推荐）</button>
+          <button data-choice="md" style="padding:10px;border:1px solid #d8d6cc;border-radius:8px;background:#fff;color:#444;font-size:13px;cursor:pointer">仍保存为 Markdown（.md）</button>
+          <button data-choice="cancel" style="padding:10px;border:none;border-radius:8px;background:none;color:#999;font-size:13px;cursor:pointer">取消</button>
+        </div>
+      </div>`
+    overlay.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        document.body.removeChild(overlay)
+        resolve(btn.getAttribute('data-choice'))
+      }
+    })
+    document.body.appendChild(overlay)
+  })
+}
+
+// 把内容渲染成带 KaTeX 公式的 HTML，交给主进程生成 PDF 并按文件名 AI 归类保存
+// 返回主进程的保存结果对象 { success, path, filename, folder, usedInbox, noMatch, error }
+async function nwSaveContentAsPdf(content, sourceTitle, opts) {
+  opts = opts || {}
+  const htmlBody = nwMdToKatexHtml(content)
+  const vaultPath = opts.vaultPath !== undefined ? opts.vaultPath : await window.api.getVaultPath()
+  const vaultFolders = opts.vaultFolders || (vaultPath ? (await window.api.getVaultFolders(vaultPath)).folders || [] : [])
+  const aiSettings = opts.aiSettings || await window.api.getAiSettings()
+  const inboxFolder = opts.inboxFolder !== undefined ? opts.inboxFolder : (aiSettings.inboxFolder || '')
+  const inboxPath = opts.inboxPath !== undefined ? opts.inboxPath : await window.api.getInboxPath()
+
+  return await window.api.pdfSmartSave({
+    htmlBody,
+    filename: opts.filename || sourceTitle,
+    sourceTitle,
+    vaultPath, vaultFolders, inboxFolder, inboxPath
+  })
 }
 
 function studyMd2Html(md) {
@@ -5006,7 +5240,7 @@ function studyReviewDownloadPDF() {
   if (!studyReviewResultContent) return
   const generateType = document.querySelector('input[name="study-gen-type"]:checked')?.value || 'review'
   const typeLabel = generateType === 'quiz' ? '练习题' : (generateType === 'both' ? '复习资料与练习题' : '复习资料')
-  const htmlBody = studyMd2Html(studyReviewResultContent)
+  const htmlBody = nwMdToKatexHtml(studyReviewResultContent)
   window.api.studyInvoke('study-export-pdf', { htmlBody, title: typeLabel })
     .then(res => {
       if (!res || !res.success) alert('PDF 导出失败：' + (res?.error || '未知错误'))
