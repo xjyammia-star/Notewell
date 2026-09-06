@@ -286,6 +286,91 @@
     .nw-settings-scope #app-version { color:#fff !important; }
     .nw-settings-scope #update-status { color:rgba(255,255,255,0.45) !important; }
 
+    /* ── 搜索页暗色配色覆盖（仅改颜色，不改布局/间距） ── */
+    .nw-search-scope { color:rgba(255,255,255,0.75); }
+    .nw-search-scope #tag-cloud-wrap { background:rgba(255,255,255,0.05) !important; border-color:rgba(255,255,255,0.1) !important; }
+    .nw-search-scope .search-bar { }
+    .nw-search-scope .search-input { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-search-scope .search-input::placeholder { color:rgba(255,255,255,0.25); }
+    .nw-search-scope .filter-bar { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
+    .nw-search-scope .filter-label { color:rgba(255,255,255,0.4); }
+    .nw-search-scope .filter-sep { color:rgba(255,255,255,0.15); }
+    .nw-search-scope .chip { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); }
+    .nw-search-scope .chip:hover { border-color:#afa9ec; color:#afa9ec; }
+    .nw-search-scope .chip.active { background:#534ab7; color:#fff; border-color:#534ab7; }
+    .nw-search-scope .date-input { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-search-scope .date-input::-webkit-calendar-picker-indicator { filter:invert(1); }
+    .nw-search-scope .sort-select { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-search-scope .sort-select option { background:#1a2130; color:#fff; }
+    .nw-search-scope .filter-reset { color:rgba(255,255,255,0.4); }
+    .nw-search-scope .filter-reset:hover { background:rgba(255,255,255,0.08); color:#fff; }
+    .nw-search-scope div[style*="font-weight:500;color:#5f5e5a"] { color:rgba(255,255,255,0.7) !important; }
+    .nw-search-scope .tag-toggle-btn { color:rgba(255,255,255,0.4); border-color:rgba(255,255,255,0.2); }
+    .nw-search-scope .tag-toggle-btn:hover { background:rgba(255,255,255,0.08); }
+    .nw-search-scope .tag-group-label { color:rgba(255,255,255,0.3); }
+    .nw-search-scope .tag-pill.size-lg { background:rgba(83,74,183,0.25); color:#afa9ec; border-color:rgba(175,169,236,0.4); }
+    .nw-search-scope .tag-pill.size-md { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.12); }
+    .nw-search-scope .tag-pill.size-sm { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.4); border-color:rgba(255,255,255,0.1); }
+    .nw-search-scope .tag-pill:hover { border-color:#afa9ec !important; color:#afa9ec !important; background:rgba(83,74,183,0.2) !important; }
+    .nw-search-scope .tag-pill.active { background:#534ab7 !important; color:#fff !important; border-color:#534ab7 !important; }
+    .nw-search-scope .empty-tip { color:rgba(255,255,255,0.25); }
+    .nw-search-scope .loading { color:rgba(255,255,255,0.25); }
+    .nw-search-scope .result-item { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
+    .nw-search-scope .result-item:hover { border-color:#afa9ec; }
+    .nw-search-scope .result-name { color:#fff; }
+    .nw-search-scope .result-path { color:rgba(255,255,255,0.35); }
+    .nw-search-scope .result-snippet { color:rgba(255,255,255,0.55); }
+    .nw-search-scope .result-count { color:rgba(255,255,255,0.4); }
+    .nw-search-scope .result-actions button { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.65); }
+    .nw-search-scope .result-actions button:hover { background:rgba(255,255,255,0.12); }
+    .nw-search-scope .result-actions .obs-btn { color:#afa9ec; border-color:rgba(175,169,236,0.4); }
+    .nw-search-scope .result-actions .obs-btn:hover { background:rgba(83,74,183,0.2); }
+
+    /* ── 导入资料页暗色配色覆盖（仅改颜色，不改布局/间距） ── */
+    .nw-import-scope { color:rgba(255,255,255,0.75); }
+    .nw-import-scope .section-title { color:rgba(255,255,255,0.85); }
+    .nw-import-scope .panel { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.1); }
+    .nw-import-scope .drop-zone { border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.4); }
+    .nw-import-scope .drop-zone:hover, .nw-import-scope .drop-zone.drag-over { border-color:#afa9ec; background:rgba(83,74,183,0.15); }
+    .nw-import-scope .import-file-item { border-bottom-color:rgba(255,255,255,0.08); }
+    .nw-import-scope .remove-btn { color:rgba(255,255,255,0.3); }
+    .nw-import-scope .remove-btn:hover { color:#f09595; background:rgba(226,75,74,0.12); }
+    .nw-import-scope .folder-select { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-import-scope .folder-select option { background:#1a2130; color:#fff; }
+    .nw-import-scope .import-result.success { background:rgba(15,110,86,0.15); color:#5dcaa5; }
+    .nw-import-scope .import-result.error { background:rgba(226,75,74,0.12); color:#f09595; }
+    .nw-import-scope .empty-tip { color:rgba(255,255,255,0.25); }
+    .nw-import-scope .loading { color:rgba(255,255,255,0.25); }
+    .nw-import-scope .inbox-file-item { border-bottom-color:rgba(255,255,255,0.06); }
+    .nw-import-scope .inbox-file-item:hover { background:rgba(255,255,255,0.05); }
+    .nw-import-scope .inbox-file-name { color:rgba(255,255,255,0.75); }
+    .nw-import-scope .inbox-file-meta { color:rgba(255,255,255,0.3); }
+    .nw-import-scope .ai-result-badge { background:rgba(83,74,183,0.25); color:#afa9ec; }
+    .nw-import-scope span[style*="color:#888780"] { color:rgba(255,255,255,0.4) !important; }
+    .nw-import-scope div[style*="background:#faeeda"] { background:rgba(250,199,117,0.12) !important; border-color:rgba(250,199,117,0.25) !important; }
+    .nw-import-scope span[style*="color:#854f0b"] { color:#e8c078 !important; }
+    .nw-import-scope div[style*="background:#fff;border:1px solid #e0dfd8"] { background:rgba(255,255,255,0.05) !important; border-color:rgba(255,255,255,0.1) !important; }
+
+    /* ── 新建笔记页暗色配色覆盖（仅改颜色，不改布局/间距） ── */
+    .nw-newnote-scope { color:rgba(255,255,255,0.75); }
+    .nw-newnote-scope .section-title { color:rgba(255,255,255,0.85); }
+    .nw-newnote-scope .template-card { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); }
+    .nw-newnote-scope .template-card:hover { border-color:#afa9ec; }
+    .nw-newnote-scope .template-card.selected { border-color:#534ab7; background:rgba(83,74,183,0.2); }
+    .nw-newnote-scope .template-card .t-desc { color:rgba(255,255,255,0.35); }
+    .nw-newnote-scope .note-input { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-newnote-scope .note-input::placeholder { color:rgba(255,255,255,0.25); }
+    .nw-newnote-scope .note-editor { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.12); color:#fff; }
+    .nw-newnote-scope .note-editor::placeholder { color:rgba(255,255,255,0.25); }
+    .nw-newnote-scope span[style*="color:#888780"] { color:rgba(255,255,255,0.4) !important; }
+    .nw-newnote-scope span[style*="color:#b4b2a9"] { color:rgba(255,255,255,0.3) !important; }
+    .nw-newnote-scope .folder-select { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.15); color:#fff; }
+    .nw-newnote-scope .folder-select option { background:#1a2130; color:#fff; }
+    .nw-newnote-scope .import-result.success { background:rgba(15,110,86,0.15); color:#5dcaa5; }
+    .nw-newnote-scope .import-result.error { background:rgba(226,75,74,0.12); color:#f09595; }
+    .nw-newnote-scope div[style*="border-top:1px solid #e0dfd8"] { border-top-color:rgba(255,255,255,0.1) !important; }
+    .nw-newnote-scope p[style*="color:#888780"] { color:rgba(255,255,255,0.4) !important; }
+
     /* ── 学习助手结果框内容样式 ── */
     .study-result-box h1 { font-size: 18px; color: #2c2c2a; border-bottom: 2px solid #534ab7; padding-bottom: 6px; margin: 14px 0 10px; }
     .study-result-box h2 { font-size: 15px; color: #3c3489; margin: 12px 0 7px; }
@@ -955,125 +1040,9 @@
 
         </div><!-- /#nw-inner-settings -->
 
-        </div><!-- /#nw-main-scroll -->
-      </div><!-- /#nw-main -->
+        <!-- ══ 搜索页内嵌面板 ══ -->
+        <div id="nw-inner-search" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-search-scope">
 
-      <!-- 拖拽分隔线 -->
-      <div id="nw-resizer"></div>
-
-      <!-- ══ 右侧边栏（时钟→倒计时→错题→日历） ══ -->
-      <div id="nw-side">
-
-        <!-- 1. 时钟 -->
-        <div id="nw-hero">
-          <div id="nw-clock">--:--</div>
-          <div id="nw-datestr">Loading...</div>
-        </div>
-
-        <!-- 2. 倒计时 -->
-        <div>
-          <div class="nw-side-label">Countdowns</div>
-          <div id="nw-countdowns"></div>
-          <button id="nw-add-cd" onclick="nwOpenCdModal()">+ Add event</button>
-        </div>
-
-        <!-- 3. 错题统计 -->
-        <div>
-          <div class="nw-side-label">Wrong answers</div>
-          <div id="nw-mistakes">
-            <div class="nw-mcard">
-              <div class="nw-mcard-num" style="color:#f09595" id="nw-mistakes-unsolved">—</div>
-              <div class="nw-mcard-lbl">Unsolved</div>
-            </div>
-            <div class="nw-mcard">
-              <div class="nw-mcard-num" style="color:#5dcaa5" id="nw-mistakes-solved">—</div>
-              <div class="nw-mcard-lbl">Resolved</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 日历（底部） -->
-        <div style="margin-top:auto;padding-top:8px;flex-shrink:0;">
-          <div class="nw-side-label">Calendar</div>
-          <div id="nw-cal">
-            <div id="nw-cal-month">—</div>
-            <div class="nw-cal-grid" id="nw-cal-grid"></div>
-          </div>
-        </div>
-
-      </div><!-- /#nw-side -->
-    </div><!-- /#nw-body -->
-  </div><!-- /#nw-home -->
-
-  <!-- 倒计时弹窗 -->
-  <div id="nw-cd-modal">
-    <div id="nw-cd-modal-box">
-      <h3>Add countdown event</h3>
-      <label class="nw-modal-label">Event name</label>
-      <input class="nw-modal-input" id="nw-cd-name-input" type="text" placeholder="e.g. Biology Paper 2">
-      <label class="nw-modal-label">Date</label>
-      <input class="nw-modal-input" id="nw-cd-date-input" type="date">
-      <label class="nw-modal-label">Type (optional)</label>
-      <input class="nw-modal-input" id="nw-cd-type-input" type="text" placeholder="e.g. IB exam, homework, mock…">
-      <div class="nw-modal-btns">
-        <button class="nw-modal-cancel" onclick="nwCloseCdModal()">Cancel</button>
-        <button class="nw-modal-save" onclick="nwSaveCd()">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 概览页 -->
-<div id="page-overview" class="hidden">
-  <div class="stats-grid">
-    <div class="stat-card" onclick="loadFilesByType('md','Markdown 笔记',this)"><div class="num" id="stat-md">—</div><div class="label">Markdown 笔记</div></div>
-    <div class="stat-card" onclick="loadFilesByType('pdf','PDF 文件',this)"><div class="num" id="stat-pdf">—</div><div class="label">PDF 文件</div></div>
-    <div class="stat-card" onclick="loadFilesByType('image','图片文件',this)"><div class="num" id="stat-img">—</div><div class="label">图片文件</div></div>
-    <div class="stat-card" onclick="loadFilesByType('video','视频文件',this)"><div class="num" id="stat-video">—</div><div class="label">视频文件</div></div>
-    <div class="stat-card" onclick="loadFilesByType('other','其他文件',this)"><div class="num" id="stat-other">—</div><div class="label">其他文件</div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin:0">知识库结构</div>
-        <button class="btn-sm" onclick="refreshAll()" style="display:flex;align-items:center;gap:4px">
-          <span style="font-size:14px">↻</span><span>刷新</span>
-        </button>
-      </div>
-      <div class="panel scrollable" id="folder-tree"><div class="loading">加载中...</div></div>
-    </div>
-    <div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <div class="section-title" id="folder-files-title" style="margin:0;flex:1">最近修改</div>
-        <div id="ff-action-bar" style="display:none;align-items:center;gap:5px">
-          <span id="ff-select-count" style="font-size:12px;color:#888780"></span>
-          <button class="btn-sm" onclick="ffSelectAll(true)">全选</button>
-          <button class="btn-sm" onclick="ffSelectAll(false)">取消</button>
-          <button class="btn-sm" style="color:#2e6b3a;border-color:#b8dfc4" onclick="ffMoveSelected()">🗂 移动选中</button>
-          <button class="btn-sm" style="color:#a32d2d;border-color:#f0c0c0" onclick="ffDeleteSelected()">🗑 删除选中</button>
-        </div>
-      </div>
-      <div class="panel scrollable" id="folder-files"><div class="loading">加载中...</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- 移动文件浮层（全局，挂在 body 级别） -->
-<div id="ff-move-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:14px;padding:24px;width:440px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.18)">
-    <div style="font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:6px">🗂 移动到文件夹</div>
-    <div id="ff-move-file-count" style="font-size:12px;color:#888780;margin-bottom:14px"></div>
-    <div style="font-size:12px;color:#888780;margin-bottom:6px">选择目标文件夹：</div>
-    <div id="ff-move-folder-list" style="overflow-y:auto;border:1px solid #e0dfd8;border-radius:8px;max-height:340px"></div>
-    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
-      <button class="btn-sm" onclick="ffCloseMoveOverlay()">取消</button>
-      <button class="btn-sm green" id="ff-move-confirm-btn" onclick="ffConfirmMove()" style="opacity:0.4;pointer-events:none">确认移动</button>
-    </div>
-  </div>
-</div>
-
-<!-- 搜索页 -->
-<div id="page-search" class="hidden">
   <div class="search-bar">
     <input class="search-input" id="search-input" type="text" placeholder="输入关键词搜索文件名或笔记内容…（留空+筛选条件可列出所有符合文件）" onkeydown="if(event.key==='Enter')doSearch()">
     <button class="btn-search" onclick="doSearch()">搜索</button>
@@ -1123,10 +1092,12 @@
     <div id="tag-cloud-wrap"><div id="tag-cloud"><div class="loading">加载中...</div></div></div>
   </div>
   <div id="search-results" style="margin-top:16px"><div class="empty-tip">输入关键词或设置筛选条件后点击搜索</div></div>
-</div>
 
-<!-- 导入页 -->
-<div id="page-import" class="hidden">
+        </div><!-- /#nw-inner-search -->
+
+        <!-- ══ 导入资料内嵌面板 ══ -->
+        <div id="nw-inner-import" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-import-scope">
+
 
 
   <!-- 待处理文件库 -->
@@ -1277,10 +1248,12 @@
     </div>
   </div>
 </div>
-</div>
 
-<!-- 新建笔记页 -->
-<div id="page-new-note" class="hidden">
+        </div><!-- /#nw-inner-import -->
+
+        <!-- ══ 新建笔记内嵌面板 ══ -->
+        <div id="nw-inner-new-note" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
+
   <div class="section-title">选择模板</div>
   <div class="template-grid">
     <div class="template-card selected" onclick="selectTemplate('blank',this)"><div class="t-icon">📄</div><div class="t-name">随笔记录</div><div class="t-desc">随时记录想法</div></div>
@@ -1303,7 +1276,134 @@
     <button class="btn-sm" style="padding:7px 16px;font-size:13px" onclick="doMoveNote()">移入知识库</button>
     <div id="note-move-result" class="import-result hidden" style="margin-top:8px"></div>
   </div>
+
+        </div><!-- /#nw-inner-new-note -->
+
+        </div><!-- /#nw-main-scroll -->
+      </div><!-- /#nw-main -->
+
+      <!-- 拖拽分隔线 -->
+      <div id="nw-resizer"></div>
+
+      <!-- ══ 右侧边栏（时钟→倒计时→错题→日历） ══ -->
+      <div id="nw-side">
+
+        <!-- 1. 时钟 -->
+        <div id="nw-hero">
+          <div id="nw-clock">--:--</div>
+          <div id="nw-datestr">Loading...</div>
+        </div>
+
+        <!-- 2. 倒计时 -->
+        <div>
+          <div class="nw-side-label">Countdowns</div>
+          <div id="nw-countdowns"></div>
+          <button id="nw-add-cd" onclick="nwOpenCdModal()">+ Add event</button>
+        </div>
+
+        <!-- 3. 错题统计 -->
+        <div>
+          <div class="nw-side-label">Wrong answers</div>
+          <div id="nw-mistakes">
+            <div class="nw-mcard">
+              <div class="nw-mcard-num" style="color:#f09595" id="nw-mistakes-unsolved">—</div>
+              <div class="nw-mcard-lbl">Unsolved</div>
+            </div>
+            <div class="nw-mcard">
+              <div class="nw-mcard-num" style="color:#5dcaa5" id="nw-mistakes-solved">—</div>
+              <div class="nw-mcard-lbl">Resolved</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 日历（底部） -->
+        <div style="margin-top:auto;padding-top:8px;flex-shrink:0;">
+          <div class="nw-side-label">Calendar</div>
+          <div id="nw-cal">
+            <div id="nw-cal-month">—</div>
+            <div class="nw-cal-grid" id="nw-cal-grid"></div>
+          </div>
+        </div>
+
+      </div><!-- /#nw-side -->
+    </div><!-- /#nw-body -->
+  </div><!-- /#nw-home -->
+
+  <!-- 倒计时弹窗 -->
+  <div id="nw-cd-modal">
+    <div id="nw-cd-modal-box">
+      <h3>Add countdown event</h3>
+      <label class="nw-modal-label">Event name</label>
+      <input class="nw-modal-input" id="nw-cd-name-input" type="text" placeholder="e.g. Biology Paper 2">
+      <label class="nw-modal-label">Date</label>
+      <input class="nw-modal-input" id="nw-cd-date-input" type="date">
+      <label class="nw-modal-label">Type (optional)</label>
+      <input class="nw-modal-input" id="nw-cd-type-input" type="text" placeholder="e.g. IB exam, homework, mock…">
+      <div class="nw-modal-btns">
+        <button class="nw-modal-cancel" onclick="nwCloseCdModal()">Cancel</button>
+        <button class="nw-modal-save" onclick="nwSaveCd()">Save</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- 概览页 -->
+<div id="page-overview" class="hidden">
+  <div class="stats-grid">
+    <div class="stat-card" onclick="loadFilesByType('md','Markdown 笔记',this)"><div class="num" id="stat-md">—</div><div class="label">Markdown 笔记</div></div>
+    <div class="stat-card" onclick="loadFilesByType('pdf','PDF 文件',this)"><div class="num" id="stat-pdf">—</div><div class="label">PDF 文件</div></div>
+    <div class="stat-card" onclick="loadFilesByType('image','图片文件',this)"><div class="num" id="stat-img">—</div><div class="label">图片文件</div></div>
+    <div class="stat-card" onclick="loadFilesByType('video','视频文件',this)"><div class="num" id="stat-video">—</div><div class="label">视频文件</div></div>
+    <div class="stat-card" onclick="loadFilesByType('other','其他文件',this)"><div class="num" id="stat-other">—</div><div class="label">其他文件</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin:0">知识库结构</div>
+        <button class="btn-sm" onclick="refreshAll()" style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:14px">↻</span><span>刷新</span>
+        </button>
+      </div>
+      <div class="panel scrollable" id="folder-tree"><div class="loading">加载中...</div></div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <div class="section-title" id="folder-files-title" style="margin:0;flex:1">最近修改</div>
+        <div id="ff-action-bar" style="display:none;align-items:center;gap:5px">
+          <span id="ff-select-count" style="font-size:12px;color:#888780"></span>
+          <button class="btn-sm" onclick="ffSelectAll(true)">全选</button>
+          <button class="btn-sm" onclick="ffSelectAll(false)">取消</button>
+          <button class="btn-sm" style="color:#2e6b3a;border-color:#b8dfc4" onclick="ffMoveSelected()">🗂 移动选中</button>
+          <button class="btn-sm" style="color:#a32d2d;border-color:#f0c0c0" onclick="ffDeleteSelected()">🗑 删除选中</button>
+        </div>
+      </div>
+      <div class="panel scrollable" id="folder-files"><div class="loading">加载中...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 移动文件浮层（全局，挂在 body 级别） -->
+<div id="ff-move-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:24px;width:440px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.18)">
+    <div style="font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:6px">🗂 移动到文件夹</div>
+    <div id="ff-move-file-count" style="font-size:12px;color:#888780;margin-bottom:14px"></div>
+    <div style="font-size:12px;color:#888780;margin-bottom:6px">选择目标文件夹：</div>
+    <div id="ff-move-folder-list" style="overflow-y:auto;border:1px solid #e0dfd8;border-radius:8px;max-height:340px"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn-sm" onclick="ffCloseMoveOverlay()">取消</button>
+      <button class="btn-sm green" id="ff-move-confirm-btn" onclick="ffConfirmMove()" style="opacity:0.4;pointer-events:none">确认移动</button>
+    </div>
+  </div>
+</div>
+
+<!-- 搜索页 -->
+<div id="page-search" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true"></div>
+
+<!-- 导入页 -->
+<div id="page-import" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true"></div></div>
+
+<!-- 新建笔记页 -->
+<div id="page-new-note" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true"></div></div>
 
 <!-- AI 分析页 -->
 <div id="page-ai" class="hidden">
@@ -2104,9 +2204,15 @@ function showPage(name) {
     const hc = document.getElementById('nw-home-content')
     const is = document.getElementById('nw-inner-study')
     const isg = document.getElementById('nw-inner-settings')
+    const isr = document.getElementById('nw-inner-search')
+    const isi = document.getElementById('nw-inner-import')
+    const isn = document.getElementById('nw-inner-new-note')
     if (hc) { hc.style.display = ''; hc.classList.remove('hidden') }
     if (is) { is.style.display = 'none'; is.classList.add('hidden') }
     if (isg) { isg.style.display = 'none'; isg.classList.add('hidden') }
+    if (isr) { isr.style.display = 'none'; isr.classList.add('hidden') }
+    if (isi) { isi.style.display = 'none'; isi.classList.add('hidden') }
+    if (isn) { isn.style.display = 'none'; isn.classList.add('hidden') }
     nwInitHome()
     return
   }
@@ -2115,13 +2221,13 @@ function showPage(name) {
   if (pageHome) { pageHome.style.display = 'block'; pageHome.classList.remove('hidden') }
 
   // 所有 inner 面板
-  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings']
+  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-search','nw-inner-import','nw-inner-new-note']
   panels.forEach(id => {
     const el = document.getElementById(id)
     if (el) { el.style.display = 'none'; el.classList.add('hidden') }
   })
 
-  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings' }
+  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', search:'nw-inner-search', import:'nw-inner-import', 'new-note':'nw-inner-new-note' }
   const innerId = innerMap[name]
   if (innerId) {
     const el = document.getElementById(innerId)
@@ -2129,7 +2235,7 @@ function showPage(name) {
   }
 
   // 对于还没迁移到暗色框架的页面，先降级显示旧页面
-  const legacyPages = ['import','search','new-note']
+  const legacyPages = []
   if (legacyPages.includes(name)) {
     // 暂时：隐藏 page-home，显示旧式页面
     if (pageHome) { pageHome.style.display = 'none'; pageHome.classList.add('hidden') }
