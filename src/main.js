@@ -1266,6 +1266,7 @@ ipcMain.handle('ai-classify-file', async (event, { filePath, vaultPath, vaultFol
   const fileName = path.basename(filePath)
   const isText = ['.md', '.txt'].includes(ext)
   const isPdf = ext === '.pdf'
+  const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)
 
   let contentForAI = `文件名：${fileName}`
 
@@ -1282,6 +1283,23 @@ ipcMain.handle('ai-classify-file', async (event, { filePath, vaultPath, vaultFol
   if (isPdf) {
     const pdfText = await extractPdfText(filePath, 1500)
     if (pdfText) contentForAI += `\nPDF内容（前1500字）：\n${pdfText}`
+  }
+
+  // 图片：用 Doubao 视觉模型描述内容
+  if (isImage) {
+    const audioApiKey = settings.audioApiKey || settings.apiKey
+    const audioModelId = settings.audioModelId || ''
+    const audioEndpoint = settings.audioEndpoint || settings.endpoint
+    if (audioApiKey && audioModelId) {
+      try {
+        const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
+        const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, filePath, visionPrompt)
+        if (visionRes.content) {
+          contentForAI += `\n图片内容描述：\n${visionRes.content}`
+          recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
+        }
+      } catch (_) {}
+    }
   }
 
   // 构建知识库文件夹列表
@@ -1316,7 +1334,16 @@ ${contentForAI}
 // ── 导入并 AI 分类（批量，并行处理）──
 ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders }) => {
   const settings = store.get('aiSettings', {})
-  const inboxFolder = settings.inboxFolder || path.join(vaultPath, '00 Inbox')
+
+  // 临时文件夹：用户设置了就用，没设置则自动创建 00 Inbox 并写入设置
+  let inboxFolder = settings.inboxFolder || ''
+  if (!inboxFolder) {
+    inboxFolder = path.join(vaultPath, '00 Inbox')
+    if (!fs.existsSync(inboxFolder)) fs.mkdirSync(inboxFolder, { recursive: true })
+    // 写入设置，下次直接用
+    const updatedSettings = { ...settings, inboxFolder }
+    store.set('aiSettings', updatedSettings)
+  }
 
   // 并行处理所有文件
   const results = await Promise.all(files.map(async srcPath => {
@@ -1324,6 +1351,7 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
       const ext = path.extname(srcPath).toLowerCase()
       const fileName = path.basename(srcPath)
       const isText = ['.md', '.txt'].includes(ext)
+      const srcInInbox = path.normalize(path.dirname(srcPath)) === path.normalize(inboxFolder)
 
       // 检查是否为空文件，空文件直接存 inbox 不调 AI
       let isEmpty = false
@@ -1335,18 +1363,30 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
         } catch (_) {}
       }
 
-      let targetDir = inboxFolder
-      let aiFolder = isEmpty ? '00 Inbox（内容为空）' : ''
+      let targetDir = null  // null 表示"留在原地"
+      let aiFolder = ''
       let aiTags = ''
       let aiTitle = ''
+      let stayed = false  // 是否留在临时文件夹未移动
 
-      if (!isEmpty) {
+      if (isEmpty) {
+        // 空文件：若来自临时文件夹则留在原地，否则移入临时文件夹
+        if (srcInInbox) {
+          stayed = true
+          aiFolder = '临时文件夹（内容为空，保留原位）'
+        } else {
+          targetDir = inboxFolder
+          aiFolder = '临时文件夹（内容为空）'
+        }
+      } else {
         // 调 AI 分类
         const classify = await (async () => {
           try {
-            // 复用 ai-classify-file 的逻辑
             if (!settings.apiKey || !settings.modelId) return null
+            const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            const isImage = imageExts.includes(ext)
             let contentForAI = `文件名：${fileName}`
+
             if (isText) {
               const raw = fs.readFileSync(srcPath, 'utf-8')
               const body = raw.replace(/^---[\s\S]*?---\n?/, '').trim().slice(0, 1500)
@@ -1354,7 +1394,25 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
             } else if (ext === '.pdf') {
               const pdfText = await extractPdfText(srcPath, 1500)
               if (pdfText) contentForAI += `\nPDF内容：\n${pdfText}`
+            } else if (isImage) {
+              // 图片：先用 Doubao 视觉模型描述图片内容，再用文字模型分类
+              const audioApiKey = settings.audioApiKey || settings.apiKey
+              const audioModelId = settings.audioModelId || ''
+              const audioEndpoint = settings.audioEndpoint || settings.endpoint
+              if (audioApiKey && audioModelId) {
+                try {
+                  const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
+                  const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, srcPath, visionPrompt)
+                  if (visionRes.content) {
+                    contentForAI += `\n图片内容描述：\n${visionRes.content}`
+                    recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
+                  }
+                } catch (_) {
+                  // 视觉识别失败则仅靠文件名分类，不中断流程
+                }
+              }
             }
+
             const folderList = vaultFolders.map(f => f.label).filter(l => l !== '（根目录）').join('、')
             const prompt = `你是知识库分类助手。知识库文件夹：${folderList}\n根据以下文件信息判断：1.存放文件夹（输出相对路径如"01 AI/Claude"）2.标签（中文逗号分隔）3.md文件无标题则建议标题（20字内）\n文件信息：${contentForAI}\n只输出JSON：{"folder":"xxx","tags":"xxx","title":"xxx"}`
             const replyObj3 = await callVolcanoAI(settings.apiKey, settings.modelId, settings.endpoint, [{ role: 'user', content: prompt }])
@@ -1366,54 +1424,58 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
 
         if (classify && classify.folder) {
           const matched = vaultFolders.find(f => f.label === classify.folder || f.value.endsWith(classify.folder))
-          if (matched) { targetDir = matched.value; aiFolder = classify.folder }
-          else aiFolder = '00 Inbox（路径未匹配）'
+          if (matched) {
+            targetDir = matched.value
+            aiFolder = classify.folder
+          } else {
+            // 路径未匹配：若已在临时文件夹则留在原地，否则移入临时文件夹
+            if (srcInInbox) { stayed = true; aiFolder = '临时文件夹（路径未匹配，保留原位）' }
+            else { targetDir = inboxFolder; aiFolder = '临时文件夹（路径未匹配）' }
+          }
           aiTags = classify.tags || ''
           aiTitle = classify.title || ''
         } else {
-          aiFolder = '00 Inbox（AI无法判断）'
+          // AI 无法判断：若已在临时文件夹则留在原地，否则移入临时文件夹
+          if (srcInInbox) { stayed = true; aiFolder = '临时文件夹（AI无法判断，保留原位）' }
+          else { targetDir = inboxFolder; aiFolder = '临时文件夹（AI无法判断）' }
         }
       }
 
-      if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
-      const destPath = path.join(targetDir, fileName)
-      fs.copyFileSync(srcPath, destPath)
-
-      // 把源文件移到待处理文件库的「已处理」文件夹
-      const inboxDir = path.dirname(srcPath)
-      const processedDir = path.join(inboxDir, '已处理')
-      if (!fs.existsSync(processedDir)) fs.mkdirSync(processedDir)
-      const processedPath = path.join(processedDir, fileName)
-      try {
-        if (fs.existsSync(processedPath)) {
-          // 同名文件加时间戳避免冲突
+      // 执行移动
+      let finalPath = srcPath
+      if (!stayed && targetDir) {
+        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+        let destPath = path.join(targetDir, fileName)
+        // 同名文件加时间戳避免冲突
+        if (fs.existsSync(destPath) && path.normalize(destPath) !== path.normalize(srcPath)) {
           const ts = Date.now()
-          const ext2 = path.extname(fileName)
-          const base = path.basename(fileName, ext2)
-          fs.renameSync(srcPath, path.join(processedDir, `${base}_${ts}${ext2}`))
-        } else {
-          fs.renameSync(srcPath, processedPath)
+          const base = path.basename(fileName, ext)
+          destPath = path.join(targetDir, `${base}_${ts}${ext}`)
         }
-      } catch (_) {}
+        fs.renameSync(srcPath, destPath)
+        finalPath = destPath
 
-      // 更新 md 文件 frontmatter
-      if (ext === '.md' && (aiTags || aiTitle)) {
-        let content = fs.readFileSync(destPath, 'utf-8')
-        const date = new Date().toISOString().slice(0, 10)
-        const tagsArr = aiTags ? aiTags.split(',').map(t => t.trim()).filter(Boolean) : []
-        const tagsYaml = tagsArr.length ? `[${tagsArr.join(', ')}]` : '[]'
-        if (content.startsWith('---')) {
-          if (aiTags && !content.match(/^tags:/m)) {
-            content = content.replace(/^---/, `---\ntags: ${tagsYaml}`)
-          }
-        } else {
-          const title = aiTitle || path.basename(srcPath, '.md')
-          content = `---\ntitle: ${title}\ndate: ${date}\ntags: ${tagsYaml}\n---\n\n${content}`
+        // 更新 md 文件 frontmatter（移动后在目标位置写）
+        if (ext === '.md' && (aiTags || aiTitle)) {
+          try {
+            let content = fs.readFileSync(finalPath, 'utf-8')
+            const date = new Date().toISOString().slice(0, 10)
+            const tagsArr = aiTags ? aiTags.split(',').map(t => t.trim()).filter(Boolean) : []
+            const tagsYaml = tagsArr.length ? `[${tagsArr.join(', ')}]` : '[]'
+            if (content.startsWith('---')) {
+              if (aiTags && !content.match(/^tags:/m)) {
+                content = content.replace(/^---/, `---\ntags: ${tagsYaml}`)
+              }
+            } else {
+              const title = aiTitle || path.basename(srcPath, '.md')
+              content = `---\ntitle: ${title}\ndate: ${date}\ntags: ${tagsYaml}\n---\n\n${content}`
+            }
+            fs.writeFileSync(finalPath, content, 'utf-8')
+          } catch (_) {}
         }
-        fs.writeFileSync(destPath, content, 'utf-8')
       }
 
-      return { file: fileName, success: true, targetDir, aiFolder, aiTags, aiTitle, isEmpty }
+      return { file: fileName, success: true, targetDir: targetDir || inboxFolder, aiFolder, aiTags, aiTitle, isEmpty, stayed }
     } catch (err) {
       return { file: path.basename(srcPath), success: false, error: err.message }
     }
@@ -1867,6 +1929,54 @@ function callArkMultimodal(apiKey, modelId, endpoint, fileId, prompt, filePath) 
     req.on('error', reject)
     req.write(body)
     req.end()
+  })
+}
+
+// ── Doubao 视觉模型：用 base64 图片理解图片内容 ──
+// 复用音视频的 apiKey / endpoint / modelId，不需要额外上传文件
+function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt) {
+  return new Promise((resolve, reject) => {
+    try {
+      const ext = path.extname(imagePath).toLowerCase().slice(1)
+      const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }
+      const mimeType = mimeMap[ext] || 'image/jpeg'
+      const imageData = fs.readFileSync(imagePath)
+      const base64 = imageData.toString('base64')
+      const messages = [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+      const body = JSON.stringify({ model: modelId, messages, max_tokens: 500 })
+      const url = new URL(endpoint + '/chat/completions')
+      const options = {
+        hostname: url.hostname,
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Length': Buffer.byteLength(body)
+        }
+      }
+      const req = require('https').request(options, res => {
+        let data = ''
+        res.on('data', chunk => data += chunk)
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data)
+            if (json.error) { reject(new Error('视觉API错误: ' + JSON.stringify(json.error))); return }
+            const content = json.choices?.[0]?.message?.content || ''
+            resolve({ content, usage: json.usage || {} })
+          } catch (e) { reject(new Error('解析视觉响应失败: ' + data.slice(0, 200))) }
+        })
+      })
+      req.on('error', reject)
+      req.write(body)
+      req.end()
+    } catch (e) { reject(e) }
   })
 }
 

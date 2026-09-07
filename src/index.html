@@ -652,10 +652,6 @@
               <span class="nw-nav-icon">📥</span>
               <span class="nw-nav-label" id="nwnav-label-import">Import</span>
             </button>
-            <button class="nw-nav-btn" id="nwnav-search" onclick="showPage('search')">
-              <span class="nw-nav-icon">🔍</span>
-              <span class="nw-nav-label" id="nwnav-label-search">Search</span>
-            </button>
             <button class="nw-nav-btn" id="nwnav-study" onclick="showPage('study')">
               <span class="nw-nav-icon">🤖</span>
               <span class="nw-nav-label" id="nwnav-label-study">AI Tools</span>
@@ -688,16 +684,6 @@
             <div id="nw-home-tags" style="display:flex;flex-wrap:wrap;gap:5px;flex:1;">
               <span style="font-size:11px;color:rgba(255,255,255,0.2);">加载中…</span>
             </div>
-            <button onclick="nwHomeSearchClear()" style="font-size:11px;color:rgba(255,255,255,0.3);background:none;border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:2px 9px;cursor:pointer;font-family:inherit;white-space:nowrap;">✕ 清除</button>
-          </div>
-
-          <!-- 首页搜索结果区（默认隐藏） -->
-          <div id="nw-home-search-result" style="display:none;flex-direction:column;flex-shrink:0;margin-top:10px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-              <span id="nw-home-search-count" style="font-size:12px;color:rgba(255,255,255,0.4);"></span>
-              <button onclick="nwHomeSearchClear()" style="font-size:11px;color:rgba(255,255,255,0.35);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;">✕ 关闭结果</button>
-            </div>
-            <div id="nw-home-search-list" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
           </div>
 
           <!-- 统计卡片 -->
@@ -899,9 +885,8 @@
     <span onclick="toggleHelp('help-path')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none">说明 ▾</span>
   </div>
   <div id="help-path" style="display:none;background:#f5f4f0;border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:12px;color:#5f5e5a;line-height:1.9">
-    <b>1. 知识库路径</b>：需手工选择 Obsidian 知识库所在的文件夹路径。<br>
-    <b>2. 待处理文件库</b>：可在电脑任意位置创建一个新文件夹，并将该文件夹路径设置为待处理文件库。所有需要系统帮忙处理到 Obsidian 的文件都可以放入这个文件夹中。<br>
-    <b>3. 临时文件夹</b>：建议在 Obsidian 知识库下建一个任意名字的文件夹（如「00 Inbox」）作为临时文件夹。AI 处理时会把不确定分类的文件放入临时文件夹。如果不设置，默认存入知识库根目录下的「00 Inbox」文件夹。
+    <b>1. 知识库路径</b>：选择本地知识库文件夹的路径，Notewell 将管理该文件夹下的所有内容。<br>
+    <b>2. 临时文件夹</b>：AI 处理时，无法判断分类的文件会存入临时文件夹，可手动整理。如不设置，导入时会自动在知识库根目录创建「00 Inbox」文件夹并使用。
   </div>
   <div class="settings-section">
     <div class="settings-row">
@@ -910,13 +895,8 @@
       <button class="btn-sm" onclick="changeVault()">选择文件夹</button>
     </div>
     <div class="settings-row">
-      <div class="settings-label">📥 待处理文件库</div>
-      <div class="settings-value empty" id="set-inbox-path">未设置</div>
-      <button class="btn-sm green" onclick="changeInbox()">选择文件夹</button>
-    </div>
-    <div class="settings-row">
       <div class="settings-label">🗂️ 临时文件夹</div>
-      <div class="settings-value empty" id="set-inbox-folder">未设置（默认存入知识库 00 Inbox）</div>
+      <div class="settings-value empty" id="set-inbox-folder">未设置（导入时自动创建知识库 00 Inbox）</div>
       <button class="btn-sm" onclick="selectInboxFolder()">选择文件夹</button>
     </div>
   </div>
@@ -1010,7 +990,7 @@
       <div class="settings-label"></div>
       <div id="ai-test-result" style="flex:1;font-size:12px;color:#888780"></div>
     </div>
-    <div style="font-size:12px;font-weight:600;color:#888780;padding:10px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px;margin-top:4px">🎙️ 音视频模型</div>
+    <div style="font-size:12px;font-weight:600;color:#888780;padding:10px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px;margin-top:4px">🎙️ 图片和音视频模型</div>
     <div class="settings-row">
       <div class="settings-label">🔑 API Key</div>
       <input type="password" id="ai-audio-api-key" placeholder="与文字模型相同则填写同一个 Key"
@@ -1061,72 +1041,18 @@
 
         </div><!-- /#nw-inner-settings -->
 
-        <!-- ══ 搜索页内嵌面板 ══ -->
-        <div id="nw-inner-search" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-search-scope">
-
-  <div class="search-bar">
-    <input class="search-input" id="search-input" type="text" placeholder="输入关键词搜索文件名或笔记内容…（留空+筛选条件可列出所有符合文件）" onkeydown="if(event.key==='Enter')doSearch()">
-    <button class="btn-search" onclick="doSearch()">搜索</button>
-  </div>
-
-  <!-- 筛选栏 -->
-  <div class="filter-bar">
-    <div class="filter-group">
-      <span class="filter-label">文件类型</span>
-      <div class="filter-chips" id="type-chips">
-        <span class="chip active" data-type="all" onclick="toggleType('all',this)">全部</span>
-        <span class="chip" data-type="md" onclick="toggleType('md',this)">📝 笔记</span>
-        <span class="chip" data-type="pdf" onclick="toggleType('pdf',this)">📄 PDF</span>
-        <span class="chip" data-type="image" onclick="toggleType('image',this)">🖼️ 图片</span>
-        <span class="chip" data-type="video" onclick="toggleType('video',this)">🎬 视频</span>
-        <span class="chip" data-type="other" onclick="toggleType('other',this)">📎 其他</span>
-      </div>
-    </div>
-    <div class="filter-sep">|</div>
-    <div class="filter-group">
-      <span class="filter-label">修改日期</span>
-      <div class="filter-date">
-        <input class="date-input" type="date" id="date-from" onchange="doSearch()">
-        <span class="filter-label">至</span>
-        <input class="date-input" type="date" id="date-to" onchange="doSearch()">
-      </div>
-    </div>
-    <div class="filter-sep">|</div>
-    <div class="filter-group">
-      <span class="filter-label">排序</span>
-      <select class="sort-select" id="sort-select" onchange="doSearch()">
-        <option value="relevance">相关度</option>
-        <option value="mtime_desc">最近修改</option>
-        <option value="mtime_asc">最早修改</option>
-        <option value="name_asc">名称 A→Z</option>
-        <option value="name_desc">名称 Z→A</option>
-      </select>
-    </div>
-    <button class="filter-reset" onclick="resetFilters()">重置筛选</button>
-  </div>
-
-  <div id="tag-cloud-section">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="font-size:13px;font-weight:500;color:#5f5e5a">按标签筛选</div>
-      <button class="tag-toggle-btn" id="tag-toggle-btn" onclick="toggleTagCloud()">收起 ▲</button>
-    </div>
-    <div id="tag-cloud-wrap"><div id="tag-cloud"><div class="loading">加载中...</div></div></div>
-  </div>
-  <div id="search-results" style="margin-top:16px"><div class="empty-tip">输入关键词或设置筛选条件后点击搜索</div></div>
-
-        </div><!-- /#nw-inner-search -->
-
         <!-- ══ 导入资料内嵌面板 ══ -->
         <div id="nw-inner-import" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-import-scope">
 
 
 
-  <!-- 待处理文件库 -->
+  <!-- 临时文件夹 -->
   <div style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <div class="section-title" style="margin:0">📥 待处理文件库</div>
+      <div class="section-title" style="margin:0">🗂️ 临时文件夹</div>
       <button class="btn-sm" onclick="loadInboxFiles()">🔄 刷新</button>
-      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <span id="inbox-folder-path-tip" style="font-size:11px;color:#888780;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <div style="display:flex;gap:6px;align-items:center">
         <button class="btn-sm" onclick="selectAllInbox(true)">全选</button>
         <button class="btn-sm" onclick="selectAllInbox(false)">取消</button>
         <button class="btn-sm" style="color:#a32d2d;border-color:#f0c0c0" onclick="deleteSelectedInboxFiles()">🗑 删除选中</button>
@@ -1138,11 +1064,11 @@
     </div>
   </div>
 
-  <!-- 添加其他文件（宽条拖放区）-->
+  <!-- 直接拖入文件 -->
   <div style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <div class="section-title" style="margin:0">+ 其他文件</div>
-      <span style="font-size:12px;color:#888780">点击或拖放添加文件</span>
+      <div class="section-title" style="margin:0">+ 直接导入文件</div>
+      <span style="font-size:12px;color:#888780">点击或拖放添加文件，AI 分类后直接移入对应文件夹</span>
     </div>
     <div class="drop-zone" id="drop-zone" onclick="pickFiles()"
       ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
@@ -1153,14 +1079,7 @@
     <div id="import-file-list" class="import-file-list hidden" style="margin-top:6px"></div>
   </div>
 
-  <!-- 已处理提示栏（常驻显示）-->
-  <div id="processed-bar" style="margin-bottom:12px;padding:8px 14px;background:#faeeda;border-radius:8px;display:flex;align-items:center;gap:10px">
-    <span id="processed-bar-text" style="font-size:12px;color:#854f0b;flex:1">已整理的文件会存入「已处理」文件夹，可自行决定保留或删除。</span>
-    <button class="btn-sm" style="color:#854f0b;border-color:#fac775;white-space:nowrap" onclick="clearProcessed()">清除已处理</button>
-    <button class="btn-sm" style="white-space:nowrap" onclick="openProcessedFolder()">查看文件</button>
-  </div>
-
-  <!-- 第二行：确认导入 + 存入位置（横向一行）-->
+  <!-- 确认导入 + 存入位置（横向一行）-->
   <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:14px 16px;margin-bottom:10px">
     <button class="btn-primary" onclick="doSmartImport()" id="btn-import" style="white-space:nowrap;flex-shrink:0">确认导入</button>
     <div id="ai-classify-hint" style="font-size:12px;color:#534ab7;display:none;white-space:nowrap">
@@ -1416,9 +1335,6 @@
     </div>
   </div>
 </div>
-
-<!-- 搜索页 -->
-<div id="page-search" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true"></div>
 
 <!-- 导入页 -->
 <div id="page-import" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true"></div></div>
@@ -2205,7 +2121,7 @@ function showMainUI(vaultPath) {
 }
 function showPage(name) {
   // 更新导航栏按钮 active 状态
-  const nwNavMap = { home:'nwnav-home', 'new-note':'nwnav-new-note', import:'nwnav-import', search:'nwnav-search', study:'nwnav-study', settings:'nwnav-settings' }
+  const nwNavMap = { home:'nwnav-home', 'new-note':'nwnav-new-note', import:'nwnav-import', study:'nwnav-study', settings:'nwnav-settings' }
   document.querySelectorAll('.nw-nav-btn').forEach(btn => btn.classList.remove('active'))
   if (nwNavMap[name]) { const nb = document.getElementById(nwNavMap[name]); if(nb) nb.classList.add('active') }
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'))
@@ -2225,13 +2141,11 @@ function showPage(name) {
     const hc = document.getElementById('nw-home-content')
     const is = document.getElementById('nw-inner-study')
     const isg = document.getElementById('nw-inner-settings')
-    const isr = document.getElementById('nw-inner-search')
     const isi = document.getElementById('nw-inner-import')
     const isn = document.getElementById('nw-inner-new-note')
     if (hc) { hc.style.display = ''; hc.classList.remove('hidden') }
     if (is) { is.style.display = 'none'; is.classList.add('hidden') }
     if (isg) { isg.style.display = 'none'; isg.classList.add('hidden') }
-    if (isr) { isr.style.display = 'none'; isr.classList.add('hidden') }
     if (isi) { isi.style.display = 'none'; isi.classList.add('hidden') }
     if (isn) { isn.style.display = 'none'; isn.classList.add('hidden') }
     nwInitHome()
@@ -2242,13 +2156,13 @@ function showPage(name) {
   if (pageHome) { pageHome.style.display = 'block'; pageHome.classList.remove('hidden') }
 
   // 所有 inner 面板
-  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-search','nw-inner-import','nw-inner-new-note']
+  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-new-note']
   panels.forEach(id => {
     const el = document.getElementById(id)
     if (el) { el.style.display = 'none'; el.classList.add('hidden') }
   })
 
-  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', search:'nw-inner-search', import:'nw-inner-import', 'new-note':'nw-inner-new-note' }
+  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', 'new-note':'nw-inner-new-note' }
   const innerId = innerMap[name]
   if (innerId) {
     const el = document.getElementById(innerId)
@@ -2278,18 +2192,12 @@ function showPage(name) {
   if (name === 'settings') { loadAiSettings(); loadTokenStats() }
   if (name === 'new-note') showPage_newNote()
   if (name === 'ai') { showAiHome() }
-  if (name === 'search' && !tagCloudLoaded) loadTagCloud()
 }
 
 async function refreshAll() {
   // 重新加载概览
   await loadOverview()
-  // 如果当前在搜索页，重新加载标签云
   tagCloudLoaded = false
-  const searchPage = document.getElementById('page-search')
-  if (!searchPage.classList.contains('hidden')) {
-    await loadTagCloud()
-  }
 }
 
 /* ── 概览 ── */
@@ -2738,6 +2646,7 @@ async function loadFolders(forceRefresh) {
   if (!currentVaultPath) return
   if (!forceRefresh && _foldersCache && _foldersCacheVault === currentVaultPath) {
     document.getElementById('folder-select').innerHTML = _foldersCache
+    await applyImportModeUI()
     return
   }
   const res = await window.api.getVaultFolders(currentVaultPath)
@@ -2745,6 +2654,10 @@ async function loadFolders(forceRefresh) {
   _foldersCache = res.folders.map(f => `<option value="${f.value}">${f.label}</option>`).join('')
   _foldersCacheVault = currentVaultPath
   document.getElementById('folder-select').innerHTML = _foldersCache
+  await applyImportModeUI()
+}
+
+async function applyImportModeUI() {
   const settings = await window.api.getAiSettings()
   aiClassifyEnabled = settings.aiClassifyEnabled || false
   const hint = document.getElementById('ai-classify-hint')
@@ -2992,14 +2905,20 @@ async function doHubUpdate() {
 
 async function loadInboxFiles() {
   const panel = document.getElementById('inbox-file-panel')
-  if (!currentInboxPath) {
-    panel.innerHTML = '<div class="empty-tip">请先在「系统设置」里设置待处理文件库路径</div>'
+  const tip = document.getElementById('inbox-folder-path-tip')
+  // 读取临时文件夹路径（从 AI 设置里的 inboxFolder）
+  const aiSettings = await window.api.getAiSettings()
+  const inboxFolder = aiSettings.inboxFolder || ''
+  if (!inboxFolder) {
+    panel.innerHTML = '<div class="empty-tip">临时文件夹未设置，首次导入时将自动在知识库创建 00 Inbox</div>'
+    if (tip) tip.textContent = ''
     return
   }
+  if (tip) tip.textContent = inboxFolder
   panel.innerHTML = '<div class="loading">加载中...</div>'
-  const res = await window.api.listInboxFiles(currentInboxPath)
+  const res = await window.api.listInboxFiles(inboxFolder)
   if (!res.success || !res.files.length) {
-    panel.innerHTML = '<div class="empty-tip">待处理文件库里没有文件</div>'
+    panel.innerHTML = '<div class="empty-tip">临时文件夹里没有文件</div>'
   } else {
     panel.innerHTML = res.files.map(f => `
       <div class="inbox-file-item" onclick="toggleInboxCheck(this)">
@@ -3010,33 +2929,6 @@ async function loadInboxFiles() {
       </div>`).join('')
     updateInboxCount()
   }
-
-}
-
-function showProcessedBar() {
-  const bar = document.getElementById('processed-bar')
-  const txt = document.getElementById('processed-bar-text')
-  if (!bar || !txt) return
-  txt.textContent = '已整理的文件会存入「已处理」文件夹，可自行决定保留或删除。'
-  bar.classList.remove('hidden')
-}
-
-async function clearProcessed() {
-  if (!currentInboxPath) return
-  const res = await window.api.getProcessedFolder(currentInboxPath)
-  if (!res.count) return
-  if (!confirm(`确定要清除「已处理」文件夹中的 ${res.count} 个文件吗？\n文件会移到系统回收站，可以恢复。`)) return
-  const r = await window.api.clearProcessedFolder(currentInboxPath)
-  if (r.success) {
-    document.getElementById('processed-bar').classList.add('hidden')
-    alert(`已清除 ${r.count} 个文件，已移入系统回收站。`)
-  }
-}
-
-function openProcessedFolder() {
-  if (!currentInboxPath) return
-  const processedPath = currentInboxPath + '/已处理'
-  window.api.openFile(processedPath)
 }
 
 function toggleInboxCheck(row) {
@@ -3145,7 +3037,7 @@ async function doSmartImport() {
     resultEl.innerHTML = `✅ 成功导入 ${ok} 个文件${fail ? `，${fail} 个失败` : ''}`
   }
   btn.disabled = false; btn.textContent = '确认导入'
-  pendingFiles = []; renderImportList(); loadInboxFiles(); loadOverview(); showProcessedBar()
+  pendingFiles = []; renderImportList(); loadInboxFiles(); loadOverview()
 }
 function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over') }
 function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over') }
@@ -5551,31 +5443,28 @@ async function nwHomeSearch() {
   if (!currentVaultPath) return;
   const input = document.getElementById('nw-search-input');
   const query = input ? input.value.trim() : '';
-  const resultBox = document.getElementById('nw-home-search-result');
-  const resultList = document.getElementById('nw-home-search-list');
-  const countEl = document.getElementById('nw-home-search-count');
-  if (!resultBox || !resultList) return;
 
   // 没有关键词且没有标签筛选，不执行
   if (!query && !nwHomeSearchTagFilter) return;
 
-  resultBox.style.display = 'flex';
-  resultList.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:12px 0;">搜索中…</div>';
-  if (countEl) countEl.textContent = '';
+  const filesEl = document.getElementById('folder-files');
+  const titleEl = document.getElementById('folder-files-title');
+  if (!filesEl) return;
+
+  // 标题显示搜索状态
+  if (titleEl) titleEl.textContent = '搜索中…';
+  filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">搜索中…</div>';
 
   try {
     let files = [];
     if (nwHomeSearchTagFilter) {
-      // 按标签搜索
       const res = await window.api.searchByTag({ vaultPath: currentVaultPath, tag: nwHomeSearchTagFilter });
       files = (res && res.results) ? res.results : [];
-      // 再在结果内按关键词过滤
       if (query) {
         const q = query.toLowerCase();
         files = files.filter(f => f.name.toLowerCase().includes(q) || (f.path||'').toLowerCase().includes(q));
       }
     } else {
-      // 按关键词搜索
       const res = await window.api.searchFiles({
         vaultPath: currentVaultPath,
         query,
@@ -5587,36 +5476,37 @@ async function nwHomeSearch() {
       files = (res && res.results) ? res.results : [];
     }
 
+    const label = nwHomeSearchTagFilter ? `#${nwHomeSearchTagFilter}` : `"${query}"`;
+    if (titleEl) titleEl.textContent = `搜索 ${label} — ${files.length} 个结果`;
+
     if (!files.length) {
-      resultList.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:12px 0;">没有找到匹配的文件</div>';
-      if (countEl) countEl.textContent = '搜索结果：0 个文件';
+      filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">没有找到匹配的文件</div>';
       return;
     }
 
-    if (countEl) countEl.textContent = `搜索结果：${files.length} 个文件`;
-
-    resultList.innerHTML = files.map(f => {
+    filesEl.innerHTML = files.map(f => {
       const name = f.fullName || f.name || '';
       const filePath = f.path || '';
       const mtime = f.mtime || '';
       const snippet = f.snippet || '';
       const icon = fileIcon(name);
       const ep = esc(filePath);
-      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
-        <span style="font-size:15px;flex-shrink:0;">${icon}</span>
+      return `<div class="folder-file-item">
+        <span class="ff-icon">${icon}</span>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;color:rgba(255,255,255,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(name)}">${name}</div>
-          ${snippet ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${snippet}</div>` : ''}
+          <div class="ff-name" title="${esc(name)}">${name}</div>
+          ${snippet ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${snippet}</div>` : ''}
         </div>
-        <span style="font-size:10px;color:rgba(255,255,255,0.25);flex-shrink:0;white-space:nowrap;">${mtime}</span>
-        <div style="display:flex;gap:4px;flex-shrink:0;">
-          <button onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')" style="font-size:10px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;white-space:nowrap;">打开</button>
-          <button onclick="event.stopPropagation();openFile('${ep}')" style="font-size:10px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;white-space:nowrap;">资源管理器</button>
-        </div>
+        <span class="ff-meta">${mtime}</span>
+        <span class="ff-actions">
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+        </span>
       </div>`;
     }).join('');
   } catch(e) {
-    resultList.innerHTML = '<div style="font-size:12px;color:rgba(240,149,149,0.7);padding:12px 0;">搜索出错：' + e.message + '</div>';
+    if (titleEl) titleEl.textContent = '搜索出错';
+    filesEl.innerHTML = `<div style="font-size:11px;color:rgba(240,149,149,0.7);padding:16px;text-align:center">搜索出错：${e.message}</div>`;
   }
 }
 
@@ -5624,8 +5514,6 @@ function nwHomeSearchClear() {
   nwHomeSearchTagFilter = null;
   const input = document.getElementById('nw-search-input');
   if (input) input.value = '';
-  const resultBox = document.getElementById('nw-home-search-result');
-  if (resultBox) resultBox.style.display = 'none';
   // 重置标签按钮样式
   const tagsEl = document.getElementById('nw-home-tags');
   if (tagsEl) {
@@ -5635,6 +5523,11 @@ function nwHomeSearchClear() {
       b.style.color = 'rgba(255,255,255,0.55)';
     });
   }
+  // 恢复文件列表标题，并清空列表让用户重新点文件夹
+  const titleEl = document.getElementById('folder-files-title');
+  const filesEl = document.getElementById('folder-files');
+  if (titleEl) titleEl.textContent = 'Recent files';
+  if (filesEl) filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">Select a folder</div>';
 }
 
 /* ── Clock ── */
@@ -6132,8 +6025,8 @@ function applyLanguage() {
   const setQAll = (sel, vals) => { document.querySelectorAll(sel).forEach((el,i) => { if(vals[i]) el.textContent = vals[i] }) }
 
   // nav buttons（新导航栏，使用 nwnav-label-xxx ID）
-  const navLabelIds = ['nwnav-label-home','nwnav-label-new','nwnav-label-import','nwnav-label-search','nwnav-label-study','nwnav-label-settings']
-  const navKeys = ['navHome','navNew','navImport','navSearch','navAI','navSettings']
+  const navLabelIds = ['nwnav-label-home','nwnav-label-new','nwnav-label-import','nwnav-label-study','nwnav-label-settings']
+  const navKeys = ['navHome','navNew','navImport','navAI','navSettings']
   navLabelIds.forEach((id, i) => {
     const el = document.getElementById(id)
     if (el) el.textContent = s[navKeys[i]]
