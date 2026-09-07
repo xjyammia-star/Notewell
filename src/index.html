@@ -644,17 +644,17 @@
               <span class="nw-nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg></span>
               <span class="nw-nav-label" id="nwnav-label-home">Home</span>
             </button>
-            <button class="nw-nav-btn" id="nwnav-new-note" onclick="showPage('new-note')">
-              <span class="nw-nav-icon">✏️</span>
-              <span class="nw-nav-label" id="nwnav-label-new">New Note</span>
+            <button class="nw-nav-btn" id="nwnav-study" onclick="showPage('study')">
+              <span class="nw-nav-icon">🤖</span>
+              <span class="nw-nav-label" id="nwnav-label-study">AI笔记</span>
             </button>
             <button class="nw-nav-btn" id="nwnav-import" onclick="showPage('import')">
               <span class="nw-nav-icon">📥</span>
               <span class="nw-nav-label" id="nwnav-label-import">Import</span>
             </button>
-            <button class="nw-nav-btn" id="nwnav-study" onclick="showPage('study')">
-              <span class="nw-nav-icon">🤖</span>
-              <span class="nw-nav-label" id="nwnav-label-study">AI Tools</span>
+            <button class="nw-nav-btn" id="nwnav-new-note" onclick="showPage('new-note')">
+              <span class="nw-nav-icon">✏️</span>
+              <span class="nw-nav-label" id="nwnav-label-new">文章纠错</span>
             </button>
             <button class="nw-nav-btn" id="nwnav-settings" onclick="showPage('settings')">
               <span class="nw-nav-icon">⚙️</span>
@@ -1194,30 +1194,78 @@
         <!-- ══ 新建笔记内嵌面板 ══ -->
         <div id="nw-inner-new-note" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
 
-  <div class="section-title">选择模板</div>
-  <div class="template-grid">
-    <div class="template-card selected" onclick="selectTemplate('blank',this)"><div class="t-icon">📄</div><div class="t-name">随笔记录</div><div class="t-desc">随时记录想法</div></div>
-    <div class="template-card" onclick="selectTemplate('daily',this)"><div class="t-icon">📅</div><div class="t-name">今日备忘</div><div class="t-desc">今日计划 + 待办事项</div></div>
-    <div class="template-card" onclick="selectTemplate('book',this)"><div class="t-icon">📖</div><div class="t-name">读书笔记</div><div class="t-desc">书名 / 摘录 / 感想</div></div>
-    <div class="template-card" onclick="selectTemplate('meeting',this)"><div class="t-icon">🗒️</div><div class="t-name">会议记录</div><div class="t-desc">人员 / 议题 / 待办</div></div>
-  </div>
-  <input class="note-input" id="note-title" placeholder="笔记标题（选填，留空自动命名）">
-  <textarea class="note-editor" id="note-body" placeholder="在这里写笔记内容…支持 Markdown 格式，写完点「保存笔记」"></textarea>
-  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
-    <button class="btn-primary" onclick="doCreateNote()">保存笔记</button>
-    <span style="font-size:13px;color:#888780">→ 保存到待处理文件库</span>
-    <span id="note-inbox-hint" style="font-size:12px;color:#b4b2a9"></span>
-  </div>
-  <div id="note-result" class="import-result hidden"></div>
-  <div id="note-move-section" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid #e0dfd8">
-    <div class="section-title">📁 移入知识库（可选）</div>
-    <p style="font-size:13px;color:#888780;margin-bottom:10px">笔记已保存到待处理文件库，也可以现在直接移入知识库的指定文件夹。</p>
-    <select class="folder-select" id="note-folder-select"></select>
-    <button class="btn-sm" style="padding:7px 16px;font-size:13px" onclick="doMoveNote()">移入知识库</button>
-    <div id="note-move-result" class="import-result hidden" style="margin-top:8px"></div>
+  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。支持直接输入文字，或上传文章照片自动识别文字。</div>
+
+  <div class="st-tabs" style="margin-top:2px">
+    <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ 文字输入</button>
+    <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ 上传图片</button>
   </div>
 
-        </div><!-- /#nw-inner-new-note -->
+  <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px">
+    <textarea class="st-textarea" id="essay-input-text" style="min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
+  </div>
+
+  <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px">
+    <div class="drop-zone" id="essay-drop-zone" onclick="essayPickImage()"
+      style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px;cursor:pointer">
+      <span style="font-size:22px">🖼️</span>
+      <span style="font-size:13px;color:#888780">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
+    </div>
+    <div id="essay-image-preview" style="display:none;align-items:center;gap:12px">
+      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div id="essay-image-name" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 识别图片文字</button>
+      </div>
+    </div>
+    <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780"></div>
+    <div>
+      <div style="font-size:12px;color:#888780;margin-bottom:6px">识别出的文字（可手动修正后再纠错）：</div>
+      <textarea class="st-textarea" id="essay-ocr-result-text" style="min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
+    </div>
+  </div>
+
+  <div class="st-action-row">
+    <button class="st-btn-primary" id="essay-correct-btn" onclick="essayStartCorrect()">✅ 开始纠错</button>
+    <button class="st-btn-sec" onclick="essayClearAll()">🗑 清空</button>
+    <div id="essay-correct-progress" style="font-size:13px;color:#888780"></div>
+  </div>
+
+  <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px">
+
+    <div id="essay-result-lang" style="font-size:12px;color:#888780"></div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
+      <div class="st-result-box study-result-box" id="essay-annotated-box" style="max-height:280px"></div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">📋 逐条错误说明</div>
+      <div id="essay-corrections-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">✅ 修改后完整版本</div>
+      <div class="st-result-box study-result-box" id="essay-clean-box" style="max-height:280px"></div>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px">
+      <div class="section-title" style="margin-bottom:8px">💾 保存到知识库</div>
+      <div class="st-row" style="margin-bottom:8px">
+        <input type="text" class="st-input" id="essay-filename" placeholder="请输入文件名（不含扩展名）" style="flex:1">
+        <button class="st-btn-primary" onclick="essaySaveToVault()" id="essay-save-btn">💾 保存</button>
+      </div>
+      <p style="font-size:12px;color:#888780">保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。</p>
+      <div id="essay-save-msg" style="display:none;margin-top:8px" class="import-result"></div>
+    </div>
+
+    <div>
+      <button class="btn-sm" onclick="essayBackToInput()">← 返回修改重新纠错</button>
+    </div>
+  </div>
+
+        </div><!-- /#nw-inner-new-note (文章纠错) -->
 
         </div><!-- /#nw-main-scroll -->
       </div><!-- /#nw-main -->
@@ -2190,7 +2238,7 @@ function showPage(name) {
   }
   if (name === 'import') { loadFolders(); loadInboxFiles(); const ir=document.getElementById('import-result');if(ir)ir.classList.add('hidden');const ia=document.getElementById('import-ai-results');if(ia)ia.classList.add('hidden');const il=document.getElementById('import-results-list');if(il)il.innerHTML='' }
   if (name === 'settings') { loadAiSettings(); loadTokenStats() }
-  if (name === 'new-note') showPage_newNote()
+  if (name === 'new-note') essayInitPage()
   if (name === 'ai') { showAiHome() }
 }
 
@@ -3126,105 +3174,198 @@ function formatSize(bytes) {
 }
 
 /* ── 新建笔记 ── */
-function showPage_newNote() {
-  const hint = document.getElementById('note-inbox-hint')
-  if (hint) hint.textContent = currentInboxPath ? '（' + currentInboxPath + '）' : '（未设置待处理文件库，将保存到知识库根目录）'
-  document.getElementById('note-result').classList.add('hidden')
-  document.getElementById('note-move-section').classList.add('hidden')
-  document.getElementById('note-move-result').classList.add('hidden')
-  document.getElementById('note-body').value = ''
-  document.getElementById('note-title').value = ''
-  lastCreatedNotePath = null
+function essayEsc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
-async function loadNoteFolders() {
-  if (!currentVaultPath) return
-  const res = await window.api.getVaultFolders(currentVaultPath); if (!res.success) return
-  document.getElementById('note-folder-select').innerHTML = res.folders.map(f => `<option value="${f.value}">${f.label}</option>`).join('')
+
+let essayImagePath = null
+let essayCorrectResult = null
+
+function essayInitPage() {
+  const msgEl = document.getElementById('essay-save-msg')
+  if (msgEl) { msgEl.style.display = 'none' }
 }
-function selectTemplate(name, el) {
-  currentTemplate = name
-  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'))
-  el.classList.add('selected')
-  const ti = document.getElementById('note-title')
-  const today = new Date().toISOString().slice(0, 10)
-  if (name === 'daily') {
-    ti.value = today
-    ti.disabled = true
-  } else if (name === 'meeting') {
-    ti.value = ''
-    ti.disabled = false
-    ti.placeholder = `会议标题（选填，留空将命名为"会议记录 ${today}"）`
-  } else if (name === 'book') {
-    ti.value = ''
-    ti.disabled = false
-    ti.placeholder = '书名（选填）'
+
+function essaySwitchInputMode(mode) {
+  const tabText = document.getElementById('essay-tab-text')
+  const tabImage = document.getElementById('essay-tab-image')
+  const panelText = document.getElementById('essay-panel-text')
+  const panelImage = document.getElementById('essay-panel-image')
+  if (mode === 'text') {
+    tabText.classList.add('active'); tabImage.classList.remove('active')
+    panelText.style.display = 'flex'; panelImage.style.display = 'none'
   } else {
-    ti.value = ''
-    ti.disabled = false
-    ti.placeholder = '标题（选填，留空自动命名）'
+    tabImage.classList.add('active'); tabText.classList.remove('active')
+    panelImage.style.display = 'flex'; panelText.style.display = 'none'
   }
 }
-async function doCreateNote() {
-  const title = document.getElementById('note-title').value.trim()
-  const body  = document.getElementById('note-body').value.trim()
-  const el = document.getElementById('note-result'); el.classList.remove('hidden')
 
-  // 检测公式：若检测到，询问用户是否改存 PDF
-  if (nwDetectFormula(body)) {
-    const choice = await nwShowSaveChoiceDialog()
-    if (choice === 'cancel') return
-    if (choice === 'pdf') {
-      if (!currentVaultPath) { alert('请先在知识库概览页选择知识库路径'); return }
-      el.className = 'import-result'
-      el.innerHTML = '⏳ 正在生成 PDF，AI 正在按文件名匹配文件夹...'
-      const pdfFilename = title || ('笔记_' + new Date().toISOString().slice(0, 10))
-      let res
-      try {
-        res = await nwSaveContentAsPdf(body, pdfFilename, { vaultPath: currentVaultPath, inboxPath: currentInboxPath })
-      } catch (e) {
-        el.className = 'import-result error'; el.innerHTML = '❌ 保存失败：' + e.message
-        return
-      }
-      if (res && res.success) {
-        el.className = 'import-result success'
-        const where = res.noMatch ? '临时文件夹' : ('「' + res.folder + '」')
-        el.innerHTML = `✅ 笔记已保存为 PDF，存入${where}。<button class="open-btn" style="margin-left:8px" onclick="openFile('${esc(res.path)}')">📂 文件管理器查看</button>`
-        document.getElementById('note-title').value = ''; document.getElementById('note-body').value = ''
-        loadOverview()
-      } else {
-        el.className = 'import-result error'; el.innerHTML = '❌ 保存失败：' + (res ? res.error : '未知错误')
-      }
+async function essayPickImage() {
+  const res = await window.api.studyInvoke('select-essay-image')
+  if (res && res.success) essaySetImage(res.path)
+}
+
+function essaySetImage(imgPath) {
+  essayImagePath = imgPath
+  const preview = document.getElementById('essay-image-preview')
+  const img = document.getElementById('essay-image-preview-img')
+  const nameEl = document.getElementById('essay-image-name')
+  img.src = 'file://' + imgPath.replace(/\\/g,'/')
+  nameEl.textContent = imgPath.split(/[\\/]/).pop()
+  preview.style.display = 'flex'
+  document.getElementById('essay-ocr-result-text').value = ''
+}
+
+async function essayOcrImage() {
+  if (!essayImagePath) return
+  const btn = document.getElementById('essay-ocr-btn')
+  const progress = document.getElementById('essay-ocr-progress')
+  btn.disabled = true; btn.textContent = '识别中...'
+  progress.style.display = 'block'; progress.textContent = '⏳ 正在识别图片中的文字...'
+  try {
+    const res = await window.api.studyInvoke('essay-ocr-image', { imagePath: essayImagePath })
+    if (res.success) {
+      document.getElementById('essay-ocr-result-text').value = res.text
+      progress.style.display = 'none'
+    } else {
+      progress.textContent = '❌ ' + (res.error || '识别失败')
+    }
+  } catch (e) {
+    progress.textContent = '❌ 出错：' + e.message
+  }
+  btn.disabled = false; btn.textContent = '🔍 识别图片文字'
+}
+
+function essayGetInputText() {
+  const isImageMode = document.getElementById('essay-panel-image').style.display !== 'none'
+  if (isImageMode) return document.getElementById('essay-ocr-result-text').value.trim()
+  return document.getElementById('essay-input-text').value.trim()
+}
+
+function essayClearAll() {
+  document.getElementById('essay-input-text').value = ''
+  document.getElementById('essay-ocr-result-text').value = ''
+  document.getElementById('essay-image-preview').style.display = 'none'
+  document.getElementById('essay-ocr-progress').style.display = 'none'
+  document.getElementById('essay-filename').value = ''
+  essayImagePath = null
+  essayCorrectResult = null
+  document.getElementById('essay-result-section').style.display = 'none'
+  document.getElementById('essay-correct-progress').textContent = ''
+}
+
+async function essayStartCorrect() {
+  const text = essayGetInputText()
+  if (!text) { alert('请先输入或识别文章内容'); return }
+
+  const btn = document.getElementById('essay-correct-btn')
+  const progress = document.getElementById('essay-correct-progress')
+  btn.disabled = true; btn.textContent = '纠错中...'
+  progress.textContent = '⏳ AI 正在检查文章...'
+
+  try {
+    const res = await window.api.studyInvoke('essay-correct', { text })
+    if (!res.success) {
+      progress.textContent = '❌ ' + (res.error || '纠错失败')
+      btn.disabled = false; btn.textContent = '✅ 开始纠错'
       return
     }
-    // choice === 'md'：继续走下面原有的 MD 保存流程
+    essayCorrectResult = res
+    progress.textContent = ''
+    essayRenderResult(res)
+  } catch (e) {
+    progress.textContent = '❌ 出错：' + e.message
+  }
+  btn.disabled = false; btn.textContent = '✅ 开始纠错'
+}
+
+function essayAnnotatedToHtml(md) {
+  let html = essayEsc(md || '')
+  html = html.replace(/~~(.+?)~~/g, '<del style="color:#f09595">$1</del>')
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="background:rgba(93,202,165,0.25);color:#5dcaa5;padding:0 3px;border-radius:3px">$1</strong>')
+  html = html.replace(/\n/g, '<br>')
+  return html
+}
+
+function essayRenderResult(res) {
+  const langEl = document.getElementById('essay-result-lang')
+  langEl.textContent = '检测语言：' + (res.language || '未知') + (res.hasErrors ? '' : '　·　未发现需要修改的客观错误')
+
+  document.getElementById('essay-annotated-box').innerHTML = essayAnnotatedToHtml(res.annotatedText || '')
+  document.getElementById('essay-clean-box').innerHTML = essayEsc(res.correctedText || '').replace(/\n/g, '<br>')
+
+  const listEl = document.getElementById('essay-corrections-list')
+  if (!res.corrections || !res.corrections.length) {
+    listEl.innerHTML = '<div class="empty-tip" style="padding:12px">没有需要说明的修改</div>'
+  } else {
+    listEl.innerHTML = res.corrections.map(c => `
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;font-size:13px">
+        <span style="color:#f09595;text-decoration:line-through">${essayEsc(c.original||'')}</span>
+        <span style="margin:0 6px;color:rgba(255,255,255,0.3)">→</span>
+        <span style="color:#5dcaa5;font-weight:600">${essayEsc(c.corrected||'')}</span>
+        <span style="display:block;color:rgba(255,255,255,0.4);margin-top:3px;font-size:12px">${essayEsc(c.reason||'')}</span>
+      </div>`).join('')
   }
 
-  const targetDir = currentInboxPath || currentVaultPath
-  const res = await window.api.createNote({ vaultPath: currentVaultPath, targetDir, title, template: currentTemplate, body })
-  if (res.success) {
-    lastCreatedNotePath = res.path
-    const dest = currentInboxPath ? '待处理文件库' : '知识库根目录'
-    el.className = 'import-result success'
-    // 保存在待处理文件库时只显示"文件管理器"，保存在知识库时才能用 Obsidian 打开
-    const openBtn = currentInboxPath
-      ? `<button class="open-btn" style="margin-left:8px" onclick="openFile('${esc(res.path)}')">📂 文件管理器查看</button>`
-      : `<button class="open-btn" style="margin-left:8px" onclick="openInObsidian('${esc(res.path)}')">🟣 在 Obsidian 中打开</button>`
-    el.innerHTML = `✅ 笔记已保存到${dest}。${openBtn}`
-    document.getElementById('note-title').value = ''; document.getElementById('note-body').value = ''
-    document.getElementById('note-move-section').classList.remove('hidden')
-    loadNoteFolders(); loadOverview()
-  } else { el.className = 'import-result error'; el.innerHTML = '❌ 保存失败：' + res.error }
+  const fnEl = document.getElementById('essay-filename')
+  if (!fnEl.value.trim()) {
+    const now = new Date()
+    const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0')
+    fnEl.value = '文章纠错-' + dateStr
+  }
+
+  document.getElementById('essay-result-section').style.display = 'flex'
+  document.getElementById('essay-save-msg').style.display = 'none'
 }
-async function doMoveNote() {
-  if (!lastCreatedNotePath) return
-  const targetDir = document.getElementById('note-folder-select').value
-  const res = await window.api.moveNote({ srcPath: lastCreatedNotePath, targetDir })
-  const el = document.getElementById('note-move-result'); el.classList.remove('hidden')
-  if (res.success) {
-    lastCreatedNotePath = res.path; el.className = 'import-result success'
-    el.innerHTML = `✅ 已移入知识库。<button class="open-btn" style="margin-left:8px" onclick="openInObsidian('${esc(res.path)}')">在 Obsidian 中打开</button>`
-    loadOverview()
-  } else { el.className = 'import-result error'; el.innerHTML = '❌ 移动失败：' + res.error }
+
+function essayBackToInput() {
+  document.getElementById('essay-result-section').style.display = 'none'
+}
+
+async function essaySaveToVault() {
+  if (!essayCorrectResult) return
+  if (!currentVaultPath) { alert('请先选择知识库路径'); return }
+  const filename = document.getElementById('essay-filename').value.trim()
+  if (!filename) { alert('请填写文件名'); return }
+
+  const btn = document.getElementById('essay-save-btn')
+  const msgEl = document.getElementById('essay-save-msg')
+  btn.disabled = true; btn.textContent = '⏳ 保存中...'
+  msgEl.style.display = 'none'
+
+  try {
+    const folders = await window.api.getVaultFolders(currentVaultPath)
+    const vaultFolders = folders.success ? folders.folders : []
+    const aiSettings = await window.api.getAiSettings()
+
+    const res = await window.api.studyInvoke('essay-save', {
+      filename,
+      correctedText: essayCorrectResult.correctedText,
+      annotatedText: essayCorrectResult.annotatedText,
+      vaultPath: currentVaultPath,
+      vaultFolders,
+      inboxFolder: aiSettings.inboxFolder || '',
+      inboxPath: await window.api.getInboxPath()
+    })
+
+    if (res.success) {
+      const where = res.usedInbox ? '📁 临时文件夹' : ('📂 ' + (res.folder || ''))
+      msgEl.className = 'import-result success'
+      msgEl.innerHTML = `✅ 保存成功！已生成两个文件，存入 ${where}<br>批改记录版：${essayEsc(res.annotatedPath.split(/[\\/]/).pop())}<br>干净版：${essayEsc(res.cleanPath.split(/[\\/]/).pop())}`
+      msgEl.style.display = 'block'
+      loadOverview()
+    } else {
+      msgEl.className = 'import-result error'
+      msgEl.innerHTML = '❌ 保存失败：' + essayEsc(res.error || '未知错误')
+      msgEl.style.display = 'block'
+    }
+  } catch (e) {
+    msgEl.className = 'import-result error'
+    msgEl.innerHTML = '❌ 出错：' + essayEsc(e.message)
+    msgEl.style.display = 'block'
+  }
+
+  btn.disabled = false; btn.textContent = '💾 保存'
 }
 
 /* ── AI 分析文件夹 ── */
@@ -5961,8 +6102,8 @@ function nwInitResizer() {
    ═══════════════════════════════════════════ */
 const NW_STRINGS = {
   en: {
-    navHome:'Home', navNew:'New Note', navImport:'Import',
-    navSearch:'Search', navAI:'AI Tools', navSettings:'Settings',
+    navHome:'Home', navNew:'Essay Correction', navImport:'Import',
+    navSearch:'Search', navAI:'AI Notes', navSettings:'Settings',
     // home stats
     statMd:'Notes', statPdf:'PDF', statImg:'Images', statVideo:'Videos', statOther:'Others',
     // home folders area
@@ -5987,8 +6128,8 @@ const NW_STRINGS = {
     setTitle:'Settings', setLangTitle:'Language / 语言', setLangLabel:'Interface language',
   },
   zh: {
-    navHome:'主页', navNew:'新建笔记', navImport:'导入资料',
-    navSearch:'搜索', navAI:'AI 工具', navSettings:'设置',
+    navHome:'主页', navNew:'文章纠错', navImport:'导入资料',
+    navSearch:'搜索', navAI:'AI笔记', navSettings:'设置',
     statMd:'笔记', statPdf:'PDF', statImg:'图片', statVideo:'视频', statOther:'其他',
     foldersLabel:'文件夹目录', refreshBtn:'↻ 刷新',
     filesTitle:'最近修改', selectFolder:'请选择文件夹',

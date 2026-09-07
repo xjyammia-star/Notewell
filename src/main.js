@@ -1934,7 +1934,7 @@ function callArkMultimodal(apiKey, modelId, endpoint, fileId, prompt, filePath) 
 
 // ── Doubao 视觉模型：用 base64 图片理解图片内容 ──
 // 复用音视频的 apiKey / endpoint / modelId，不需要额外上传文件
-function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt) {
+function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxTokens) {
   return new Promise((resolve, reject) => {
     try {
       const ext = path.extname(imagePath).toLowerCase().slice(1)
@@ -1949,7 +1949,7 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt) {
           { type: 'text', text: prompt }
         ]
       }]
-      const body = JSON.stringify({ model: modelId, messages, max_tokens: 500 })
+      const body = JSON.stringify({ model: modelId, messages, max_tokens: maxTokens || 500 })
       const url = new URL(endpoint + '/chat/completions')
       const options = {
         hostname: url.hostname,
@@ -1979,6 +1979,205 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt) {
     } catch (e) { reject(e) }
   })
 }
+
+// ── 文章纠错：选择文章图片 ──
+ipcMain.handle('select-essay-image', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    title: '选择文章图片',
+    filters: [
+      { name: '图片文件', extensions: ['jpg','jpeg','png','gif','webp'] }
+    ]
+  })
+  if (!result.canceled && result.filePaths.length > 0) {
+    return { success: true, path: result.filePaths[0], name: path.basename(result.filePaths[0]) }
+  }
+  return { success: false }
+})
+
+// ── 文章纠错：识别图片中的文字（复用图片/音视频模型）──
+ipcMain.handle('essay-ocr-image', async (event, { imagePath }) => {
+  const settings = store.get('aiSettings', {})
+  const visionApiKey = settings.audioApiKey || settings.apiKey
+  const visionModelId = settings.audioModelId || ''
+  const visionEndpoint = settings.audioEndpoint || settings.endpoint
+  if (!visionApiKey || !visionModelId) {
+    return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
+  }
+  try {
+    const prompt = '请提取这张图片中的所有文字内容，按原文的顺序和分段完整输出，不要遗漏任何文字，不要添加任何解释、总结、标题或者标点符号以外的内容。如果图片中的某部分不是文字（如插图、图表），可以忽略，不用描述。'
+    const res = await callDoubaoVision(visionApiKey, visionModelId, visionEndpoint, imagePath, prompt, 4000)
+    recordTokenUsage('essay', 'audio', res.usage.prompt_tokens||0, res.usage.completion_tokens||0)
+    return { success: true, text: (res.content || '').trim() }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+// ── 文章纠错：AI 检查客观错误（错别字/语法/标点/固定搭配）──
+ipcMain.handle('essay-correct', async (event, { text }) => {
+  const settings = store.get('aiSettings', {})
+  if (!settings.apiKey || !settings.modelId) {
+    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
+  }
+  const content = (text || '').trim()
+  if (!content) return { success: false, error: '内容为空' }
+
+  const prompt = `你是一个专业的语言校对助手，任务是检查文章中的客观错误，绝不评判或修改主观内容。
+
+请仔细检查以下文章，只修改这几类客观错误：
+1. 错别字/拼写错误
+2. 语法错误（时态、主谓一致、冠词、介词等）
+3. 标点符号错误
+4. 固定搭配/词组错误（如英语固定搭配用错）
+
+自动判断文章使用的语言：中文按中文语言标准检查，英文按英语语言标准检查，其他语言按该语言标准检查。
+
+你绝对不能做的事：
+- 不评价文章结构和思路
+- 不评价观点是否合理
+- 不改写句子让它"更好看"（不做文采润色）
+- 不打分、不给评语
+
+请输出严格的 JSON（不要加任何其他文字、不要用 markdown 代码块包裹），格式如下：
+{
+  "language": "检测到的语言，如：中文 / 英文 / 泰文",
+  "hasErrors": true 或 false,
+  "correctedText": "完整的修改后干净文本（只修正上述四类错误，其余原文保持不变，不加任何标注）",
+  "annotatedText": "完整原文，在每一处错误的位置用「~~原错误片段~~ **修改后片段**」的格式原地标注，其余没有错误的原文原样保留，不要打乱原文顺序和分段",
+  "corrections": [
+    { "original": "原文错误片段", "corrected": "修改后片段", "reason": "错误类型及简要说明" }
+  ]
+}
+
+如果文章完全没有错误，hasErrors 填 false，correctedText 和 annotatedText 都填原文，corrections 填空数组。
+
+文章原文：
+${content}`
+
+  try {
+    const replyObj = await callVolcanoAI(
+      settings.apiKey, settings.modelId, settings.endpoint,
+      [{ role: 'user', content: prompt }],
+      4000
+    )
+    recordTokenUsage('essay', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
+    const clean = (replyObj.content || '').replace(/```json|```/g, '').trim()
+    const result = JSON.parse(clean)
+    return {
+      success: true,
+      language: result.language || '',
+      hasErrors: !!result.hasErrors,
+      correctedText: result.correctedText || content,
+      annotatedText: result.annotatedText || content,
+      corrections: Array.isArray(result.corrections) ? result.corrections : []
+    }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+// ── 文章纠错：保存干净版 + 批改记录版到知识库（AI 判断科目文件夹）──
+ipcMain.handle('essay-save', async (event, { filename, correctedText, annotatedText, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
+  const settings = store.get('aiSettings', {})
+  if (!settings.apiKey || !settings.modelId) {
+    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
+  }
+  const rawName = (filename || '').trim()
+  if (!rawName) return { success: false, error: '请填写文件名' }
+  const safeName = rawName.replace(/[\\/:*?"<>|]/g, '_').slice(0, 60)
+
+  const folderList = (vaultFolders || [])
+    .map(f => f.label)
+    .filter(l => l && l !== '（根目录）')
+    .join('、')
+
+  const classifyPrompt = `你是一个知识库文件分类助手。
+知识库现有文件夹：${folderList || '（暂无文件夹）'}
+这是一篇经过批改的文章，文件名为：${safeName}
+
+请判断这篇文章最适合存放的文件夹（从上面列表中选择完整相对路径，如果都不合适输出空字符串 ""）。
+
+文章内容（前1500字）：
+${(correctedText||'').slice(0,1500)}
+
+请严格按以下 JSON 格式回复，不要加任何其他文字：
+{"folder":"xxx"}`
+
+  let aiFolder = ''
+  try {
+    const replyObj = await callVolcanoAI(
+      settings.apiKey, settings.modelId, settings.endpoint,
+      [{ role: 'user', content: classifyPrompt }],
+      300
+    )
+    recordTokenUsage('essay', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
+    const clean = (replyObj.content||'').replace(/```json|```/g, '').trim()
+    const parsed = JSON.parse(clean)
+    aiFolder = (parsed.folder || '').trim()
+  } catch (_) {}
+
+  let targetDir = null
+  let usedInbox = false
+  let noMatch = false
+
+  if (aiFolder) {
+    const matched = (vaultFolders || []).find(f =>
+      f.label && f.label.replace(/\\/g,'/') === aiFolder.replace(/\\/g,'/')
+    )
+    if (matched && matched.value) targetDir = matched.value
+  }
+
+  if (!targetDir) {
+    noMatch = true
+    if (inboxFolder) { targetDir = inboxFolder; usedInbox = true }
+    else if (inboxPath) { targetDir = inboxPath; usedInbox = true }
+    else return { success: false, error: '没有匹配的文件夹，且未设置临时文件夹，请先在系统设置中配置。' }
+  }
+
+  try {
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+  } catch (e) {
+    return { success: false, error: '目标文件夹创建失败：' + e.message }
+  }
+
+  const now = new Date()
+  const dateStr = now.toISOString().slice(0,10)
+
+  // 干净版
+  let cleanPath = path.join(targetDir, safeName + '.md')
+  if (fs.existsSync(cleanPath)) {
+    let i = 2
+    while (fs.existsSync(path.join(targetDir, `${safeName}_${i}.md`))) i++
+    cleanPath = path.join(targetDir, `${safeName}_${i}.md`)
+  }
+  const cleanContent = `---\ntitle: "${safeName}"\ndate: "${dateStr}"\ntags: [文章纠错]\n---\n\n${correctedText}`
+
+  // 批改记录版
+  const annotatedName = safeName + '-批改记录'
+  let annotatedPath = path.join(targetDir, annotatedName + '.md')
+  if (fs.existsSync(annotatedPath)) {
+    let i = 2
+    while (fs.existsSync(path.join(targetDir, `${annotatedName}_${i}.md`))) i++
+    annotatedPath = path.join(targetDir, `${annotatedName}_${i}.md`)
+  }
+  const annotatedContent = `---\ntitle: "${safeName}（批改记录）"\ndate: "${dateStr}"\ntags: [文章纠错, 批改记录]\n---\n\n${annotatedText}`
+
+  try {
+    fs.writeFileSync(cleanPath, cleanContent, 'utf-8')
+    fs.writeFileSync(annotatedPath, annotatedContent, 'utf-8')
+  } catch (e) {
+    return { success: false, error: '文件写入失败：' + e.message }
+  }
+
+  try { updateHubFile(targetDir, vaultPath, settings) } catch (_) {}
+
+  return {
+    success: true,
+    cleanPath, annotatedPath,
+    folder: aiFolder, targetDir, usedInbox, noMatch
+  }
+})
 
 function buildAnalyzeTree(dir, rootPath, depth) {
   depth = depth || 0
