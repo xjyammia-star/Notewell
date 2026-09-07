@@ -656,6 +656,10 @@
               <span class="nw-nav-icon">✏️</span>
               <span class="nw-nav-label" id="nwnav-label-new">文章纠错</span>
             </button>
+            <button class="nw-nav-btn" id="nwnav-exam" onclick="showPage('exam')">
+              <span class="nw-nav-icon">🧾</span>
+              <span class="nw-nav-label" id="nwnav-label-exam">考试复盘</span>
+            </button>
             <button class="nw-nav-btn" id="nwnav-settings" onclick="showPage('settings')">
               <span class="nw-nav-icon">⚙️</span>
               <span class="nw-nav-label" id="nwnav-label-settings">Settings</span>
@@ -1266,6 +1270,59 @@
   </div>
 
         </div><!-- /#nw-inner-new-note (文章纠错) -->
+
+        <!-- ══ 考试复盘内嵌面板 ══ -->
+        <div id="nw-inner-exam" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
+
+  <div class="st-info-tip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
+
+  <div class="st-row" style="gap:14px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
+      <label style="font-size:12px;color:#888780;display:flex;align-items:center;gap:6px">科目
+        <span onclick="examRefreshSubjects()" style="cursor:pointer;color:#afa9ec;font-size:11px" title="重新用 AI 判断哪些文件夹是科目">🔄 刷新</span>
+      </label>
+      <select class="st-select" id="exam-subject-select" style="width:100%"></select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
+      <label style="font-size:12px;color:#888780">考试日期</label>
+      <input type="date" class="st-input" id="exam-date" style="width:100%">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
+      <label style="font-size:12px;color:#888780">考试类型</label>
+      <select class="st-select" id="exam-type-select" style="width:100%" onchange="examToggleCustomType()"></select>
+    </div>
+    <div id="exam-type-custom-wrap" style="display:none;flex-direction:column;gap:5px;min-width:160px">
+      <label style="font-size:12px;color:#888780">自定义类型</label>
+      <input type="text" class="st-input" id="exam-type-custom" placeholder="请输入考试类型" style="width:100%">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
+      <label style="font-size:12px;color:#888780">分数（选填，得分 / 总分）</label>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="number" class="st-input" id="exam-score" placeholder="得分" style="width:80px">
+        <span style="color:#888780">/</span>
+        <input type="number" class="st-input" id="exam-score-total" placeholder="总分" style="width:80px">
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
+      <label style="font-size:12px;color:#888780">等级评价（选填）</label>
+      <input type="text" class="st-input" id="exam-grade" placeholder="如 A / B+" style="width:100%">
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
+    <label style="font-size:12px;color:#888780">复盘内容（选填，哪里没考好、哪个知识点有欠缺等）</label>
+    <textarea class="st-textarea" id="exam-review-text" style="flex:1;min-height:220px" placeholder="写下这次考试的复盘…"></textarea>
+  </div>
+
+  <div class="st-action-row">
+    <button class="st-btn-primary" id="exam-save-btn" onclick="examSaveReview()">💾 保存复盘</button>
+    <button class="st-btn-sec" onclick="examClearForm()">🗑 清空</button>
+    <div id="exam-save-progress" style="font-size:13px;color:#888780"></div>
+  </div>
+
+  <div id="exam-save-msg" style="display:none;margin-top:4px" class="import-result"></div>
+
+        </div><!-- /#nw-inner-exam -->
 
         </div><!-- /#nw-main-scroll -->
       </div><!-- /#nw-main -->
@@ -1955,16 +2012,16 @@
     <div class="st-lang-bar">
       <span>输出语言：</span>
       <label class="st-radio-label" style="padding:3px 8px">
-        <input type="radio" name="study-output-lang" value="中文"> 中文
+        <input type="radio" name="study-output-lang-old" value="中文"> 中文
       </label>
       <label class="st-radio-label" style="padding:3px 8px">
-        <input type="radio" name="study-output-lang" value="英文" checked> English
+        <input type="radio" name="study-output-lang-old" value="英文" checked> English
       </label>
     </div>
   </div>
 
   <!-- ── 标签一：学习笔记 ── -->
-  <div id="study-tab-note" class="st-tab-panel active">
+  <div id="study-tab-note-old" class="st-tab-panel active">
     <div class="st-info-tip">📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。</div>
     <div class="st-row">
       <input type="text" class="st-input" id="study-note-title" placeholder="笔记标题（可选，不填则由 AI 自动生成）" style="flex:1">
@@ -1991,15 +2048,15 @@
         <option value="初中" selected>初中</option>
         <option value="高中">高中</option>
       </select>
-      <div id="study-expand-system-wrap" class="st-radio-group">
-        <label class="st-radio-label" id="study-sys-label-cn">
-          <input type="radio" name="study-expand-system" value="国内" onchange="updateSystemLabel()"> 国内体系
+      <div id="study-expand-system-wrap-old" class="st-radio-group">
+        <label class="st-radio-label" id="study-sys-label-cn-old">
+          <input type="radio" name="study-expand-system-old" value="国内" onchange="updateSystemLabel()"> 国内体系
         </label>
-        <label class="st-radio-label" id="study-sys-label-intl">
-          <input type="radio" name="study-expand-system" value="国际" checked onchange="updateSystemLabel()"> 国际体系
+        <label class="st-radio-label" id="study-sys-label-intl-old">
+          <input type="radio" name="study-expand-system-old" value="国际" checked onchange="updateSystemLabel()"> 国际体系
         </label>
       </div>
-      <select class="st-select" id="study-expand-curriculum" style="display:none">
+      <select class="st-select" id="study-expand-curriculum-old" style="display:none">
         <option value="IGCSE">IGCSE</option>
         <option value="A-Level">A-Level</option>
         <option value="AP">AP</option>
@@ -2050,9 +2107,9 @@
     <div>
       <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:10px">生成内容类型</div>
       <div class="st-gen-type">
-        <label><input type="radio" name="study-gen-type" value="review" checked> 📋 复习资料</label>
-        <label><input type="radio" name="study-gen-type" value="quiz"> ✏️ 练习题</label>
-        <label><input type="radio" name="study-gen-type" value="both"> 📚 复习资料 + 练习题</label>
+        <label><input type="radio" name="study-gen-type-old" value="review" checked> 📋 复习资料</label>
+        <label><input type="radio" name="study-gen-type-old" value="quiz"> ✏️ 练习题</label>
+        <label><input type="radio" name="study-gen-type-old" value="both"> 📚 复习资料 + 练习题</label>
       </div>
     </div>
     <textarea class="st-textarea" id="study-review-requirement" style="min-height:90px"
@@ -2169,7 +2226,7 @@ function showMainUI(vaultPath) {
 }
 function showPage(name) {
   // 更新导航栏按钮 active 状态
-  const nwNavMap = { home:'nwnav-home', 'new-note':'nwnav-new-note', import:'nwnav-import', study:'nwnav-study', settings:'nwnav-settings' }
+  const nwNavMap = { home:'nwnav-home', 'new-note':'nwnav-new-note', import:'nwnav-import', study:'nwnav-study', exam:'nwnav-exam', settings:'nwnav-settings' }
   document.querySelectorAll('.nw-nav-btn').forEach(btn => btn.classList.remove('active'))
   if (nwNavMap[name]) { const nb = document.getElementById(nwNavMap[name]); if(nb) nb.classList.add('active') }
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'))
@@ -2191,11 +2248,13 @@ function showPage(name) {
     const isg = document.getElementById('nw-inner-settings')
     const isi = document.getElementById('nw-inner-import')
     const isn = document.getElementById('nw-inner-new-note')
+    const ise = document.getElementById('nw-inner-exam')
     if (hc) { hc.style.display = ''; hc.classList.remove('hidden') }
     if (is) { is.style.display = 'none'; is.classList.add('hidden') }
     if (isg) { isg.style.display = 'none'; isg.classList.add('hidden') }
     if (isi) { isi.style.display = 'none'; isi.classList.add('hidden') }
     if (isn) { isn.style.display = 'none'; isn.classList.add('hidden') }
+    if (ise) { ise.style.display = 'none'; ise.classList.add('hidden') }
     nwInitHome()
     return
   }
@@ -2204,13 +2263,13 @@ function showPage(name) {
   if (pageHome) { pageHome.style.display = 'block'; pageHome.classList.remove('hidden') }
 
   // 所有 inner 面板
-  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-new-note']
+  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-new-note','nw-inner-exam']
   panels.forEach(id => {
     const el = document.getElementById(id)
     if (el) { el.style.display = 'none'; el.classList.add('hidden') }
   })
 
-  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', 'new-note':'nw-inner-new-note' }
+  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', 'new-note':'nw-inner-new-note', exam:'nw-inner-exam' }
   const innerId = innerMap[name]
   if (innerId) {
     const el = document.getElementById(innerId)
@@ -2239,6 +2298,7 @@ function showPage(name) {
   if (name === 'import') { loadFolders(); loadInboxFiles(); const ir=document.getElementById('import-result');if(ir)ir.classList.add('hidden');const ia=document.getElementById('import-ai-results');if(ia)ia.classList.add('hidden');const il=document.getElementById('import-results-list');if(il)il.innerHTML='' }
   if (name === 'settings') { loadAiSettings(); loadTokenStats() }
   if (name === 'new-note') essayInitPage()
+  if (name === 'exam') examInitPage()
   if (name === 'ai') { showAiHome() }
 }
 
@@ -3366,6 +3426,164 @@ async function essaySaveToVault() {
   }
 
   btn.disabled = false; btn.textContent = '💾 保存'
+}
+
+/* ── 考试复盘 ── */
+const EXAM_TYPE_OPTIONS = [
+  { key: 'learningCheck', zh: '随堂检测', en: 'Learning Check' },
+  { key: 'quiz', zh: '小测验', en: 'Quiz' },
+  { key: 'test', zh: '测试', en: 'Test' },
+  { key: 'exam', zh: '考试', en: 'Exam' },
+  { key: 'mockExam', zh: '模拟考试', en: 'Mock Exam' },
+  { key: 'other', zh: '其他（自己填写）', en: 'Other (custom)' }
+]
+
+function examTypeLang() { return nwLang === 'zh' ? 'zh' : 'en' }
+
+function examGetTypeLabel(key) {
+  const found = EXAM_TYPE_OPTIONS.find(o => o.key === key)
+  return found ? found[examTypeLang()] : key
+}
+
+function examRenderTypeOptions() {
+  const sel = document.getElementById('exam-type-select')
+  if (!sel) return
+  const prevValue = sel.value
+  const lang = examTypeLang()
+  sel.innerHTML = EXAM_TYPE_OPTIONS.map(o => `<option value="${o.key}">${essayEsc(o[lang])}</option>`).join('')
+  if (prevValue && EXAM_TYPE_OPTIONS.some(o => o.key === prevValue)) sel.value = prevValue
+  examToggleCustomType()
+}
+
+function examToggleCustomType() {
+  const sel = document.getElementById('exam-type-select')
+  const wrap = document.getElementById('exam-type-custom-wrap')
+  wrap.style.display = sel.value === 'other' ? 'flex' : 'none'
+}
+
+async function examInitPage() {
+  const msgEl = document.getElementById('exam-save-msg')
+  if (msgEl) msgEl.style.display = 'none'
+  const dateEl = document.getElementById('exam-date')
+  if (dateEl && !dateEl.value) {
+    const now = new Date()
+    dateEl.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0')
+  }
+  examRenderTypeOptions()
+  await examLoadSubjects()
+}
+
+async function examLoadSubjects() {
+  const sel = document.getElementById('exam-subject-select')
+  if (!sel) return
+  if (!currentVaultPath) { sel.innerHTML = '<option value="">请先选择知识库</option>'; return }
+
+  sel.innerHTML = '<option value="">🤖 正在判断科目...</option>'
+  let res
+  try {
+    res = await window.api.studyInvoke('exam-get-subjects', { vaultPath: currentVaultPath })
+  } catch (e) {
+    sel.innerHTML = '<option value="">加载失败</option>'
+    return
+  }
+  if (!res || !res.success) {
+    sel.innerHTML = '<option value="">加载失败：' + essayEsc(res && res.error || '未知错误') + '</option>'
+    return
+  }
+
+  const subjectFolders = res.folders || []
+  if (!subjectFolders.length) {
+    sel.innerHTML = '<option value="">未识别到科目文件夹</option>'
+    return
+  }
+  sel.innerHTML = subjectFolders.map(f =>
+    `<option value="${f.value.replace(/"/g,'&quot;')}" data-label="${f.label.replace(/"/g,'&quot;')}">${essayEsc(f.label)}</option>`
+  ).join('')
+}
+
+async function examRefreshSubjects() {
+  const sel = document.getElementById('exam-subject-select')
+  if (sel) sel.innerHTML = '<option value="">🤖 正在重新判断...</option>'
+  try {
+    await window.api.studyInvoke('exam-reset-subject-cache')
+  } catch (_) {}
+  await examLoadSubjects()
+}
+
+function examClearForm() {
+  document.getElementById('exam-review-text').value = ''
+  document.getElementById('exam-score').value = ''
+  document.getElementById('exam-score-total').value = ''
+  document.getElementById('exam-grade').value = ''
+  document.getElementById('exam-type-custom').value = ''
+  document.getElementById('exam-save-msg').style.display = 'none'
+  document.getElementById('exam-save-progress').textContent = ''
+}
+
+async function examSaveReview() {
+  const sel = document.getElementById('exam-subject-select')
+  const targetDir = sel.value
+  const subjectLabel = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].dataset.label : ''
+  if (!targetDir) { alert('请先选择科目'); return }
+
+  const dateVal = document.getElementById('exam-date').value
+  if (!dateVal) { alert('请选择考试日期'); return }
+
+  const typeSel = document.getElementById('exam-type-select')
+  const typeKey = typeSel.value
+  let examType
+  if (typeKey === 'other') {
+    examType = document.getElementById('exam-type-custom').value.trim()
+    if (!examType) { alert('请填写自定义考试类型'); return }
+  } else {
+    examType = examGetTypeLabel(typeKey)
+  }
+
+  const score = document.getElementById('exam-score').value.trim()
+  const scoreTotal = document.getElementById('exam-score-total').value.trim()
+  const grade = document.getElementById('exam-grade').value.trim()
+  const reviewText = document.getElementById('exam-review-text').value.trim()
+
+  const btn = document.getElementById('exam-save-btn')
+  const msgEl = document.getElementById('exam-save-msg')
+  const progress = document.getElementById('exam-save-progress')
+  btn.disabled = true; btn.textContent = '⏳ 保存中...'
+  progress.textContent = ''
+  msgEl.style.display = 'none'
+
+  try {
+    const res = await window.api.studyInvoke('exam-review-save', {
+      targetDir,
+      subjectLabel,
+      date: dateVal,
+      examType,
+      score,
+      scoreTotal,
+      grade,
+      reviewText,
+      vaultPath: currentVaultPath
+    })
+    if (res.success) {
+      msgEl.className = 'import-result success'
+      msgEl.innerHTML = `✅ 已保存到「${essayEsc(subjectLabel)}」的考试复盘文件（${essayEsc(res.filename)}）`
+      msgEl.style.display = 'block'
+      document.getElementById('exam-review-text').value = ''
+      document.getElementById('exam-score').value = ''
+      document.getElementById('exam-score-total').value = ''
+      document.getElementById('exam-grade').value = ''
+      loadOverview()
+    } else {
+      msgEl.className = 'import-result error'
+      msgEl.innerHTML = '❌ 保存失败：' + essayEsc(res.error || '未知错误')
+      msgEl.style.display = 'block'
+    }
+  } catch (e) {
+    msgEl.className = 'import-result error'
+    msgEl.innerHTML = '❌ 出错：' + essayEsc(e.message)
+    msgEl.style.display = 'block'
+  }
+
+  btn.disabled = false; btn.textContent = '💾 保存复盘'
 }
 
 /* ── AI 分析文件夹 ── */
@@ -6103,7 +6321,7 @@ function nwInitResizer() {
 const NW_STRINGS = {
   en: {
     navHome:'Home', navNew:'Essay Correction', navImport:'Import',
-    navSearch:'Search', navAI:'AI Notes', navSettings:'Settings',
+    navSearch:'Search', navAI:'AI Notes', navExam:'Exam Review', navSettings:'Settings',
     // home stats
     statMd:'Notes', statPdf:'PDF', statImg:'Images', statVideo:'Videos', statOther:'Others',
     // home folders area
@@ -6129,7 +6347,7 @@ const NW_STRINGS = {
   },
   zh: {
     navHome:'主页', navNew:'文章纠错', navImport:'导入资料',
-    navSearch:'搜索', navAI:'AI笔记', navSettings:'设置',
+    navSearch:'搜索', navAI:'AI笔记', navExam:'考试复盘', navSettings:'设置',
     statMd:'笔记', statPdf:'PDF', statImg:'图片', statVideo:'视频', statOther:'其他',
     foldersLabel:'文件夹目录', refreshBtn:'↻ 刷新',
     filesTitle:'最近修改', selectFolder:'请选择文件夹',
@@ -6165,9 +6383,12 @@ function applyLanguage() {
   const setQ = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = val }
   const setQAll = (sel, vals) => { document.querySelectorAll(sel).forEach((el,i) => { if(vals[i]) el.textContent = vals[i] }) }
 
+  // 考试复盘：考试类型选项跟随界面语言
+  if (typeof examRenderTypeOptions === 'function') examRenderTypeOptions()
+
   // nav buttons（新导航栏，使用 nwnav-label-xxx ID）
-  const navLabelIds = ['nwnav-label-home','nwnav-label-new','nwnav-label-import','nwnav-label-study','nwnav-label-settings']
-  const navKeys = ['navHome','navNew','navImport','navAI','navSettings']
+  const navLabelIds = ['nwnav-label-home','nwnav-label-new','nwnav-label-import','nwnav-label-study','nwnav-label-exam','nwnav-label-settings']
+  const navKeys = ['navHome','navNew','navImport','navAI','navExam','navSettings']
   navLabelIds.forEach((id, i) => {
     const el = document.getElementById(id)
     if (el) el.textContent = s[navKeys[i]]

@@ -2179,6 +2179,123 @@ ${(correctedText||'').slice(0,1500)}
   }
 })
 
+// ── 考试复盘：AI 判断知识库一级文件夹里哪些是"科目"文件夹（结果按文件夹名缓存，只对新出现的文件夹调用AI）──
+ipcMain.handle('exam-get-subjects', async (event, { vaultPath }) => {
+  if (!vaultPath) return { success: false, error: '未选择知识库' }
+  const settings = store.get('aiSettings', {})
+
+  let allFolders
+  try {
+    allFolders = getFolders(vaultPath, vaultPath)
+  } catch (e) {
+    return { success: false, error: '读取文件夹失败：' + e.message }
+  }
+
+  const inboxFolder = (settings.inboxFolder || '').replace(/\\/g,'/').replace(/\/+$/,'')
+  const topLevel = allFolders.filter(f => {
+    if (!f.label || f.label === '（根目录）') return false
+    if (/[\\/]/.test(f.label)) return false
+    const normVal = (f.value || '').replace(/\\/g,'/').replace(/\/+$/,'')
+    if (inboxFolder && normVal === inboxFolder) return false
+    return true
+  })
+
+  if (!topLevel.length) return { success: true, folders: [] }
+
+  const cache = store.get('examSubjectClassification', {})
+  const uncachedLabels = topLevel.map(f => f.label).filter(l => !(l in cache))
+
+  if (uncachedLabels.length) {
+    if (settings.apiKey && settings.modelId) {
+      try {
+        const prompt = `你是一个帮助分类文件夹的助手。以下是一个学生知识库中若干一级文件夹的名称，请判断每一个是不是"学科/科目"类文件夹（例如：数学、英语、物理、化学、生物、Math、English、Biology、Chemistry、History 等学校科目），而不是其他类型的文件夹（例如：日记、临时文件夹、素材、其他、杂项、笔记、资料、Notes、Diary 等非学科类文件夹）。
+
+文件夹名称列表：
+${uncachedLabels.join('、')}
+
+请严格按以下 JSON 格式回复，不要加任何其他文字：
+{"subjects": ["科目文件夹名称1", "科目文件夹名称2"]}
+
+只包含你判断为学科/科目类的文件夹名称，不确定的请谨慎排除。`
+
+        const replyObj = await callVolcanoAI(
+          settings.apiKey, settings.modelId, settings.endpoint,
+          [{ role: 'user', content: prompt }],
+          500
+        )
+        recordTokenUsage('exam', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
+        const clean = (replyObj.content || '').replace(/```json|```/g, '').trim()
+        const parsed = JSON.parse(clean)
+        const subjectsSet = new Set(Array.isArray(parsed.subjects) ? parsed.subjects : [])
+        uncachedLabels.forEach(l => { cache[l] = subjectsSet.has(l) })
+      } catch (e) {
+        // AI 调用失败：未分类的文件夹暂时都当作科目显示，避免功能不可用
+        uncachedLabels.forEach(l => { cache[l] = true })
+      }
+    } else {
+      // 未配置 AI：无法判断，暂时都当作科目显示
+      uncachedLabels.forEach(l => { cache[l] = true })
+    }
+    store.set('examSubjectClassification', cache)
+  }
+
+  const subjectFolders = topLevel.filter(f => cache[f.label])
+  return { success: true, folders: subjectFolders }
+})
+
+// ── 考试复盘：清空科目判断缓存，下次会重新用 AI 判断全部一级文件夹 ──
+ipcMain.handle('exam-reset-subject-cache', async () => {
+  store.set('examSubjectClassification', {})
+  return { success: true }
+})
+
+// ── 考试复盘：追加保存到对应科目的考试复盘文件（只保存，不修改不分析）──
+ipcMain.handle('exam-review-save', async (event, { targetDir, subjectLabel, date, examType, score, scoreTotal, grade, reviewText, vaultPath }) => {
+  if (!targetDir) return { success: false, error: '未指定科目文件夹' }
+  if (!date) return { success: false, error: '未指定考试日期' }
+
+  try {
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true })
+  } catch (e) {
+    return { success: false, error: '文件夹不存在且创建失败：' + e.message }
+  }
+
+  const safeSubject = (subjectLabel || path.basename(targetDir) || '考试').replace(/[\\/:*?"<>|]/g, '_')
+  const filename = safeSubject + '-考试复盘.md'
+  const filePath = path.join(targetDir, filename)
+
+  let scoreLines = []
+  if (score !== '' && score !== undefined && score !== null) {
+    scoreLines.push(`分数：${score}${scoreTotal ? ' / ' + scoreTotal : ''}`)
+  }
+  if (grade && String(grade).trim()) {
+    scoreLines.push(`等级：${String(grade).trim()}`)
+  }
+  if (!scoreLines.length) scoreLines.push('分数：未填写')
+  const scoreLine = scoreLines.join('\n')
+
+  const reviewPart = (reviewText && reviewText.trim()) ? reviewText.trim() + '\n\n' : ''
+  const entry = `---\n\n## ${date} · ${examType || '未分类'}\n\n${scoreLine}\n\n${reviewPart}`
+
+  try {
+    if (!fs.existsSync(filePath)) {
+      const header = `---\ntitle: "${safeSubject}-考试复盘"\ntags: [考试复盘]\n---\n\n# ${safeSubject} 考试复盘记录\n\n`
+      fs.writeFileSync(filePath, header + entry, 'utf-8')
+    } else {
+      fs.appendFileSync(filePath, entry, 'utf-8')
+    }
+  } catch (e) {
+    return { success: false, error: '文件写入失败：' + e.message }
+  }
+
+  try {
+    const settings = store.get('aiSettings', {})
+    updateHubFile(targetDir, vaultPath, settings)
+  } catch (_) {}
+
+  return { success: true, filename, filePath, targetDir }
+})
+
 function buildAnalyzeTree(dir, rootPath, depth) {
   depth = depth || 0
   const name = depth === 0 ? path.basename(dir) + '（根目录）' : path.basename(dir)
