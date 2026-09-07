@@ -672,11 +672,32 @@
 
           <div id="nw-home-content" style="display:flex;flex-direction:column;flex:1;min-height:0;">
         <!-- 搜索栏 -->
-          <div id="nw-search-bar" onclick="document.getElementById('nw-search-input').focus()">
-            <span class="icon">🔍</span>
-            <input id="nw-search-input" type="text" placeholder="Search notes or ask AI anything…"
-              onkeydown="if(event.key==='Enter'&&this.value.trim()){showPage('search');document.getElementById('search-input').value=this.value;doSearch()}">
-            <span class="nw-search-kbd">⌘K</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+            <div id="nw-search-bar" onclick="document.getElementById('nw-search-input').focus()" style="flex:1;">
+              <span class="icon">🔍</span>
+              <input id="nw-search-input" type="text" placeholder="Search notes by filename or content…"
+                onkeydown="if(event.key==='Enter')nwHomeSearch()">
+              <button id="nw-tag-filter-toggle" onclick="event.stopPropagation();nwToggleTagFilter()" title="按标签筛选" style="background:none;border:1px solid rgba(255,255,255,0.15);border-radius:5px;padding:2px 9px;font-size:11px;color:rgba(255,255,255,0.35);cursor:pointer;font-family:inherit;flex-shrink:0;transition:all 0.15s;white-space:nowrap;">🏷 标签</button>
+            </div>
+            <button onclick="nwHomeSearch()" style="flex-shrink:0;background:#534ab7;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;" onmouseover="this.style.background='#3c3489'" onmouseout="this.style.background='#534ab7'">搜索</button>
+          </div>
+
+          <!-- 标签筛选栏（默认隐藏） -->
+          <div id="nw-tag-filter-bar" style="display:none;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:9px;margin-top:8px;flex-shrink:0;">
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap;">按标签筛选：</span>
+            <div id="nw-home-tags" style="display:flex;flex-wrap:wrap;gap:5px;flex:1;">
+              <span style="font-size:11px;color:rgba(255,255,255,0.2);">加载中…</span>
+            </div>
+            <button onclick="nwHomeSearchClear()" style="font-size:11px;color:rgba(255,255,255,0.3);background:none;border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:2px 9px;cursor:pointer;font-family:inherit;white-space:nowrap;">✕ 清除</button>
+          </div>
+
+          <!-- 首页搜索结果区（默认隐藏） -->
+          <div id="nw-home-search-result" style="display:none;flex-direction:column;flex-shrink:0;margin-top:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+              <span id="nw-home-search-count" style="font-size:12px;color:rgba(255,255,255,0.4);"></span>
+              <button onclick="nwHomeSearchClear()" style="font-size:11px;color:rgba(255,255,255,0.35);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;">✕ 关闭结果</button>
+            </div>
+            <div id="nw-home-search-list" style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;padding-right:2px;"></div>
           </div>
 
           <!-- 统计卡片 -->
@@ -5455,6 +5476,165 @@ async function nwLoadFilesByType(type, label) {
       </div>`
     }).join('')
   } catch(e) {}
+}
+
+/* ── 首页搜索功能 ── */
+let nwHomeSearchTagFilter = null; // 当前激活的标签筛选
+
+// 切换标签筛选栏显示/隐藏，并在展开时加载标签列表
+async function nwToggleTagFilter() {
+  const bar = document.getElementById('nw-tag-filter-bar');
+  const btn = document.getElementById('nw-tag-filter-toggle');
+  if (!bar) return;
+  const isOpen = bar.style.display !== 'none';
+  if (isOpen) {
+    bar.style.display = 'none';
+    if (btn) { btn.style.background = 'none'; btn.style.color = 'rgba(255,255,255,0.35)'; }
+  } else {
+    bar.style.display = 'flex';
+    if (btn) { btn.style.background = 'rgba(83,74,183,0.2)'; btn.style.color = '#afa9ec'; }
+    // 加载标签
+    await nwHomeLoadTags();
+  }
+}
+
+async function nwHomeLoadTags() {
+  if (!currentVaultPath) return;
+  const tagsEl = document.getElementById('nw-home-tags');
+  if (!tagsEl) return;
+  tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">加载中…</span>';
+  try {
+    const res = await window.api.getTagStats(currentVaultPath);
+    if (!res || !res.tags || !res.tags.length) {
+      tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">没有找到标签</span>';
+      return;
+    }
+    tagsEl.innerHTML = res.tags.map(t => {
+      const isActive = nwHomeSearchTagFilter === t.tag;
+      return `<button onclick="nwHomeSearchByTag('${t.tag.replace(/'/g,"\\'")}',this)"
+        style="font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid ${isActive?'#534ab7':'rgba(255,255,255,0.15)'};
+        background:${isActive?'#534ab7':'rgba(255,255,255,0.06)'};color:${isActive?'#fff':'rgba(255,255,255,0.55)'};
+        cursor:pointer;font-family:inherit;transition:all 0.12s;white-space:nowrap;"
+        data-tag="${t.tag}">#${t.tag} <span style="opacity:0.5">${t.count}</span></button>`;
+    }).join('');
+  } catch(e) {
+    tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">加载失败</span>';
+  }
+}
+
+async function nwHomeSearchByTag(tag, btnEl) {
+  // 切换激活状态
+  if (nwHomeSearchTagFilter === tag) {
+    nwHomeSearchTagFilter = null;
+  } else {
+    nwHomeSearchTagFilter = tag;
+  }
+  // 更新按钮样式
+  const tagsEl = document.getElementById('nw-home-tags');
+  if (tagsEl) {
+    tagsEl.querySelectorAll('button[data-tag]').forEach(b => {
+      const active = b.dataset.tag === nwHomeSearchTagFilter;
+      b.style.background = active ? '#534ab7' : 'rgba(255,255,255,0.06)';
+      b.style.borderColor = active ? '#534ab7' : 'rgba(255,255,255,0.15)';
+      b.style.color = active ? '#fff' : 'rgba(255,255,255,0.55)';
+    });
+  }
+  // 如果有激活标签则直接执行搜索
+  if (nwHomeSearchTagFilter) {
+    await nwHomeSearch();
+  } else {
+    nwHomeSearchClear();
+  }
+}
+
+async function nwHomeSearch() {
+  if (!currentVaultPath) return;
+  const input = document.getElementById('nw-search-input');
+  const query = input ? input.value.trim() : '';
+  const resultBox = document.getElementById('nw-home-search-result');
+  const resultList = document.getElementById('nw-home-search-list');
+  const countEl = document.getElementById('nw-home-search-count');
+  if (!resultBox || !resultList) return;
+
+  // 没有关键词且没有标签筛选，不执行
+  if (!query && !nwHomeSearchTagFilter) return;
+
+  resultBox.style.display = 'flex';
+  resultList.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:12px 0;">搜索中…</div>';
+  if (countEl) countEl.textContent = '';
+
+  try {
+    let files = [];
+    if (nwHomeSearchTagFilter) {
+      // 按标签搜索
+      const res = await window.api.searchByTag({ vaultPath: currentVaultPath, tag: nwHomeSearchTagFilter });
+      files = (res && res.results) ? res.results : [];
+      // 再在结果内按关键词过滤
+      if (query) {
+        const q = query.toLowerCase();
+        files = files.filter(f => f.name.toLowerCase().includes(q) || (f.path||'').toLowerCase().includes(q));
+      }
+    } else {
+      // 按关键词搜索
+      const res = await window.api.searchFiles({
+        vaultPath: currentVaultPath,
+        query,
+        fileTypes: [],
+        dateFrom: null,
+        dateTo: null,
+        sortBy: 'date'
+      });
+      files = (res && res.results) ? res.results : [];
+    }
+
+    if (!files.length) {
+      resultList.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:12px 0;">没有找到匹配的文件</div>';
+      if (countEl) countEl.textContent = '搜索结果：0 个文件';
+      return;
+    }
+
+    if (countEl) countEl.textContent = `搜索结果：${files.length} 个文件`;
+
+    resultList.innerHTML = files.map(f => {
+      const name = f.fullName || f.name || '';
+      const filePath = f.path || '';
+      const mtime = f.mtime || '';
+      const snippet = f.snippet || '';
+      const icon = fileIcon(name);
+      const ep = esc(filePath);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;">
+        <span style="font-size:15px;flex-shrink:0;">${icon}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:rgba(255,255,255,0.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(name)}">${name}</div>
+          ${snippet ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${snippet}</div>` : ''}
+        </div>
+        <span style="font-size:10px;color:rgba(255,255,255,0.25);flex-shrink:0;white-space:nowrap;">${mtime}</span>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')" style="font-size:10px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;white-space:nowrap;">打开</button>
+          <button onclick="event.stopPropagation();openFile('${ep}')" style="font-size:10px;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:2px 8px;cursor:pointer;font-family:inherit;white-space:nowrap;">资源管理器</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    resultList.innerHTML = '<div style="font-size:12px;color:rgba(240,149,149,0.7);padding:12px 0;">搜索出错：' + e.message + '</div>';
+  }
+}
+
+function nwHomeSearchClear() {
+  nwHomeSearchTagFilter = null;
+  const input = document.getElementById('nw-search-input');
+  if (input) input.value = '';
+  const resultBox = document.getElementById('nw-home-search-result');
+  if (resultBox) resultBox.style.display = 'none';
+  // 重置标签按钮样式
+  const tagsEl = document.getElementById('nw-home-tags');
+  if (tagsEl) {
+    tagsEl.querySelectorAll('button[data-tag]').forEach(b => {
+      b.style.background = 'rgba(255,255,255,0.06)';
+      b.style.borderColor = 'rgba(255,255,255,0.15)';
+      b.style.color = 'rgba(255,255,255,0.55)';
+    });
+  }
 }
 
 /* ── Clock ── */
