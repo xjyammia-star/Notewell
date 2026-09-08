@@ -832,6 +832,13 @@
     #nw-radar-settings-current .study-selected-item { border-bottom-color:var(--st-border); }
     #nw-radar-settings-current .study-selected-remove { color:var(--st-text-muted); }
     #nw-radar-add-select option { background:var(--sidebar-panel-bg); color:var(--st-text); }
+    #nw-exam-subject-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+      z-index:9999; align-items:center; justify-content:center; }
+    #nw-exam-subject-modal.open { display:flex; }
+    #nw-exam-subject-box { background:var(--sidebar-panel-bg); border:1px solid var(--st-border); border-radius:14px; padding:22px 24px; width:320px; max-height:70vh; overflow-y:auto; }
+    #nw-exam-subject-box h3 { font-size:14px; color:var(--st-text); margin-bottom:8px; font-weight:500; }
+    #nw-exam-subject-tree .nw-tree-item { color:var(--st-text); }
+    #nw-exam-subject-tree .nw-tree-item:hover { background:rgba(255,255,255,0.06); }
     .nw-modal-label { font-size:11px; color:var(--st-text-muted); margin-bottom:5px; display:block; }
     .nw-modal-input { width:100%; background:var(--st-input-bg); border:1px solid var(--st-input-border);
       border-radius:8px; padding:8px 11px; font-size:13px; color:var(--st-text); outline:none;
@@ -1047,7 +1054,7 @@
           <!-- ── 标签三：文章纠错 ── -->
           <div id="study-tab-essay" class="st-tab-panel nw-newnote-scope" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
 
-  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。支持直接输入文字，或上传文章照片自动识别文字。</div>
+  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。纠错尺度偏宽松，日常口语化的表达、非正式书写中的省略（如缺少句末标点、时间写法不标准等）只要意思清楚就不会被判定为错误，只处理明显、确定无疑的错误。支持直接输入文字，或上传文章照片自动识别文字。</div>
 
   <div class="st-tabs" style="margin-top:2px">
     <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ 文字输入</button>
@@ -1087,6 +1094,7 @@
   <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px">
 
     <div id="essay-result-lang" style="font-size:12px;color:#888780"></div>
+    <div id="essay-punctuation-note" style="display:none;font-size:12px;color:var(--warn-text);background:var(--warn-bg);border:1px solid var(--warn-text);border-radius:6px;padding:6px 10px;"></div>
 
     <div>
       <div class="section-title" style="margin-bottom:8px">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
@@ -1519,11 +1527,12 @@
   <div class="st-info-tip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
 
   <div class="st-row" style="gap:14px;flex-wrap:wrap">
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
-      <label style="font-size:12px;color:#888780;display:flex;align-items:center;gap:6px">科目
-        <span onclick="examRefreshSubjects()" style="cursor:pointer;color:#afa9ec;font-size:11px" title="重新用 AI 判断哪些文件夹是科目">🔄 刷新</span>
-      </label>
-      <select class="st-select" id="exam-subject-select" style="width:100%"></select>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:220px">
+      <label style="font-size:12px;color:#888780">科目文件夹（点击选择，支持任意层级）</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div id="exam-subject-display" style="flex:1;padding:8px 11px;border:1px solid var(--border-input);border-radius:8px;background:var(--bg-input);color:var(--text-primary);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">未选择</div>
+        <button class="btn-sm" onclick="examOpenSubjectPicker()">📁 选择</button>
+      </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
       <label style="font-size:12px;color:#888780">考试日期</label>
@@ -1645,6 +1654,18 @@
       <div class="nw-modal-btns" style="margin-top:16px;">
         <button class="nw-modal-cancel" onclick="nwCloseRadarSettings()">关闭</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 考试复盘：选择科目文件夹弹窗 -->
+<div id="nw-exam-subject-modal">
+  <div id="nw-exam-subject-box">
+    <h3>选择科目文件夹</h3>
+    <div style="font-size:11px;color:var(--st-text-muted);margin-bottom:10px;">点击任意一层文件夹即可选中，不限于一级目录</div>
+    <div id="nw-exam-subject-tree"></div>
+    <div class="nw-modal-btns" style="margin-top:16px;">
+      <button class="nw-modal-cancel" onclick="examCloseSubjectPicker()">取消</button>
     </div>
   </div>
 </div>
@@ -3609,6 +3630,17 @@ function essayRenderResult(res) {
   const langEl = document.getElementById('essay-result-lang')
   langEl.textContent = '检测语言：' + (res.language || '未知') + (res.hasErrors ? '' : '　·　未发现需要修改的客观错误')
 
+  const noteEl = document.getElementById('essay-punctuation-note')
+  if (noteEl) {
+    if (res.hasPunctuationIssues && !res.isFormal) {
+      noteEl.style.display = 'block'
+      noteEl.textContent = '💡 友情提醒：文章中部分标点符号缺失或使用不规范，请注意。（非正式内容不逐条标注标点问题）'
+    } else {
+      noteEl.style.display = 'none'
+      noteEl.textContent = ''
+    }
+  }
+
   document.getElementById('essay-annotated-box').innerHTML = essayAnnotatedToHtml(res.annotatedText || '')
   document.getElementById('essay-clean-box').innerHTML = essayEsc(res.correctedText || '').replace(/\n/g, '<br>')
 
@@ -3729,44 +3761,88 @@ async function examInitPage() {
     dateEl.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0')
   }
   examRenderTypeOptions()
-  await examLoadSubjects()
+  examRestoreLastSubject()
 }
 
-async function examLoadSubjects() {
-  const sel = document.getElementById('exam-subject-select')
-  if (!sel) return
-  if (!currentVaultPath) { sel.innerHTML = '<option value="">请先选择知识库</option>'; return }
+// ── 考试复盘：科目文件夹选择（改为让用户自己点选任意层级的文件夹，不再靠 AI 猜） ──
+let examSelectedSubjectPath = ''
+let examSelectedSubjectLabel = ''
 
-  sel.innerHTML = '<option value="">🤖 正在判断科目...</option>'
-  let res
+// 页面打开时，尝试恢复上一次选过的科目（只是回填显示文字，不校验文件夹是否还存在）
+function examRestoreLastSubject() {
   try {
-    res = await window.api.studyInvoke('exam-get-subjects', { vaultPath: currentVaultPath })
-  } catch (e) {
-    sel.innerHTML = '<option value="">加载失败</option>'
-    return
-  }
-  if (!res || !res.success) {
-    sel.innerHTML = '<option value="">加载失败：' + essayEsc(res && res.error || '未知错误') + '</option>'
-    return
-  }
-
-  const subjectFolders = res.folders || []
-  if (!subjectFolders.length) {
-    sel.innerHTML = '<option value="">未识别到科目文件夹</option>'
-    return
-  }
-  sel.innerHTML = subjectFolders.map(f =>
-    `<option value="${f.value.replace(/"/g,'&quot;')}" data-label="${f.label.replace(/"/g,'&quot;')}">${essayEsc(f.label)}</option>`
-  ).join('')
+    const last = JSON.parse(localStorage.getItem('nw_exam_last_subject') || 'null')
+    if (last && last.path && last.label) {
+      examSelectedSubjectPath = last.path
+      examSelectedSubjectLabel = last.label
+      const disp = document.getElementById('exam-subject-display')
+      if (disp) disp.textContent = last.label
+    }
+  } catch(e) {}
 }
 
-async function examRefreshSubjects() {
-  const sel = document.getElementById('exam-subject-select')
-  if (sel) sel.innerHTML = '<option value="">🤖 正在重新判断...</option>'
+function examOpenSubjectPicker() {
+  const modal = document.getElementById('nw-exam-subject-modal')
+  if (modal) modal.classList.add('open')
+  examLoadSubjectTree()
+}
+
+function examCloseSubjectPicker() {
+  const modal = document.getElementById('nw-exam-subject-modal')
+  if (modal) modal.classList.remove('open')
+}
+
+async function examLoadSubjectTree() {
+  const wrap = document.getElementById('nw-exam-subject-tree')
+  if (!wrap) return
+  if (!currentVaultPath) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--st-text-muted);padding:10px;text-align:center;">请先选择知识库</div>'
+    return
+  }
+  wrap.innerHTML = '<div style="font-size:12px;color:var(--st-text-muted);padding:10px;text-align:center;">加载中…</div>'
   try {
-    await window.api.studyInvoke('exam-reset-subject-cache')
-  } catch (_) {}
-  await examLoadSubjects()
+    const res = await window.api.getFolderTree(currentVaultPath)
+    const nodes = (res.success && res.tree) ? (res.tree.children || []) : []
+    if (!nodes.length) {
+      wrap.innerHTML = '<div style="font-size:12px;color:var(--st-text-muted);padding:10px;text-align:center;">未找到文件夹</div>'
+      return
+    }
+    wrap.innerHTML = examBuildSubjectTreeHTML(nodes)
+  } catch(e) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--st-text-muted);padding:10px;text-align:center;">加载失败</div>'
+  }
+}
+
+// 递归渲染文件夹树，支持任意层级；点击任意一层都可以直接选中它作为科目
+function examBuildSubjectTreeHTML(nodes) {
+  if (!nodes || !nodes.length) return ''
+  return nodes.map(node => {
+    const hasChildren = node.children && node.children.length
+    const uid = 'examt' + Math.random().toString(36).slice(2,8)
+    const esc = (node.path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    const nameEsc = (node.name || '').replace(/'/g, "\\'")
+    const toggle = hasChildren
+      ? `<span class="nw-tree-toggle" id="tog-${uid}" onclick="nwDtToggle('${uid}',this);event.stopPropagation()">▶</span>`
+      : `<span class="nw-tree-toggle"></span>`
+    const children = hasChildren
+      ? `<div class="nw-tree-children collapsed" id="${uid}">${examBuildSubjectTreeHTML(node.children)}</div>`
+      : ''
+    return `<div>
+      <div class="nw-tree-item" onclick="examPickSubject('${esc}','${nameEsc}')">
+        ${toggle}<span style="font-size:13px">📁</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${node.name}</span>
+      </div>${children}
+    </div>`
+  }).join('')
+}
+
+function examPickSubject(folderPath, folderName) {
+  examSelectedSubjectPath = folderPath
+  examSelectedSubjectLabel = folderName
+  const disp = document.getElementById('exam-subject-display')
+  if (disp) disp.textContent = folderName
+  try { localStorage.setItem('nw_exam_last_subject', JSON.stringify({ path: folderPath, label: folderName })) } catch(e) {}
+  examCloseSubjectPicker()
 }
 
 function examClearForm() {
@@ -3780,10 +3856,9 @@ function examClearForm() {
 }
 
 async function examSaveReview() {
-  const sel = document.getElementById('exam-subject-select')
-  const targetDir = sel.value
-  const subjectLabel = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].dataset.label : ''
-  if (!targetDir) { alert('请先选择科目'); return }
+  const targetDir = examSelectedSubjectPath
+  const subjectLabel = examSelectedSubjectLabel
+  if (!targetDir) { alert('请先选择科目文件夹'); return }
 
   const dateVal = document.getElementById('exam-date').value
   if (!dateVal) { alert('请选择考试日期'); return }

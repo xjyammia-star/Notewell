@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Notification } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, shell, Notification, net } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const https = require('https')
@@ -1221,40 +1221,101 @@ ipcMain.handle('select-inbox-folder', async () => {
   return { success: false }
 })
 
+// ── AI 调用诊断日志（写到本地文件，方便下次卡住时排查是"完全没响应"还是"响应慢"）──
+function logAICall(line) {
+  try {
+    const logDir = path.join(app.getPath('userData'), 'logs')
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true })
+    const logFile = path.join(logDir, 'ai-debug.log')
+    fs.appendFileSync(logFile, '[' + new Date().toISOString() + '] ' + line + '\n', 'utf-8')
+  } catch (e) { /* 日志失败不影响主流程 */ }
+}
+
 // ── AI 调用（火山引擎）──
-function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens) {
+function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry) {
   const timeoutMs = 120000
+  const callId = Math.random().toString(36).slice(2, 8)
+  const promptLen = JSON.stringify(messages).length
+  const t0 = Date.now()
+  logAICall(`[${callId}] 发起请求 modelId=${modelId} endpoint=${endpoint} maxTokens=${maxTokens||500} promptLen=${promptLen} retry=${!!_isRetry}`)
   const apiCall = new Promise((resolve, reject) => {
-    const body = JSON.stringify({ model: modelId, messages, max_tokens: maxTokens || 500 })
-    const url = new URL(endpoint + '/chat/completions')
-    const options = {
-      hostname: url.hostname,
-      path: url.pathname,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey,
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }
-    const req = https.request(options, res => {
+    // thinking:disabled 关掉模型的内部"思考"步骤。真正的原因找到了：这个模型是带"思考"模式的，
+    // 遇到有很多琐碎判断点的内容（比如这次网球那段话，里面有好几处标点/格式的模糊地带）时，
+    // 会在看不见的思考阶段里反复纠结，导致耗时远超正常水平甚至卡住不返回，跟网络、跟App完全无关，
+    // 已经用同样的内容在App外单独测试验证过：开着思考模式必卡，关掉之后4秒多就正常返回。
+    const body = JSON.stringify({ model: modelId, messages, max_tokens: maxTokens || 500, thinking: { type: 'disabled' } })
+    const fullUrl = endpoint.replace(/\/+$/, '') + '/chat/completions'
+    // 改用 Electron 自带的 net 模块（走 Chromium 的网络栈），不再用 Node 的 https 模块。
+    // Electron 28 内置的是 Node 18，跟这台电脑单独装的 Node（版本高出好几代）在网络底层实现上
+    // 差异不小，怀疑是 Node 18 在这类请求上的某个边界情况有问题——用 Chromium 的网络栈可以绕开
+    // Node 版本本身的这个不确定因素。
+    const req = net.request({ method: 'POST', url: fullUrl })
+    req.setHeader('Content-Type', 'application/json')
+    req.setHeader('Authorization', 'Bearer ' + apiKey)
+
+    let stalled = false
+    const stallTimer = setTimeout(() => {
+      stalled = true
+      logAICall(`[${callId}] 45秒无响应，主动断开 elapsed=${Date.now()-t0}ms`)
+      req.abort()
+      // Electron 的 net 请求 abort() 之后不一定会触发 error 事件，不能只等它自己报错，
+      // 这里直接把 promise 结束掉，避免像之前那样一路挂到120秒外层超时才失败
+      reject(new Error('STALLED_NO_RESPONSE'))
+    }, 45000)
+
+    req.on('response', res => {
+      clearTimeout(stallTimer)
+      logAICall(`[${callId}] 收到响应头 statusCode=${res.statusCode} elapsed=${Date.now()-t0}ms`)
       let data = ''
       res.on('data', chunk => data += chunk)
       res.on('end', () => {
+        logAICall(`[${callId}] 响应结束 elapsed=${Date.now()-t0}ms bodyBytes=${Buffer.byteLength(data)}`)
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          reject(new Error('AI 服务返回错误（状态码 ' + res.statusCode + '）：' + data.slice(0, 300)))
+          return
+        }
         try {
           const json = JSON.parse(data)
+          if (!json.choices || !json.choices[0]) {
+            reject(new Error('AI 返回结果格式异常：' + data.slice(0, 300)))
+            return
+          }
           resolve({ content: json.choices?.[0]?.message?.content || '', usage: json.usage || {} })
         } catch (e) { reject(e) }
       })
     })
-    req.on('error', reject)
+    req.on('error', err => {
+      clearTimeout(stallTimer)
+      if (stalled) {
+        reject(new Error('STALLED_NO_RESPONSE'))
+        return
+      }
+      logAICall(`[${callId}] 请求报错 elapsed=${Date.now()-t0}ms error=${err.message}`)
+      reject(err)
+    })
     req.write(body)
     req.end()
   })
   const timeout = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('AI 请求超时（120秒），可能是网络不稳定或 AI 服务响应较慢，请稍后重试；若反复出现，请检查网络连接，或到"设置"里确认 API Key / 模型 ID 是否正确')), timeoutMs)
   )
-  return Promise.race([apiCall, timeout])
+  return Promise.race([apiCall, timeout]).then(result => {
+    logAICall(`[${callId}] 成功 elapsed=${Date.now()-t0}ms`)
+    return result
+  }).catch(err => {
+    // 连接卡住（45秒内无任何响应）大多是偶发的跨境网络抖动，自动重试一次；
+    // 重试仍失败或其他类型的错误（认证失败、格式错误等）不会重试，直接把原始错误抛出去
+    if (err && err.message === 'STALLED_NO_RESPONSE' && !_isRetry) {
+      logAICall(`[${callId}] 判定卡住，准备自动重试`)
+      return callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, true)
+    }
+    if (err && err.message === 'STALLED_NO_RESPONSE') {
+      logAICall(`[${callId}] 重试后仍卡住，放弃`)
+      throw new Error('AI 请求已重试一次仍无响应（45秒内没有收到任何数据），大概率是网络在国内节点间不稳定或被中间网络设备拦截，不是内容长度的问题，建议更换网络环境后再试')
+    }
+    logAICall(`[${callId}] 失败 elapsed=${Date.now()-t0}ms error=${err && err.message}`)
+    throw err
+  })
 }
 
 // ── AI 分类单个文件 ──
@@ -2015,6 +2076,23 @@ ipcMain.handle('essay-ocr-image', async (event, { imagePath }) => {
 })
 
 // ── 文章纠错：AI 检查客观错误（错别字/语法/标点/固定搭配）──
+// 根据原文 + AI 给出的 corrections 列表，自动生成带删除线/加粗标注的对照版本，
+// 不再依赖 AI 自己再重复输出一遍全文（那个任务对模型来说明显更重、更容易卡）。
+// 按 corrections 出现的顺序，从原文里从前往后依次查找并替换，避免同一个词被重复标注。
+function buildAnnotatedText(original, corrections) {
+  let result = original
+  let cursor = 0
+  for (const c of corrections) {
+    if (!c || !c.original) continue
+    const idx = result.indexOf(c.original, cursor)
+    if (idx === -1) continue
+    const replacement = '~~' + c.original + '~~ **' + (c.corrected || '') + '**'
+    result = result.slice(0, idx) + replacement + result.slice(idx + c.original.length)
+    cursor = idx + replacement.length
+  }
+  return result
+}
+
 ipcMain.handle('essay-correct', async (event, { text }) => {
   const settings = store.get('aiSettings', {})
   if (!settings.apiKey || !settings.modelId) {
@@ -2023,13 +2101,28 @@ ipcMain.handle('essay-correct', async (event, { text }) => {
   const content = (text || '').trim()
   if (!content) return { success: false, error: '内容为空' }
 
-  const prompt = `你是一个专业的语言校对助手，任务是检查文章中的客观错误，绝不评判或修改主观内容。
+  const prompt = `你是一个专业的语言校对助手，任务是挑出文章里明显、确定无疑的客观错误，绝不评判或修改主观内容，尺度上宁可漏改、不可错改。
 
-请仔细检查以下文章，只修改这几类客观错误：
-1. 错别字/拼写错误
-2. 语法错误（时态、主谓一致、冠词、介词等）
-3. 标点符号错误
-4. 固定搭配/词组错误（如英语固定搭配用错）
+第一步：判断文体是否正式。
+- "正式文体"：考试作文、小论文、正式提交的作业、正式报告等需要严格规范书面语的场合
+- "非正式文体"：邮件、通知、消息、便条、清单、日常记录等不需要严格规范的场合
+把判断结果填入 isFormal 字段（true=正式，false=非正式）。
+
+第二步：按下面的标准检查客观错误：
+1. 错别字/拼写错误 —— 不论正式或非正式，都要检查，这是最基本的底线
+2. 语法错误（时态、主谓一致、冠词、介词等）—— 只挑会让读者产生误解、明显不符合基本语法规则的，不要吹毛求疵纠结"更标准"的写法
+3. 固定搭配/词组错误（如英语固定搭配用错）
+4. 标点符号错误 —— 处理方式取决于第一步的判断：
+   - **如果是非正式文体**：不要把标点问题单独列进 corrections（不要因为标点问题生成任何一条修改），但如果确实存在比较明显的标点缺失或错误，把 hasPunctuationIssues 设为 true（程序会在界面上统一显示一句提醒，不需要你写具体提醒文字）；如果标点没有明显问题，hasPunctuationIssues 设为 false
+   - **如果是正式文体**：需要正常列出标点错误，加入 corrections。但标注范围必须尽量小——**只标出真正需要改动的标点本身，绝不能把前后本来就正确、不需要修改的完整单词或词组也一起包含进 original/corrected 里**。比如需要在两个词中间补一个逗号，应该只把逗号"贴"在紧邻的那一个词后面（如 original: "school" corrected: "school,"），而不是把逗号前后两个完整的词都框进去（不要写成 original: "school and" corrected: "school, and"）。范围越小、越精确越好，避免用户误以为是单词本身拼错了
+
+宽松原则（很重要，请严格遵守，正式和非正式文体都适用）：
+- **不要给句子/行末补句号或其他终止标点**。即使是正式文体，只要不是逐句都严重缺失标点导致读不懂，句末缺句号这种情况也不用作为 corrections 里的一条单独列出——这类问题如果存在，同样只反映在 hasPunctuationIssues 里
+- 日常口语化表达、非正式书写中常见的省略（大小写不规范、时间写成"2.30pm"而不是"2:30pm"这类、缺少连接词等），只要意思清楚、大家都能看懂，就不算错误，不要修改，也不要放进 corrections 里
+- 不要仅仅因为可以"加个逗号让意思更清楚"就添加逗号——除非不加逗号会导致完全不同或者荒谬的理解
+- 拿不准算不算错、属于"可以这样写也可以那样写"的情况，一律不要修改，宁可少挑，不要多挑
+- 每一条 corrections 里的 original 和 corrected 必须是真正不同的内容——绝不能出现 original 和 corrected 完全一样的情况
+- 如果整篇文章读起来通顺、意思清楚，即使不是最规范的书面语，也应该判定 hasErrors 为 false，corrections 为空数组
 
 自动判断文章使用的语言：中文按中文语言标准检查，英文按英语语言标准检查，其他语言按该语言标准检查。
 
@@ -2042,35 +2135,50 @@ ipcMain.handle('essay-correct', async (event, { text }) => {
 请输出严格的 JSON（不要加任何其他文字、不要用 markdown 代码块包裹），格式如下：
 {
   "language": "检测到的语言，如：中文 / 英文 / 泰文",
+  "isFormal": true 或 false,
   "hasErrors": true 或 false,
-  "correctedText": "完整的修改后干净文本（只修正上述四类错误，其余原文保持不变，不加任何标注）",
-  "annotatedText": "完整原文，在每一处错误的位置用「~~原错误片段~~ **修改后片段**」的格式原地标注，其余没有错误的原文原样保留，不要打乱原文顺序和分段",
+  "hasPunctuationIssues": true 或 false,
+  "correctedText": "完整的修改后干净文本（只修正错别字/语法/固定搭配错误，正式文体下也修正标点错误，其余原文保持不变，不加任何标注）",
   "corrections": [
-    { "original": "原文错误片段", "corrected": "修改后片段", "reason": "错误类型及简要说明" }
+    { "original": "原文错误片段（范围尽量小）", "corrected": "修改后片段", "reason": "错误类型及简要说明", "type": "spelling 或 grammar 或 punctuation 或 collocation" }
   ]
 }
 
-如果文章完全没有错误，hasErrors 填 false，correctedText 和 annotatedText 都填原文，corrections 填空数组。
+不需要再额外生成一份带标注的版本，标注版会由程序自动根据 corrections 生成，请把精力放在准确找出错误和给出 correctedText 上。
+
+如果文章完全没有错误，hasErrors 填 false，correctedText 填原文，corrections 填空数组。
 
 文章原文：
 ${content}`
 
   try {
+    // 现在只要求模型生成 correctedText + corrections，不用再重复生成一份带标注的全文，
+    // 输出量小了很多，预算也相应调低（原来是按可能要生成两份全文估的）
+    const dynamicMaxTokens = Math.min(4000, Math.max(500, content.length * 2))
     const replyObj = await callVolcanoAI(
       settings.apiKey, settings.modelId, settings.endpoint,
       [{ role: 'user', content: prompt }],
-      4000
+      dynamicMaxTokens
     )
     recordTokenUsage('essay', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
     const clean = (replyObj.content || '').replace(/```json|```/g, '').trim()
     const result = JSON.parse(clean)
+    const isFormal = !!result.isFormal
+    // 兜底过滤：万一模型还是给出了"改前改后完全一样"的无效条目，这里直接剔除；
+    // 非正式文体下，就算模型还是标了标点类的修改，这里也再兜底剔除一次，
+    // 标点问题一律只通过 hasPunctuationIssues 的提醒来体现，不逐条列出
+    const corrections = (Array.isArray(result.corrections) ? result.corrections : [])
+      .filter(c => c && c.original && c.corrected && c.original.trim() !== c.corrected.trim())
+      .filter(c => isFormal || c.type !== 'punctuation')
     return {
       success: true,
       language: result.language || '',
+      isFormal,
       hasErrors: !!result.hasErrors,
+      hasPunctuationIssues: !!result.hasPunctuationIssues,
       correctedText: result.correctedText || content,
-      annotatedText: result.annotatedText || content,
-      corrections: Array.isArray(result.corrections) ? result.corrections : []
+      annotatedText: buildAnnotatedText(content, corrections),
+      corrections
     }
   } catch (err) {
     return { success: false, error: err.message }
