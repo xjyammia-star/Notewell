@@ -1252,7 +1252,7 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens) {
     req.end()
   })
   const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('AI 请求超时（120秒），内容可能过长，请减少文件数量')), timeoutMs)
+    setTimeout(() => reject(new Error('AI 请求超时（120秒），可能是网络不稳定或 AI 服务响应较慢，请稍后重试；若反复出现，请检查网络连接，或到"设置"里确认 API Key / 模型 ID 是否正确')), timeoutMs)
   )
   return Promise.race([apiCall, timeout])
 }

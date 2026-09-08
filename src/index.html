@@ -24,12 +24,12 @@
       --bg-hover:       #f1efe8;
       --bg-input:       #ffffff;
       --bg-select-opt:  #ffffff;
-      --border-color:   #e0dfd8;
+      --border-color:   #d3d1c5;
       --border-subtle:  #f1efe8;
       --border-input:   #d3d1c7;
       --text-primary:   #2c2c2a;
       --text-secondary: #5f5e5a;
-      --text-muted:     #888780;
+      --text-muted:     #6f6e67;
       --text-placeholder: #b4b2a9;
       --accent:         #534ab7;
       --accent-hover:   #3c3489;
@@ -61,6 +61,10 @@
       --st-bg:          rgba(255,255,255,0.04);
       --st-border:      rgba(255,255,255,0.08);
       --st-text:        rgba(255,255,255,0.85);
+      --st-text-muted:  rgba(255,255,255,0.5);
+      --st-input-bg:    rgba(255,255,255,0.06);
+      --st-input-border: rgba(255,255,255,0.14);
+      --st-placeholder: rgba(255,255,255,0.3);
       --sidebar-panel-bg: #1a2130;
       --st-panel-bg:    #1c1e2e;
     }
@@ -111,6 +115,10 @@
       --st-bg:          rgba(255,255,255,0.04);
       --st-border:      rgba(255,255,255,0.08);
       --st-text:        rgba(255,255,255,0.85);
+      --st-text-muted:  rgba(255,255,255,0.5);
+      --st-input-bg:    rgba(255,255,255,0.06);
+      --st-input-border: rgba(255,255,255,0.14);
+      --st-placeholder: rgba(255,255,255,0.3);
       --sidebar-panel-bg: #1a2130;
       --st-panel-bg:    #111722;
     }
@@ -161,6 +169,10 @@
       --st-bg:          rgba(167,139,250,0.04);
       --st-border:      rgba(167,139,250,0.1);
       --st-text:        rgba(236,228,255,0.85);
+      --st-text-muted:  rgba(236,228,255,0.5);
+      --st-input-bg:    rgba(167,139,250,0.08);
+      --st-input-border: rgba(167,139,250,0.18);
+      --st-placeholder: rgba(236,228,255,0.3);
       --sidebar-panel-bg: #13101e;
       --st-panel-bg:    #110e1c;
     }
@@ -624,6 +636,11 @@
     .study-file-check-item:last-child { border-bottom:none; }
     .study-file-check-item input { width:15px; height:15px; accent-color:#534ab7; cursor:pointer; flex-shrink:0; }
     .study-file-check-item label { cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .study-selected-item { display:flex; align-items:center; justify-content:space-between; gap:4px; padding:5px 2px; font-size:12px; border-bottom:1px solid var(--border-subtle); }
+    .study-selected-item:last-child { border-bottom:none; }
+    .study-selected-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-primary); }
+    .study-selected-remove { flex-shrink:0; cursor:pointer; color:var(--text-muted); font-size:11px; padding-left:6px; }
+    .study-selected-remove:hover { color:#e05252; }
     .study-gen-type { display:flex; gap:8px; flex-wrap:wrap; }
     .study-gen-type label { display:flex; align-items:center; gap:5px; font-size:13px; color:#5f5e5a; cursor:pointer; padding:5px 12px; border:1px solid #d3d1c7; border-radius:6px; }
     .study-gen-type label:has(input:checked) { border-color:#534ab7; background:#eeedfe; color:#3c3489; }
@@ -749,12 +766,18 @@
     /* 倒计时 */
     #nw-countdowns { display:flex; flex-direction:column; gap:6px; }
     .nw-cd { background:var(--bg-card); border:1px solid var(--border-color);
-      border-radius:8px; padding:16px 16px; min-height:90px; }
-    .nw-cd-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+      border-radius:8px; padding:11px 12px; min-height:63px; }
+    .nw-cd-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
     .nw-cd-name { font-size:14px; color:var(--text-secondary); white-space:nowrap;
       overflow:hidden; text-overflow:ellipsis; max-width:160px; }
     .nw-cd-desc { font-size:11px; color:var(--text-muted); margin-left:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px; }
     .nw-cd-badge { font-size:12px; font-weight:500; padding:3px 10px; border-radius:99px; flex-shrink:0; }
+    .nw-cd-badge-urgent { background:rgba(226,75,74,0.18); color:#f09595; }
+    .nw-cd-badge-soon   { background:rgba(239,159,39,0.2); color:#fac775; }
+    .nw-cd-badge-ok     { background:rgba(29,158,117,0.18); color:#5dcaa5; }
+    [data-theme="light"] .nw-cd-badge-urgent { background:rgba(226,75,74,0.14); color:#c62828; }
+    [data-theme="light"] .nw-cd-badge-soon   { background:rgba(239,159,39,0.22); color:#9a5b00; }
+    [data-theme="light"] .nw-cd-badge-ok     { background:rgba(29,158,117,0.16); color:#0f7a53; }
     .nw-cd-bar-bg { background:var(--border-subtle); border-radius:99px; height:3px; overflow:hidden; }
     .nw-cd-bar-fill { height:100%; border-radius:99px; transition:width 0.4s; }
     #nw-add-cd { width:100%; font-size:10px; color:var(--text-placeholder); background:none;
@@ -798,16 +821,26 @@
     #nw-cd-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
       z-index:9999; align-items:center; justify-content:center; }
     #nw-cd-modal.open { display:flex; }
-    #nw-cd-modal-box { background:var(--sidebar-panel-bg); border:1px solid var(--border-color); border-radius:14px; padding:22px 24px; width:320px; }
-    #nw-cd-modal-box h3 { font-size:14px; color:var(--text-primary); margin-bottom:16px; font-weight:500; }
-    .nw-modal-label { font-size:11px; color:var(--text-muted); margin-bottom:5px; display:block; }
-    .nw-modal-input { width:100%; background:var(--bg-input); border:1px solid var(--border-input);
-      border-radius:8px; padding:8px 11px; font-size:13px; color:var(--text-primary); outline:none;
+    #nw-cd-modal-box { background:var(--sidebar-panel-bg); border:1px solid var(--st-border); border-radius:14px; padding:22px 24px; width:320px; }
+    #nw-cd-modal-box h3 { font-size:14px; color:var(--st-text); margin-bottom:16px; font-weight:500; }
+    #nw-radar-settings-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+      z-index:9999; align-items:center; justify-content:center; }
+    #nw-radar-settings-modal.open { display:flex; }
+    #nw-radar-settings-box { background:var(--sidebar-panel-bg); border:1px solid var(--st-border); border-radius:14px; padding:22px 24px; width:340px; max-height:70vh; overflow-y:auto; }
+    #nw-radar-settings-box h3 { font-size:14px; color:var(--st-text); margin-bottom:16px; font-weight:500; }
+    #nw-radar-settings-current .study-selected-name { color:var(--st-text); }
+    #nw-radar-settings-current .study-selected-item { border-bottom-color:var(--st-border); }
+    #nw-radar-settings-current .study-selected-remove { color:var(--st-text-muted); }
+    #nw-radar-add-select option { background:var(--sidebar-panel-bg); color:var(--st-text); }
+    .nw-modal-label { font-size:11px; color:var(--st-text-muted); margin-bottom:5px; display:block; }
+    .nw-modal-input { width:100%; background:var(--st-input-bg); border:1px solid var(--st-input-border);
+      border-radius:8px; padding:8px 11px; font-size:13px; color:var(--st-text); outline:none;
       font-family:inherit; margin-bottom:12px; box-sizing:border-box; }
+    .nw-modal-input::placeholder { color:var(--st-placeholder); }
     .nw-modal-input:focus { border-color:var(--accent); }
     .nw-modal-btns { display:flex; gap:8px; justify-content:flex-end; margin-top:4px; }
-    .nw-modal-cancel { font-size:12px; color:var(--text-muted); background:none;
-      border:1px solid var(--border-input); border-radius:7px; padding:7px 14px; cursor:pointer; font-family:inherit; }
+    .nw-modal-cancel { font-size:12px; color:var(--st-text-muted); background:none;
+      border:1px solid var(--st-input-border); border-radius:7px; padding:7px 14px; cursor:pointer; font-family:inherit; }
     .nw-modal-save { font-size:12px; color:#fff; background:var(--accent); border:none;
       border-radius:7px; padding:7px 16px; cursor:pointer; font-family:inherit; }
     .nw-modal-save:hover { background:var(--accent-hover); }
@@ -844,10 +877,6 @@
             <button class="nw-nav-btn" id="nwnav-import" onclick="showPage('import')">
               <span class="nw-nav-icon">📥</span>
               <span class="nw-nav-label" id="nwnav-label-import">Import</span>
-            </button>
-            <button class="nw-nav-btn" id="nwnav-new-note" onclick="showPage('new-note')">
-              <span class="nw-nav-icon">✏️</span>
-              <span class="nw-nav-label" id="nwnav-label-new">文章纠错</span>
             </button>
             <button class="nw-nav-btn" id="nwnav-exam" onclick="showPage('exam')">
               <span class="nw-nav-icon">🧾</span>
@@ -938,6 +967,7 @@
             <div class="st-tabs">
               <button class="st-tab-btn active" onclick="switchStudyTab('note', this)">📝 学习笔记</button>
               <button class="st-tab-btn" onclick="switchStudyTab('expand', this)">🔬 知识点扩充</button>
+              <button class="st-tab-btn" onclick="switchStudyTab('essay', this)">✏️ 文章纠错</button>
               <button class="st-tab-btn" onclick="switchStudyTab('review', this)">📖 复习备考</button>
             </div>
             <div class="st-lang-bar">
@@ -1014,7 +1044,83 @@
             </div>
           </div>
 
-          <!-- ── 标签三：复习备考 ── -->
+          <!-- ── 标签三：文章纠错 ── -->
+          <div id="study-tab-essay" class="st-tab-panel nw-newnote-scope" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
+
+  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。支持直接输入文字，或上传文章照片自动识别文字。</div>
+
+  <div class="st-tabs" style="margin-top:2px">
+    <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ 文字输入</button>
+    <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ 上传图片</button>
+  </div>
+
+  <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px">
+    <textarea class="st-textarea" id="essay-input-text" style="min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
+  </div>
+
+  <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px">
+    <div class="drop-zone" id="essay-drop-zone" onclick="essayPickImage()"
+      style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px;cursor:pointer">
+      <span style="font-size:22px">🖼️</span>
+      <span style="font-size:13px;color:#888780">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
+    </div>
+    <div id="essay-image-preview" style="display:none;align-items:center;gap:12px">
+      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div id="essay-image-name" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 识别图片文字</button>
+      </div>
+    </div>
+    <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780"></div>
+    <div>
+      <div style="font-size:12px;color:#888780;margin-bottom:6px">识别出的文字（可手动修正后再纠错）：</div>
+      <textarea class="st-textarea" id="essay-ocr-result-text" style="min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
+    </div>
+  </div>
+
+  <div class="st-action-row">
+    <button class="st-btn-primary" id="essay-correct-btn" onclick="essayStartCorrect()">✅ 开始纠错</button>
+    <button class="st-btn-sec" onclick="essayClearAll()">🗑 清空</button>
+    <div id="essay-correct-progress" style="font-size:13px;color:#888780"></div>
+  </div>
+
+  <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px">
+
+    <div id="essay-result-lang" style="font-size:12px;color:#888780"></div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
+      <div class="st-result-box study-result-box" id="essay-annotated-box" style="max-height:280px"></div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">📋 逐条错误说明</div>
+      <div id="essay-corrections-list" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <div>
+      <div class="section-title" style="margin-bottom:8px">✅ 修改后完整版本</div>
+      <div class="st-result-box study-result-box" id="essay-clean-box" style="max-height:280px"></div>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px">
+      <div class="section-title" style="margin-bottom:8px">💾 保存到知识库</div>
+      <div class="st-row" style="margin-bottom:8px">
+        <input type="text" class="st-input" id="essay-filename" placeholder="请输入文件名（不含扩展名）" style="flex:1">
+        <button class="st-btn-primary" onclick="essaySaveToVault()" id="essay-save-btn">💾 保存</button>
+      </div>
+      <p style="font-size:12px;color:#888780">保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。</p>
+      <div id="essay-save-msg" style="display:none;margin-top:8px" class="import-result"></div>
+    </div>
+
+    <div>
+      <button class="btn-sm" onclick="essayBackToInput()">← 返回修改重新纠错</button>
+    </div>
+  </div>
+
+          </div>
+
+          <!-- ── 标签四：复习备考 ── -->
           <div id="study-tab-review" class="st-tab-panel" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
             <div class="st-info-tip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
             <div>
@@ -1022,12 +1128,18 @@
                 <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">选择知识库资料</span>
                 <span class="st-selected-count" id="study-review-count">（未选择）</span>
               </div>
-              <div class="st-folder-panel">
+              <div class="st-folder-panel" style="grid-template-columns:200px 3fr 2fr;">
                 <div class="st-folder-left" id="study-review-folders">
-                  <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:14px;text-align:center">加载中...</div>
+                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center">加载中...</div>
                 </div>
                 <div class="st-folder-right" id="study-review-files">
-                  <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:14px;text-align:center">← 点击左侧文件夹</div>
+                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center">← 点击左侧文件夹</div>
+                </div>
+                <div class="st-folder-right" id="study-review-selected" style="border-left:1px solid var(--border-color);">
+                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已选文件（可跨文件夹累加）</div>
+                  <div id="study-review-selected-list">
+                    <div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1401,82 +1513,6 @@
 
         </div><!-- /#nw-inner-import -->
 
-        <!-- ══ 新建笔记内嵌面板 ══ -->
-        <div id="nw-inner-new-note" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
-
-  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。支持直接输入文字，或上传文章照片自动识别文字。</div>
-
-  <div class="st-tabs" style="margin-top:2px">
-    <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ 文字输入</button>
-    <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ 上传图片</button>
-  </div>
-
-  <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px">
-    <textarea class="st-textarea" id="essay-input-text" style="min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
-  </div>
-
-  <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px">
-    <div class="drop-zone" id="essay-drop-zone" onclick="essayPickImage()"
-      style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px;cursor:pointer">
-      <span style="font-size:22px">🖼️</span>
-      <span style="font-size:13px;color:#888780">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
-    </div>
-    <div id="essay-image-preview" style="display:none;align-items:center;gap:12px">
-      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0">
-      <div style="flex:1;min-width:0">
-        <div id="essay-image-name" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 识别图片文字</button>
-      </div>
-    </div>
-    <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780"></div>
-    <div>
-      <div style="font-size:12px;color:#888780;margin-bottom:6px">识别出的文字（可手动修正后再纠错）：</div>
-      <textarea class="st-textarea" id="essay-ocr-result-text" style="min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
-    </div>
-  </div>
-
-  <div class="st-action-row">
-    <button class="st-btn-primary" id="essay-correct-btn" onclick="essayStartCorrect()">✅ 开始纠错</button>
-    <button class="st-btn-sec" onclick="essayClearAll()">🗑 清空</button>
-    <div id="essay-correct-progress" style="font-size:13px;color:#888780"></div>
-  </div>
-
-  <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px">
-
-    <div id="essay-result-lang" style="font-size:12px;color:#888780"></div>
-
-    <div>
-      <div class="section-title" style="margin-bottom:8px">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
-      <div class="st-result-box study-result-box" id="essay-annotated-box" style="max-height:280px"></div>
-    </div>
-
-    <div>
-      <div class="section-title" style="margin-bottom:8px">📋 逐条错误说明</div>
-      <div id="essay-corrections-list" style="display:flex;flex-direction:column;gap:6px"></div>
-    </div>
-
-    <div>
-      <div class="section-title" style="margin-bottom:8px">✅ 修改后完整版本</div>
-      <div class="st-result-box study-result-box" id="essay-clean-box" style="max-height:280px"></div>
-    </div>
-
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px">
-      <div class="section-title" style="margin-bottom:8px">💾 保存到知识库</div>
-      <div class="st-row" style="margin-bottom:8px">
-        <input type="text" class="st-input" id="essay-filename" placeholder="请输入文件名（不含扩展名）" style="flex:1">
-        <button class="st-btn-primary" onclick="essaySaveToVault()" id="essay-save-btn">💾 保存</button>
-      </div>
-      <p style="font-size:12px;color:#888780">保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。</p>
-      <div id="essay-save-msg" style="display:none;margin-top:8px" class="import-result"></div>
-    </div>
-
-    <div>
-      <button class="btn-sm" onclick="essayBackToInput()">← 返回修改重新纠错</button>
-    </div>
-  </div>
-
-        </div><!-- /#nw-inner-new-note (文章纠错) -->
-
         <!-- ══ 考试复盘内嵌面板 ══ -->
         <div id="nw-inner-exam" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
 
@@ -1536,7 +1572,7 @@
       <!-- 拖拽分隔线 -->
       <div id="nw-resizer"></div>
 
-      <!-- ══ 右侧边栏（时钟→倒计时→错题→日历） ══ -->
+      <!-- ══ 右侧边栏（时钟→日历→科目雷达图→倒计时） ══ -->
       <div id="nw-side">
 
         <!-- 1. 时钟 -->
@@ -1545,35 +1581,29 @@
           <div id="nw-datestr">Loading...</div>
         </div>
 
-        <!-- 2. 倒计时 -->
+        <!-- 2. 日历 -->
         <div>
-          <div class="nw-side-label">Countdowns</div>
-          <div id="nw-countdowns"></div>
-          <button id="nw-add-cd" onclick="nwOpenCdModal()">+ Add event</button>
-        </div>
-
-        <!-- 3. 错题统计 -->
-        <div>
-          <div class="nw-side-label">Wrong answers</div>
-          <div id="nw-mistakes">
-            <div class="nw-mcard">
-              <div class="nw-mcard-num" style="color:#f09595" id="nw-mistakes-unsolved">—</div>
-              <div class="nw-mcard-lbl">Unsolved</div>
-            </div>
-            <div class="nw-mcard">
-              <div class="nw-mcard-num" style="color:#5dcaa5" id="nw-mistakes-solved">—</div>
-              <div class="nw-mcard-lbl">Resolved</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. 日历（底部） -->
-        <div style="margin-top:auto;padding-top:8px;flex-shrink:0;">
           <div class="nw-side-label">Calendar</div>
           <div id="nw-cal">
             <div id="nw-cal-month">—</div>
             <div class="nw-cal-grid" id="nw-cal-grid"></div>
           </div>
+        </div>
+
+        <!-- 3. 科目雷达图 -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div class="nw-side-label" style="margin-bottom:0;">Subjects</div>
+            <span id="nw-radar-settings-btn" onclick="nwOpenRadarSettings()" title="设置" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">⚙ 设置</span>
+          </div>
+          <div id="nw-radar-chart"></div>
+        </div>
+
+        <!-- 4. 倒计时（底部） -->
+        <div style="margin-top:auto;padding-top:8px;flex-shrink:0;">
+          <div class="nw-side-label">Countdowns</div>
+          <div id="nw-countdowns"></div>
+          <button id="nw-add-cd" onclick="nwOpenCdModal()">+ Add event</button>
         </div>
 
       </div><!-- /#nw-side -->
@@ -1593,6 +1623,27 @@
       <div class="nw-modal-btns">
         <button class="nw-modal-cancel" onclick="nwCloseCdModal()">Cancel</button>
         <button class="nw-modal-save" onclick="nwSaveCd()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 知识库雷达图设置弹窗 -->
+  <div id="nw-radar-settings-modal">
+    <div id="nw-radar-settings-box">
+      <h3>知识库雷达图设置</h3>
+      <label class="nw-modal-label">已显示的科目（点击 ✕ 移除，至少需要 3 个才会画图）</label>
+      <div id="nw-radar-settings-current"></div>
+      <label class="nw-modal-label" style="margin-top:14px;">添加科目（从知识库的一级文件夹中选择）</label>
+      <div style="display:flex;gap:6px;">
+        <select class="nw-modal-input" id="nw-radar-add-select" style="flex:1;"></select>
+        <button class="nw-modal-save" onclick="nwRadarAddSubject()">添加</button>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--st-border);">
+        <span id="nw-radar-recount-btn" onclick="nwRadarRecount()" style="cursor:pointer;color:var(--st-text-muted);font-size:12px;text-decoration:underline;">🔄 按知识库里实际的文件数量，重新统计以上科目的分数（含子文件夹）</span>
+        <div style="font-size:11px;color:var(--st-text-muted);margin-top:6px;line-height:1.5;">用于科目文件夹里有旧文件、或文件是手动放进子文件夹的情况——这些不会被自动计分，需要点这里手动统计一次。会用当前文件数重新估算分数，覆盖这个科目原有的数值。</div>
+      </div>
+      <div class="nw-modal-btns" style="margin-top:16px;">
+        <button class="nw-modal-cancel" onclick="nwCloseRadarSettings()">关闭</button>
       </div>
     </div>
   </div>
@@ -2432,7 +2483,7 @@ function showMainUI(vaultPath) {
 }
 function showPage(name) {
   // 更新导航栏按钮 active 状态
-  const nwNavMap = { home:'nwnav-home', 'new-note':'nwnav-new-note', import:'nwnav-import', study:'nwnav-study', exam:'nwnav-exam', settings:'nwnav-settings' }
+  const nwNavMap = { home:'nwnav-home', import:'nwnav-import', study:'nwnav-study', exam:'nwnav-exam', settings:'nwnav-settings' }
   document.querySelectorAll('.nw-nav-btn').forEach(btn => btn.classList.remove('active'))
   if (nwNavMap[name]) { const nb = document.getElementById(nwNavMap[name]); if(nb) nb.classList.add('active') }
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'))
@@ -2453,13 +2504,11 @@ function showPage(name) {
     const is = document.getElementById('nw-inner-study')
     const isg = document.getElementById('nw-inner-settings')
     const isi = document.getElementById('nw-inner-import')
-    const isn = document.getElementById('nw-inner-new-note')
     const ise = document.getElementById('nw-inner-exam')
     if (hc) { hc.style.display = ''; hc.classList.remove('hidden') }
     if (is) { is.style.display = 'none'; is.classList.add('hidden') }
     if (isg) { isg.style.display = 'none'; isg.classList.add('hidden') }
     if (isi) { isi.style.display = 'none'; isi.classList.add('hidden') }
-    if (isn) { isn.style.display = 'none'; isn.classList.add('hidden') }
     if (ise) { ise.style.display = 'none'; ise.classList.add('hidden') }
     nwInitHome()
     return
@@ -2469,13 +2518,13 @@ function showPage(name) {
   if (pageHome) { pageHome.style.display = 'block'; pageHome.classList.remove('hidden') }
 
   // 所有 inner 面板
-  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-new-note','nw-inner-exam']
+  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-exam']
   panels.forEach(id => {
     const el = document.getElementById(id)
     if (el) { el.style.display = 'none'; el.classList.add('hidden') }
   })
 
-  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', 'new-note':'nw-inner-new-note', exam:'nw-inner-exam' }
+  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', exam:'nw-inner-exam' }
   const innerId = innerMap[name]
   if (innerId) {
     const el = document.getElementById(innerId)
@@ -2503,7 +2552,6 @@ function showPage(name) {
   }
   if (name === 'import') { loadFolders(); loadInboxFiles(); const ir=document.getElementById('import-result');if(ir)ir.classList.add('hidden');const ia=document.getElementById('import-ai-results');if(ia)ia.classList.add('hidden');const il=document.getElementById('import-results-list');if(il)il.innerHTML='' }
   if (name === 'settings') { loadAiSettings(); loadTokenStats() }
-  if (name === 'new-note') essayInitPage()
   if (name === 'exam') examInitPage()
   if (name === 'ai') { showAiHome() }
 }
@@ -3331,6 +3379,8 @@ async function doSmartImport() {
     const ok   = res.filter(r => r.success).length
     const fail = res.filter(r => !r.success).length
     resultEl.innerHTML = `✅ AI 分类完成，成功 ${ok} 个${fail ? `，失败 ${fail} 个` : ''}`
+    // 每个成功归类且非空的文件各计一次资料导入积分
+    res.forEach(r => { if (r.success && !r.isEmpty && r.aiFolder) nwAwardSubjectPoints(r.aiFolder, NW_SUBJECT_WEIGHTS.import) })
     const aiResultsEl = document.getElementById('import-ai-results')
     const listEl = document.getElementById('import-results-list')
     aiResultsEl.classList.remove('hidden')
@@ -3349,6 +3399,8 @@ async function doSmartImport() {
     const res = await window.api.importFiles({ files: allFiles, targetDir })
     const ok = res.filter(r => r.success).length, fail = res.filter(r => !r.success).length
     resultEl.innerHTML = `✅ 成功导入 ${ok} 个文件${fail ? `，${fail} 个失败` : ''}`
+    // 手动选择文件夹导入时，每个成功的文件各计一次资料导入积分
+    for (let i = 0; i < ok; i++) nwAwardSubjectPoints(targetDir, NW_SUBJECT_WEIGHTS.import)
   }
   btn.disabled = false; btn.textContent = '确认导入'
   pendingFiles = []; renderImportList(); loadInboxFiles(); loadOverview()
@@ -3619,6 +3671,7 @@ async function essaySaveToVault() {
       msgEl.className = 'import-result success'
       msgEl.innerHTML = `✅ 保存成功！已生成两个文件，存入 ${where}<br>批改记录版：${essayEsc(res.annotatedPath.split(/[\\/]/).pop())}<br>干净版：${essayEsc(res.cleanPath.split(/[\\/]/).pop())}`
       msgEl.style.display = 'block'
+      if (!res.usedInbox) nwAwardSubjectPoints(res.folder, NW_SUBJECT_WEIGHTS.essay)
       loadOverview()
     } else {
       msgEl.className = 'import-result error'
@@ -3773,6 +3826,7 @@ async function examSaveReview() {
       msgEl.className = 'import-result success'
       msgEl.innerHTML = `✅ 已保存到「${essayEsc(subjectLabel)}」的考试复盘文件（${essayEsc(res.filename)}）`
       msgEl.style.display = 'block'
+      nwAwardSubjectPoints(targetDir, NW_SUBJECT_WEIGHTS.exam)
       document.getElementById('exam-review-text').value = ''
       document.getElementById('exam-score').value = ''
       document.getElementById('exam-score-total').value = ''
@@ -5094,6 +5148,7 @@ function switchStudyTab(tab, btn) {
   if (btn) btn.classList.add('active')
   const panel = document.getElementById('study-tab-' + tab)
   if (panel) { panel.classList.add('active'); panel.style.display = 'flex' }
+  if (tab === 'essay') essayInitPage()
   if (tab === 'review') studyReviewLoadFolders()
 }
 
@@ -5173,6 +5228,7 @@ async function studySaveNote() {
           const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
           msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
           msgEl.style.display = 'block'
+          if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.note)
           document.getElementById('study-note-content').value = ''
           document.getElementById('study-note-title').value = ''
         } else {
@@ -5210,6 +5266,7 @@ async function studySaveNote() {
       const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
       msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + (result.tags ? '<br>标签：' + result.tags : '') + '</div>'
       msgEl.style.display = 'block'
+      if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.note)
       document.getElementById('study-note-content').value = ''
       document.getElementById('study-note-title').value = ''
     } else {
@@ -5297,6 +5354,7 @@ async function studyExpandSave() {
           const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
           msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
           msgEl.style.display = 'block'
+          if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.expand)
         } else {
           msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
           msgEl.style.display = 'block'
@@ -5334,6 +5392,7 @@ async function studyExpandSave() {
       const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
       msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
       msgEl.style.display = 'block'
+      if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.expand)
     } else {
       msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
       msgEl.style.display = 'block'
@@ -5365,6 +5424,7 @@ async function studyReviewLoadFolders() {
       renderStudyReviewFolderTree(res.tree, document.getElementById('study-review-folders'), vaultPath)
     }
   } catch(e) {}
+  renderStudyReviewSelected()
 }
 
 function renderStudyReviewFolderTree(node, container, vaultPath) {
@@ -5420,6 +5480,7 @@ async function studyReviewLoadFiles(folderPath, clickedEl) {
           studyReviewSelectedFiles = studyReviewSelectedFiles.filter(p => p !== file.path)
         }
         updateStudyReviewCount()
+        renderStudyReviewSelected()
       }
       const label = document.createElement('label')
       label.htmlFor = checkbox.id
@@ -5441,6 +5502,38 @@ function updateStudyReviewCount() {
   } else {
     countEl.textContent = '（已选 ' + studyReviewSelectedFiles.length + ' 个文件）'
   }
+}
+
+// ── 已选文件名（从完整路径中取文件名部分） ──
+function studyReviewFileName(p) {
+  return (p || '').split(/[\\/]/).pop()
+}
+
+// ── 渲染"已选文件"栏（跨文件夹累加显示） ──
+function renderStudyReviewSelected() {
+  const wrap = document.getElementById('study-review-selected-list')
+  if (!wrap) return
+  if (studyReviewSelectedFiles.length === 0) {
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>'
+    return
+  }
+  wrap.innerHTML = studyReviewSelectedFiles.map(p => {
+    const name = studyReviewFileName(p)
+    const esc = p.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    return `<div class="study-selected-item">
+      <span class="study-selected-name" title="${name}">${name}</span>
+      <span class="study-selected-remove" onclick="studyReviewRemoveSelected('${esc}')" title="移除">✕</span>
+    </div>`
+  }).join('')
+}
+
+// ── 从"已选文件"栏移除某个文件（同步取消左侧复选框，如果当前正显示的话） ──
+function studyReviewRemoveSelected(path) {
+  studyReviewSelectedFiles = studyReviewSelectedFiles.filter(p => p !== path)
+  const cb = document.getElementById('study-review-file-' + encodeURIComponent(path))
+  if (cb) cb.checked = false
+  updateStudyReviewCount()
+  renderStudyReviewSelected()
 }
 
 async function studyGenerateReview() {
@@ -5508,6 +5601,7 @@ async function studyReviewSave() {
           const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
           msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
           msgEl.style.display = 'block'
+          if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.review)
         } else {
           msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
           msgEl.style.display = 'block'
@@ -5547,6 +5641,7 @@ async function studyReviewSave() {
       const where = result.usedInbox ? '📁 临时文件夹' : ('📂 ' + result.folder)
       msgEl.innerHTML = '<div class="study-save-info">✅ 保存成功！<br>文件名：' + result.filename + '<br>保存位置：' + where + '</div>'
       msgEl.style.display = 'block'
+      if (!result.usedInbox) nwAwardSubjectPoints(result.folder, NW_SUBJECT_WEIGHTS.review)
     } else {
       msgEl.innerHTML = '<div class="study-save-err">❌ 保存失败：' + (result.error || '未知错误') + '</div>'
       msgEl.style.display = 'block'
@@ -5770,6 +5865,7 @@ function nwInitHome() {
   nwRenderCalendar()
   nwRenderCountdowns()
   nwLoadMistakeStats()
+  nwRenderSubjectRadar()
   nwRefreshAll()
   nwInitResizer()
   applyLanguage()
@@ -5864,7 +5960,7 @@ function nwRenderDarkTree(node, vaultPath, depth) {
       ? Math.max(0, node.fileCount - (node.name && hubPattern.test(node.name) ? 1 : 0))
       : node.fileCount
     if (displayCount > 0) {
-      countBadge = `<span style="font-size:10px;color:rgba(255,255,255,0.25);margin-left:auto;flex-shrink:0;padding-left:6px">${displayCount}</span>`
+      countBadge = `<span style="font-size:10px;color:var(--text-muted);margin-left:auto;flex-shrink:0;padding-left:6px">${displayCount}</span>`
     }
   }
 
@@ -6160,7 +6256,7 @@ function nwRenderCountdowns() {
   const cds = nwGetCountdowns()
   const today = new Date(); today.setHours(0,0,0,0)
   if (!cds.length) {
-    container.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;padding:10px 0">No events yet</div>'
+    container.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:10px 0">No events yet</div>'
     return
   }
   const sorted = cds.map(c => {
@@ -6178,8 +6274,8 @@ function nwRenderCountdowns() {
     else if (diff <= 7) { badge = diff+'d'; barColor = '#ef9f27'; barWidth = Math.max(30, 95 - diff*8)+'%' }
     else if (diff <= 30) { badge = diff+'d'; barColor = '#1d9e75'; barWidth = Math.max(10, 50 - diff*1.2)+'%' }
     else { badge = diff+'d'; barColor = '#534ab7'; barWidth = '5%' }
-    const badgeStyle = diff <= 0 ? 'background:rgba(226,75,74,0.18);color:#f09595' :
-      diff <= 7 ? 'background:rgba(239,159,39,0.18);color:#fac775' : 'background:rgba(29,158,117,0.18);color:#5dcaa5'
+    const badgeClass = diff <= 0 ? 'nw-cd-badge-urgent' :
+      diff <= 7 ? 'nw-cd-badge-soon' : 'nw-cd-badge-ok'
     const origIdx = cds.findIndex(x => x.name === c.name && x.date === c.date)
     const descHtml = c.type ? `<span class="nw-cd-desc">${c.type}</span>` : ''
     return `<div class="nw-cd">
@@ -6188,8 +6284,8 @@ function nwRenderCountdowns() {
           <span class="nw-cd-name" title="${c.name}">${c.name}</span>${descHtml}
         </span>
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <span class="nw-cd-badge" style="${badgeStyle}">${badge}</span>
-          <span onclick="nwDeleteCd(${origIdx})" title="删除" style="font-size:12px;color:rgba(255,255,255,0.2);cursor:pointer;padding:0 2px;line-height:1" onmouseover="this.style.color='rgba(240,149,149,0.8)'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">✕</span>
+          <span class="nw-cd-badge ${badgeClass}">${badge}</span>
+          <span onclick="nwDeleteCd(${origIdx})" title="删除" style="font-size:12px;color:var(--text-muted);cursor:pointer;padding:0 2px;line-height:1" onmouseover="this.style.color='#e05252'" onmouseout="this.style.color='var(--text-muted)'">✕</span>
         </div>
       </div>
       <div class="nw-cd-bar-bg"><div class="nw-cd-bar-fill" style="width:${barWidth};background:${barColor}"></div></div>
@@ -6360,6 +6456,311 @@ function nwLoadMistakeStats() {
   if (s) s.textContent = data.solved
 }
 
+/* ── 科目雷达图：积分权重、中英文科目名对照、积分累加与渲染 ── */
+
+// 各内容类型的单次积分权重
+const NW_SUBJECT_WEIGHTS = {
+  note: 3,      // 学习笔记
+  expand: 5,    // 知识点扩充
+  review: 8,    // 复习备考（复习资料或练习题）
+  import: 3,    // 导入资料（每个文件）
+  exam: 10,     // 考试复盘
+  essay: 5      // 文章纠错
+}
+
+// 常见科目中英文对照表：匹配不到的科目名直接显示原文件夹名，不做翻译
+const NW_SUBJECT_DICT = {
+  '数学':'Math', '语文':'Chinese', '中文':'Chinese', '英语':'English', '英文':'English',
+  '物理':'Physics', '化学':'Chemistry', '生物':'Biology', '科学':'Science',
+  '历史':'History', '地理':'Geography', '政治':'Politics', '道德与法治':'Civics',
+  '美术':'Art', '音乐':'Music', '体育':'PE', '戏剧':'Drama', '信息技术':'ICT',
+  '经济':'Economics', '商务':'Business', '心理学':'Psychology'
+}
+const NW_SUBJECT_DICT_REV = Object.fromEntries(Object.entries(NW_SUBJECT_DICT).map(([zh,en]) => [en, zh]))
+
+function nwSubjectDisplayName(rawName) {
+  if (!rawName) return rawName
+  if (nwLang === 'en') return NW_SUBJECT_DICT[rawName] || rawName
+  return NW_SUBJECT_DICT_REV[rawName] || rawName
+}
+
+function nwEscHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
+function nwGetSubjectPoints() {
+  try { return JSON.parse(localStorage.getItem('nw_subject_points') || '{}') } catch(e) { return {} }
+}
+
+// folderPathOrName 可传完整路径或纯文件夹名。如果文件存在知识库根目录下的二级、三级子文件夹里
+// （比如 "数学/代数"），科目应该算在顶层的"数学"上，而不是最深一层的"代数"，
+// 所以这里会先尝试用知识库根路径把它换算成"相对于知识库根目录的第一级文件夹名"；
+// 如果传入的本来就只是一个文件夹名（不含完整路径），则直接把它当作科目名使用。
+function nwGetTopLevelFolderKey(folderPathOrName) {
+  const raw = String(folderPathOrName)
+  if (currentVaultPath && raw.toLowerCase().indexOf(currentVaultPath.toLowerCase()) === 0) {
+    let rel = raw.slice(currentVaultPath.length).replace(/^[\\/]+/, '')
+    const first = rel.split(/[\\/]/).filter(Boolean)[0]
+    if (first) return first
+  }
+  return raw.split(/[\\/]/).filter(Boolean).pop()
+}
+
+function nwAwardSubjectPoints(folderPathOrName, points) {
+  if (!folderPathOrName || !points) return
+  const key = nwGetTopLevelFolderKey(folderPathOrName)
+  if (!key) return
+  const data = nwGetSubjectPoints()
+  data[key] = (data[key] || 0) + points
+  localStorage.setItem('nw_subject_points', JSON.stringify(data))
+  nwRenderSubjectRadar()
+}
+
+// 递归统计某个文件夹（含子文件夹）下的文件总数
+async function nwCountFilesRecursive(folderPath) {
+  try {
+    const res = await window.api.listFolderFiles({ folderPath, vaultPath: currentVaultPath })
+    if (!res || !res.success || !res.items) return 0
+    let count = 0
+    for (const item of res.items) {
+      if (item.isDir) count += await nwCountFilesRecursive(item.path)
+      else count += 1
+    }
+    return count
+  } catch (e) { return 0 }
+}
+
+// 一次性扫描：把知识库里已有的文件按科目文件夹回填成初始积分
+// 历史文件无法得知原始存档类型，统一按"学习笔记"权重计分作为估算基准
+async function nwBackfillSubjectPoints() {
+  if (!currentVaultPath) { alert('请先选择知识库路径'); return }
+  const btn = document.getElementById('nw-radar-backfill-btn')
+  if (btn) { btn.textContent = typeof t === 'function' ? t('radarScanning') : '正在扫描知识库…'; btn.style.pointerEvents = 'none' }
+
+  let res
+  try {
+    res = await window.api.studyInvoke('exam-get-subjects', { vaultPath: currentVaultPath })
+  } catch (e) {
+    if (btn) { btn.textContent = typeof t === 'function' ? t('radarBackfillBtn') : '扫描已有文件'; btn.style.pointerEvents = '' }
+    alert('扫描失败：' + e.message)
+    return
+  }
+  if (!res || !res.success || !res.folders || !res.folders.length) {
+    if (btn) { btn.textContent = typeof t === 'function' ? t('radarBackfillBtn') : '扫描已有文件'; btn.style.pointerEvents = '' }
+    alert('未能识别到科目文件夹')
+    return
+  }
+
+  const data = {}
+  for (const f of res.folders) {
+    const key = String(f.value).split(/[\\/]/).filter(Boolean).pop()
+    if (!key) continue
+    const count = await nwCountFilesRecursive(f.value)
+    if (count > 0) data[key] = count * NW_SUBJECT_WEIGHTS.note
+  }
+  localStorage.setItem('nw_subject_points', JSON.stringify(data))
+  nwRenderSubjectRadar()
+}
+
+// ── 用户自定义的雷达图科目列表（与自动积分数据分开管理） ──
+// 首次使用时，从已有积分数据里自动初始化一份（排除"临时文件夹""日记"这类非科目目录），
+// 之后完全由用户在"设置"里手动增删，不再自动判断。
+function nwGetRadarSubjects() {
+  const raw = localStorage.getItem('nw_radar_subjects')
+  if (raw !== null) {
+    try { return JSON.parse(raw) } catch(e) { return [] }
+  }
+  const data = nwGetSubjectPoints()
+  const exclude = ['临时文件夹', '日记']
+  const initial = Object.keys(data).filter(k => !exclude.includes(k))
+  localStorage.setItem('nw_radar_subjects', JSON.stringify(initial))
+  return initial
+}
+
+function nwSaveRadarSubjects(arr) {
+  localStorage.setItem('nw_radar_subjects', JSON.stringify(arr))
+}
+
+function nwOpenRadarSettings() {
+  const modal = document.getElementById('nw-radar-settings-modal')
+  if (modal) modal.classList.add('open')
+  nwRenderRadarSettingsCurrent()
+  nwPopulateRadarAddSelect()
+}
+
+function nwCloseRadarSettings() {
+  const modal = document.getElementById('nw-radar-settings-modal')
+  if (modal) modal.classList.remove('open')
+}
+
+function nwRenderRadarSettingsCurrent() {
+  const wrap = document.getElementById('nw-radar-settings-current')
+  if (!wrap) return
+  const subjects = nwGetRadarSubjects()
+  if (!subjects.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">暂未选择任何科目</div>'
+    return
+  }
+  wrap.innerHTML = subjects.map(k => {
+    const name = nwSubjectDisplayName(k)
+    const esc = k.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    return '<div class="study-selected-item">' +
+      '<span class="study-selected-name" title="' + nwEscHtml(name) + '">' + nwEscHtml(name) + '</span>' +
+      '<span class="study-selected-remove" onclick="nwRadarRemoveSubject(\'' + esc + '\')" title="移除">✕</span>' +
+      '</div>'
+  }).join('')
+}
+
+async function nwPopulateRadarAddSelect() {
+  const sel = document.getElementById('nw-radar-add-select')
+  if (!sel) return
+  if (!currentVaultPath) { sel.innerHTML = '<option value="">请先选择知识库</option>'; return }
+  sel.innerHTML = '<option value="">加载中…</option>'
+  try {
+    const res = await window.api.getFolderTree(currentVaultPath)
+    const top = (res.success && res.tree) ? (res.tree.children || []) : []
+    const subjects = nwGetRadarSubjects()
+    const options = top.map(f => f.name).filter(name => name && !subjects.includes(name))
+    if (!options.length) {
+      sel.innerHTML = '<option value="">没有可添加的文件夹</option>'
+      return
+    }
+    sel.innerHTML = options.map(name =>
+      '<option value="' + nwEscHtml(name) + '">' + nwEscHtml(nwSubjectDisplayName(name)) + '</option>'
+    ).join('')
+  } catch(e) {
+    sel.innerHTML = '<option value="">加载失败</option>'
+  }
+}
+
+function nwRadarAddSubject() {
+  const sel = document.getElementById('nw-radar-add-select')
+  if (!sel || !sel.value) return
+  const subjects = nwGetRadarSubjects()
+  if (!subjects.includes(sel.value)) subjects.push(sel.value)
+  nwSaveRadarSubjects(subjects)
+  nwRenderRadarSettingsCurrent()
+  nwPopulateRadarAddSelect()
+  nwRenderSubjectRadar()
+}
+
+function nwRadarRemoveSubject(key) {
+  const subjects = nwGetRadarSubjects().filter(k => k !== key)
+  nwSaveRadarSubjects(subjects)
+  nwRenderRadarSettingsCurrent()
+  nwPopulateRadarAddSelect()
+  nwRenderSubjectRadar()
+}
+
+// 拼接路径：跟随 currentVaultPath 本身用的分隔符（Win 是 \，Mac 是 /）
+function nwJoinPath(base, sub) {
+  const sep = base.indexOf('\\') !== -1 ? '\\' : '/'
+  return base.replace(/[\\/]+$/, '') + sep + sub
+}
+
+// 按知识库里实际的文件数量（含子文件夹），重新统计当前所有已选科目的分数。
+// 用于覆盖历史遗留文件、或手动放进子文件夹、没有触发过自动计分的内容。
+// 这是估算值（按"学习笔记"权重折算），会整体覆盖这些科目原有的分数。
+async function nwRadarRecount() {
+  if (!currentVaultPath) { alert('请先选择知识库路径'); return }
+  const subjects = nwGetRadarSubjects()
+  if (!subjects.length) { alert('请先添加至少一个科目'); return }
+  const btn = document.getElementById('nw-radar-recount-btn')
+  const originalText = btn ? btn.textContent : ''
+  if (btn) { btn.textContent = '正在统计…'; btn.style.pointerEvents = 'none' }
+
+  const data = nwGetSubjectPoints()
+  for (const key of subjects) {
+    const folderPath = nwJoinPath(currentVaultPath, key)
+    const count = await nwCountFilesRecursive(folderPath)
+    data[key] = count * NW_SUBJECT_WEIGHTS.note
+  }
+  localStorage.setItem('nw_subject_points', JSON.stringify(data))
+
+  if (btn) { btn.textContent = originalText; btn.style.pointerEvents = '' }
+  nwRenderSubjectRadar()
+}
+
+function nwRenderSubjectRadar() {
+  const container = document.getElementById('nw-radar-chart')
+  if (!container) return
+  const data = nwGetSubjectPoints()
+  const subjects = nwGetRadarSubjects()
+
+  if (subjects.length < 3) {
+    container.innerHTML = '<div style="border:1px dashed var(--border-color);border-radius:8px;padding:20px 12px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.5;">' +
+      nwEscHtml(typeof t === 'function' ? t('radarEmpty') : '') + '</div>'
+    return
+  }
+
+  const cs = getComputedStyle(document.documentElement)
+  const accent = cs.getPropertyValue('--accent').trim() || '#534ab7'
+  const bgCard = cs.getPropertyValue('--bg-card').trim() || '#1c2333'
+  const borderColor = cs.getPropertyValue('--border-color').trim() || '#2a3348'
+  const textPrimary = cs.getPropertyValue('--text-primary').trim() || '#e8e6f0'
+  const textMuted = cs.getPropertyValue('--text-muted').trim() || '#8a889a'
+
+  const n = subjects.length
+  const cx = 130, cy = 128, R = 90
+  const maxVal = Math.max(...subjects.map(k => data[k] || 0), 1) * 1.15
+
+  const angleFor = i => (Math.PI * 2 * i / n) - Math.PI / 2
+  const pointAt = (i, val) => {
+    const r = (val / maxVal) * R
+    const a = angleFor(i)
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)]
+  }
+
+  let gridPolys = ''
+  for (let ring = 1; ring <= 4; ring++) {
+    const rr = R * ring / 4
+    const pts = subjects.map((k, i) => {
+      const a = angleFor(i)
+      return (cx + rr * Math.cos(a)).toFixed(1) + ',' + (cy + rr * Math.sin(a)).toFixed(1)
+    }).join(' ')
+    gridPolys += '<polygon points="' + pts + '" fill="none" stroke="' + borderColor + '" stroke-width="0.75"/>'
+  }
+
+  let axisLines = ''
+  subjects.forEach((k, i) => {
+    const a = angleFor(i)
+    const x = cx + R * Math.cos(a), y = cy + R * Math.sin(a)
+    axisLines += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="' + borderColor + '" stroke-width="0.75"/>'
+  })
+
+  const dataPts = subjects.map((k, i) => pointAt(i, data[k] || 0))
+  const dataPolyStr = dataPts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')
+
+  let dots = ''
+  dataPts.forEach(p => {
+    dots += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.5" fill="' + accent + '" stroke="' + bgCard + '" stroke-width="1.5" filter="url(#nwRadarGlow)"/>'
+  })
+
+  let labels = ''
+  subjects.forEach((k, i) => {
+    const a = angleFor(i)
+    const lx = cx + (R + 20) * Math.cos(a)
+    const ly = cy + (R + 20) * Math.sin(a)
+    const anchor = Math.cos(a) > 0.3 ? 'start' : (Math.cos(a) < -0.3 ? 'end' : 'middle')
+    const name = nwSubjectDisplayName(k)
+    labels += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="' + anchor + '" font-size="10" font-weight="500" fill="' + textPrimary + '" font-family="inherit">' + nwEscHtml(name) + '</text>'
+    labels += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 12).toFixed(1) + '" text-anchor="' + anchor + '" font-size="8" fill="' + textMuted + '" font-family="inherit">' + (data[k] || 0) + '</text>'
+  })
+
+  container.innerHTML =
+    '<svg viewBox="-30 0 320 300" width="100%" style="max-width:340px;display:block;margin:0 auto;">' +
+      '<defs>' +
+        '<filter id="nwRadarGlow" x="-80%" y="-80%" width="260%" height="260%">' +
+          '<feGaussianBlur stdDeviation="2.2" result="b"/>' +
+          '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+        '</filter>' +
+      '</defs>' +
+      gridPolys + axisLines +
+      '<polygon points="' + dataPolyStr + '" fill="' + accent + '" fill-opacity="0.20" stroke="' + accent + '" stroke-width="2" filter="url(#nwRadarGlow)"/>' +
+      dots + labels +
+    '</svg>'
+}
+
 /* ── Home: folder tree + file list ── */
 let nwSelectedFolder = null
 let nwCheckedFiles = new Set()
@@ -6367,7 +6768,7 @@ let nwCheckedFiles = new Set()
 async function nwLoadFolderTree() {
   const wrap = document.getElementById('nw-folder-tree-wrap')
   if (!wrap || !currentVaultPath) return
-  wrap.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">Loading…</div>'
+  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">Loading…</div>'
   try {
     const res = await window.api.getFolderTree(currentVaultPath)
     // res.tree 是单个根节点对象 {name, path, children:[]}，取 children 渲染
@@ -6375,7 +6776,7 @@ async function nwLoadFolderTree() {
     // 如果没有子文件夹，直接把根节点当作一个文件夹展示
     const renderNodes = nodes.length ? nodes : (res.tree ? [res.tree] : [])
     if (!renderNodes.length) {
-      wrap.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">No folders found</div>'
+      wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">No folders found</div>'
       return
     }
     wrap.innerHTML = nwBuildTreeHTML(renderNodes)
@@ -6383,7 +6784,7 @@ async function nwLoadFolderTree() {
     const first = wrap.querySelector('.nw-tree-item')
     if (first) first.click()
   } catch(e) {
-    wrap.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">Could not load</div>'
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">Could not load</div>'
   }
 }
 
@@ -6398,7 +6799,7 @@ function nwBuildTreeHTML(nodes, depth) {
     const toggle = hasChildren
       ? `<span class="nw-tree-toggle" id="tog-${uid}" onclick="nwToggleTree('${uid}',this);event.stopPropagation()">▶</span>`
       : `<span class="nw-tree-toggle"></span>`
-    const count = node.fileCount ? `<span style="font-size:9px;color:rgba(255,255,255,0.2);margin-left:auto">${node.fileCount}</span>` : ''
+    const count = node.fileCount ? `<span style="font-size:9px;color:var(--text-muted);margin-left:auto">${node.fileCount}</span>` : ''
     const children = hasChildren
       ? `<div class="nw-tree-children collapsed" id="${uid}">${nwBuildTreeHTML(node.children, depth+1)}</div>`
       : ''
@@ -6540,6 +6941,8 @@ const NW_STRINGS = {
     searchPlh:'Search notes by filename or content…',
     // sidebar
     calLabel:'Calendar', cdLabel:'Countdowns', wrongLabel:'Wrong answers',
+    subjectsLabel:'Vault Radar', radarEmpty:'Use the ⚙ Settings button above to choose at least 3 subjects to display',
+    radarBackfillBtn:'Scan existing files', radarScanning:'Scanning your vault…',
     unsolved:'Unsolved', solved:'Resolved',
     addEvent:'+ Add event',
     // modal
@@ -6562,6 +6965,8 @@ const NW_STRINGS = {
     noFolders:'未找到文件夹',
     searchPlh:'按文件名或内容搜索笔记…',
     calLabel:'日历', cdLabel:'倒计时', wrongLabel:'错题本',
+    subjectsLabel:'知识库雷达图', radarEmpty:'点击右上角"设置"，选择至少 3 个科目来展示',
+    radarBackfillBtn:'扫描已有文件', radarScanning:'正在扫描知识库…',
     unsolved:'待解决', solved:'已解决',
     addEvent:'+ 添加事件',
     modalTitle:'添加倒计时', modalName:'事件名称', modalDate:'日期',
@@ -6597,6 +7002,8 @@ function setTheme(theme) {
       btn.style.borderColor = ''
     }
   })
+  // 雷达图颜色取自主题 CSS 变量，切换主题后需要重绘
+  if (typeof nwRenderSubjectRadar === 'function') nwRenderSubjectRadar()
 }
 
 // 启动时恢复上次选择的主题（立即执行，不等 DOMContentLoaded）
@@ -6631,8 +7038,8 @@ function applyLanguage() {
   if (typeof examRenderTypeOptions === 'function') examRenderTypeOptions()
 
   // nav buttons（新导航栏，使用 nwnav-label-xxx ID）
-  const navLabelIds = ['nwnav-label-home','nwnav-label-new','nwnav-label-import','nwnav-label-study','nwnav-label-exam','nwnav-label-settings']
-  const navKeys = ['navHome','navNew','navImport','navAI','navExam','navSettings']
+  const navLabelIds = ['nwnav-label-home','nwnav-label-import','nwnav-label-study','nwnav-label-exam','nwnav-label-settings']
+  const navKeys = ['navHome','navImport','navAI','navExam','navSettings']
   navLabelIds.forEach((id, i) => {
     const el = document.getElementById(id)
     if (el) el.textContent = s[navKeys[i]]
@@ -6660,10 +7067,13 @@ function applyLanguage() {
   setBtn('nw-btn-move', s.moveSelected)
   setBtn('nw-btn-delete', s.deleteSelected)
 
-  // sidebar labels
+  // sidebar labels（DOM 顺序：日历→科目雷达图→倒计时）
   const sideLabels = document.querySelectorAll('.nw-side-label')
-  const labelKeys = ['cdLabel','wrongLabel','calLabel']
+  const labelKeys = ['calLabel', 'subjectsLabel', 'cdLabel']
   sideLabels.forEach((el,i) => { if(labelKeys[i]) el.textContent = s[labelKeys[i]] })
+
+  // 科目雷达图：语言切换后重绘（轴上的科目名称需要跟随语言）
+  if (typeof nwRenderSubjectRadar === 'function') nwRenderSubjectRadar()
 
   // mistake card labels
   const mcards = document.querySelectorAll('.nw-mcard-lbl')
