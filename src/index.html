@@ -178,10 +178,11 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: var(--bg-page); color: var(--text-primary);
-      height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+      height: 100%; display: flex; flex-direction: column; overflow: hidden;
     }
     .topbar {
       background: var(--bg-nav); border-bottom: 1px solid var(--border-color);
@@ -741,19 +742,19 @@
     #folder-files .folder-file-item { border-bottom-color:var(--border-subtle) !important; }
     #folder-files .folder-file-item:hover { background:var(--bg-hover) !important; }
     #folder-files .folder-file-item.ff-selected { background:var(--tree-selected-bg) !important; }
-    #folder-files .ff-name { color:var(--text-primary) !important; font-size:12px !important; }
-    #folder-files .ff-meta { color:var(--text-placeholder) !important; font-size:11px !important; }
-    #folder-files .ff-icon { font-size:14px !important; }
-    #folder-files .ff-btn { font-size:10px !important; color:var(--accent-text) !important;
+    #folder-files .ff-name { color:var(--text-primary) !important; font-size:15px !important; }
+    #folder-files .ff-meta { color:var(--text-placeholder) !important; font-size:13px !important; }
+    #folder-files .ff-icon { font-size:17px !important; }
+    #folder-files .ff-btn { font-size:12px !important; color:var(--accent-text) !important;
       background:var(--accent-light) !important; border:1px solid var(--accent-border) !important;
-      border-radius:5px !important; padding:2px 8px !important; }
+      border-radius:5px !important; padding:3px 10px !important; }
     #folder-files .ff-btn:hover { background:var(--btn-sm-hover) !important; color:var(--accent-text) !important; }
-    #folder-files .loading { color:var(--text-placeholder) !important; }
-    #folder-files .empty-tip { color:var(--text-placeholder) !important; }
-    #nw-folders-label { font-size:13px !important; font-weight:600; }
-    #nw-refresh-btn { font-size:11px !important; }
-    #folder-files-title { font-size:13px !important; font-weight:600; }
-    .nw-ff-btn { font-size:11px; font-family:inherit; cursor:pointer; padding:4px 12px; border-radius:6px;
+    #folder-files .loading { color:var(--text-placeholder) !important; font-size:14px !important; }
+    #folder-files .empty-tip { color:var(--text-placeholder) !important; font-size:14px !important; }
+    #nw-folders-label { font-size:16px !important; font-weight:600; }
+    #nw-refresh-btn { font-size:14px !important; }
+    #folder-files-title { font-size:16px !important; font-weight:600; }
+    .nw-ff-btn { font-size:14px; font-family:inherit; cursor:pointer; padding:5px 14px; border-radius:6px;
       border:1px solid var(--accent-border); background:var(--accent-light); color:var(--accent-text); transition:background 0.15s; white-space:nowrap; }
     .nw-ff-btn:hover { background:var(--btn-sm-hover); color:var(--accent-text); }
     .nw-ff-btn-red { border-color:var(--error-text) !important; background:var(--error-bg) !important; color:var(--error-text) !important; }
@@ -809,12 +810,12 @@
     .nw-cal-d:not(.empty):not(.today):hover { background:var(--bg-hover); color:var(--text-primary); }
 
     /* 树状目录项（home内） */
-    .nw-tree-item { display:flex; align-items:center; gap:5px; padding:4px 6px; font-size:12px;
+    .nw-tree-item { display:flex; align-items:center; gap:6px; padding:6px 8px; font-size:15px;
       cursor:pointer; border-radius:5px; color:var(--text-secondary); user-select:none; }
     .nw-tree-item:hover { background:var(--bg-hover); color:var(--text-primary); }
     .nw-tree-item.selected { background:var(--tree-selected-bg); color:var(--tree-selected-color); }
-    .nw-tree-toggle { width:12px; text-align:center; font-size:8px; color:var(--text-placeholder); flex-shrink:0; }
-    .nw-tree-children { margin-left:14px; border-left:1px solid var(--border-subtle); padding-left:4px; }
+    .nw-tree-toggle { width:14px; text-align:center; font-size:11px; color:var(--text-placeholder); flex-shrink:0; }
+    .nw-tree-children { margin-left:16px; border-left:1px solid var(--border-subtle); padding-left:6px; }
     .nw-tree-children.collapsed { display:none; }
 
     /* 弹窗 */
@@ -906,14 +907,14 @@
               <span class="icon">🔍</span>
               <input id="nw-search-input" type="text" placeholder="按文件名或内容搜索笔记…"
                 onkeydown="if(event.key==='Enter')nwHomeSearch()">
-              <button id="nw-tag-filter-toggle" onclick="event.stopPropagation();nwToggleTagFilter()" title="按标签筛选" style="background:none;border:1px solid var(--border-input);border-radius:5px;padding:2px 9px;font-size:11px;color:var(--text-muted);cursor:pointer;font-family:inherit;flex-shrink:0;transition:all 0.15s;white-space:nowrap;">🏷 标签</button>
+              <button id="nw-tag-filter-toggle" onclick="event.stopPropagation();nwToggleTagFilter()" title="按标签筛选" style="background:none;border:1px solid var(--border-input);border-radius:5px;padding:2px 9px;font-size:11px;color:var(--text-muted);cursor:pointer;font-family:inherit;flex-shrink:0;transition:all 0.15s;white-space:nowrap;">🏷 <span id="nw-tag-filter-toggle-label">标签</span></button>
             </div>
-            <button onclick="nwHomeSearch()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;" onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='var(--accent)'">搜索</button>
+            <button id="nw-search-btn" onclick="nwHomeSearch()" style="flex-shrink:0;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;" onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='var(--accent)'">搜索</button>
           </div>
 
           <!-- 标签筛选栏（默认隐藏） -->
           <div id="nw-tag-filter-bar" style="display:none;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 14px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:9px;margin-top:8px;flex-shrink:0;">
-            <span style="font-size:11px;color:var(--text-muted);white-space:nowrap;">按标签筛选：</span>
+            <span id="nw-tag-filter-bar-label" style="font-size:11px;color:var(--text-muted);white-space:nowrap;">按标签筛选：</span>
             <div id="nw-home-tags" style="display:flex;flex-wrap:wrap;gap:5px;flex:1;">
               <span style="font-size:11px;color:var(--text-placeholder);">加载中…</span>
             </div>
@@ -934,23 +935,23 @@
               <!-- 左：目录树 -->
               <div style="display:flex;flex-direction:column;gap:6px;min-height:0">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-                  <span id="nw-folders-label" style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);">Folders</span>
+                  <span id="nw-folders-label" style="font-size:11px;font-weight:600;color:var(--text-secondary);">Folders</span>
                   <div style="display:flex;gap:5px;align-items:center">
-                    <button id="nw-btn-new-folder" onclick="nwOpenNewFolderModal()" style="font-size:11px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:5px;padding:2px 9px;cursor:pointer;font-family:inherit">+ 新增</button>
-                    <button id="nw-btn-del-folder" onclick="nwDeleteSelectedFolder()" style="font-size:11px;color:rgba(240,149,149,0.85);background:rgba(226,75,74,0.1);border:1px solid rgba(226,75,74,0.3);border-radius:5px;padding:2px 9px;cursor:pointer;font-family:inherit">删除</button>
-                    <button id="nw-refresh-btn" onclick="nwRefreshAll()" style="font-size:11px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:5px;padding:2px 9px;cursor:pointer;font-family:inherit">↻ 刷新</button>
+                    <button id="nw-btn-new-folder" onclick="nwOpenNewFolderModal()" style="font-size:14px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:5px;padding:3px 11px;cursor:pointer;font-family:inherit">+ 新增</button>
+                    <button id="nw-btn-del-folder" onclick="nwDeleteSelectedFolder()" style="font-size:14px;color:rgba(240,149,149,0.85);background:rgba(226,75,74,0.1);border:1px solid rgba(226,75,74,0.3);border-radius:5px;padding:3px 11px;cursor:pointer;font-family:inherit">删除</button>
+                    <button id="nw-refresh-btn" onclick="nwRefreshAll()" style="font-size:14px;color:rgba(175,169,236,0.9);background:rgba(83,74,183,0.15);border:1px solid rgba(83,74,183,0.3);border-radius:5px;padding:3px 11px;cursor:pointer;font-family:inherit">↻ 刷新</button>
                   </div>
                 </div>
                 <div id="folder-tree" class="nw-panel-dark">
-                  <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">Loading…</div>
+                  <div style="font-size:14px;color:var(--text-placeholder);padding:16px;text-align:center">Loading…</div>
                 </div>
               </div>
               <!-- 右：文件列表 -->
               <div style="display:flex;flex-direction:column;gap:6px;min-height:0">
                 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:24px">
-                  <span id="folder-files-title" style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);flex:1;">Recent files</span>
+                  <span id="folder-files-title" style="font-size:11px;font-weight:600;color:var(--text-secondary);flex:1;">Recent files</span>
                   <div id="ff-action-bar" style="display:none;align-items:center;gap:6px">
-                    <span id="ff-select-count" style="font-size:10px;color:rgba(255,255,255,0.35);margin-right:2px"></span>
+                    <span id="ff-select-count" style="font-size:13px;color:var(--text-muted);margin-right:2px"></span>
                     <button class="nw-ff-btn" id="nw-btn-selectall" onclick="ffSelectAll(true)">全选</button>
                     <button class="nw-ff-btn" id="nw-btn-clear" onclick="ffSelectAll(false)">取消</button>
                     <button class="nw-ff-btn" id="nw-btn-move" onclick="ffMoveSelected()">移动</button>
@@ -958,7 +959,7 @@
                   </div>
                 </div>
                 <div id="folder-files" class="nw-panel-dark">
-                  <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">Select a folder</div>
+                  <div style="font-size:14px;color:var(--text-placeholder);padding:16px;text-align:center">Select a folder</div>
                 </div>
               </div>
             </div>
@@ -972,13 +973,13 @@
           <!-- 顶部：标签栏 + 语言选择 -->
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;flex-shrink:0;">
             <div class="st-tabs">
-              <button class="st-tab-btn active" onclick="switchStudyTab('note', this)">📝 学习笔记</button>
-              <button class="st-tab-btn" onclick="switchStudyTab('expand', this)">🔬 知识点扩充</button>
-              <button class="st-tab-btn" onclick="switchStudyTab('essay', this)">✏️ 文章纠错</button>
-              <button class="st-tab-btn" onclick="switchStudyTab('review', this)">📖 复习备考</button>
+              <button class="st-tab-btn active" id="study-tabbtn-note" onclick="switchStudyTab('note', this)">📝 <span id="study-tabbtn-note-label">学习笔记</span></button>
+              <button class="st-tab-btn" id="study-tabbtn-expand" onclick="switchStudyTab('expand', this)">🔬 <span id="study-tabbtn-expand-label">知识点扩充</span></button>
+              <button class="st-tab-btn" id="study-tabbtn-essay" onclick="switchStudyTab('essay', this)">✏️ <span id="study-tabbtn-essay-label">文章纠错</span></button>
+              <button class="st-tab-btn" id="study-tabbtn-review" onclick="switchStudyTab('review', this)">📖 <span id="study-tabbtn-review-label">复习备考</span></button>
             </div>
             <div class="st-lang-bar">
-              <span>输出语言：</span>
+              <span id="study-outputlang-label">输出语言：</span>
               <label class="st-radio-label" style="padding:3px 8px">
                 <input type="radio" name="study-output-lang" value="中文"> 中文
               </label>
@@ -990,31 +991,31 @@
 
           <!-- ── 标签一：学习笔记 ── -->
           <div id="study-tab-note" class="st-tab-panel active" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
-            <div class="st-info-tip">📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。</div>
+            <div class="st-info-tip" id="study-note-infotip">📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。</div>
             <div class="st-row">
               <input type="text" class="st-input" id="study-note-title" placeholder="笔记标题（可选，不填则由 AI 自动生成）" style="flex:1">
               <label class="st-check-label">
-                <input type="checkbox" id="study-note-ai-polish" checked> AI 整理格式
+                <input type="checkbox" id="study-note-ai-polish" checked> <span id="study-note-aipolish-label">AI 整理格式</span>
               </label>
             </div>
             <textarea class="st-textarea" id="study-note-content" style="flex:1;min-height:260px"
               placeholder="在这里随意记录你的学习笔记…&#10;&#10;AI 整理模式：AI 会帮你纠正错别字、润色语句，整理成 Markdown 格式，但不改变内容主旨。&#10;直接保存模式：原样保存你输入的内容。"></textarea>
             <div class="st-action-row">
-              <button class="st-btn-primary" id="study-note-save-btn" onclick="studySaveNote()">💾 保存笔记</button>
-              <button class="st-btn-sec" onclick="document.getElementById('study-note-content').value='';document.getElementById('study-note-title').value=''">🗑 清空</button>
+              <button class="st-btn-primary" id="study-note-save-btn" onclick="studySaveNote()">💾 <span id="study-note-savebtn-label">保存笔记</span></button>
+              <button class="st-btn-sec" id="study-note-clear-btn" onclick="document.getElementById('study-note-content').value='';document.getElementById('study-note-title').value=''">🗑 <span id="study-note-clearbtn-label">清空</span></button>
             </div>
             <div id="study-note-msg" style="display:none"></div>
           </div>
 
           <!-- ── 标签二：知识点扩充 ── -->
           <div id="study-tab-expand" class="st-tab-panel" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
-            <div class="st-info-tip">🔬 输入一个知识点标题和你的理解，AI 会帮你完善内容、纠正错误，并根据年龄段/课程给出适当深度的扩展。</div>
+            <div class="st-info-tip" id="study-expand-infotip">🔬 输入一个知识点标题和你的理解，AI 会帮你完善内容、纠正错误，并根据年龄段/课程给出适当深度的扩展。</div>
             <div class="st-row">
               <input type="text" class="st-input" id="study-expand-title" placeholder="知识点标题（如：动物细胞、光合作用、牛顿第二定律…）" style="flex:1">
               <select class="st-select" id="study-expand-age" onchange="updateCurriculumSelect()">
-                <option value="小学">小学</option>
-                <option value="初中" selected>初中</option>
-                <option value="高中">高中</option>
+                <option value="小学" id="study-expand-age-opt1">小学</option>
+                <option value="初中" selected id="study-expand-age-opt2">初中</option>
+                <option value="高中" id="study-expand-age-opt3">高中</option>
               </select>
               <div id="study-expand-system-wrap" class="st-radio-group">
                 <label class="st-radio-label" id="study-sys-label-cn"><input type="radio" name="study-expand-system" value="国内" onchange="updateSystemLabel()"> 国内体系</label>
@@ -1025,27 +1026,27 @@
                 <option value="A-Level">A-Level</option>
                 <option value="AP">AP</option>
                 <option value="IB">IB</option>
-                <option value="普通高中">普通高中</option>
+                <option value="普通高中" id="study-expand-curr-opt5">普通高中</option>
               </select>
             </div>
-            <div id="study-expand-system-hint" style="font-size:12px;color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.03);border-radius:6px;padding:7px 11px;line-height:1.6;">
+            <div id="study-expand-system-hint" style="font-size:12px;color:var(--text-muted);background:var(--bg-hover);border-radius:6px;padding:7px 11px;line-height:1.6;">
               🌏 国际体系：参照 Cambridge Lower Secondary / IB MYP 课程框架，注重概念理解和批判性思维
             </div>
             <textarea class="st-textarea" id="study-expand-desc" style="min-height:180px"
               placeholder="写下你对这个知识点的理解和描述（可以不完整、有错误，AI 会帮你纠正和补充）&#10;&#10;示例：动物细胞有细胞膜、细胞质和细胞核，没有细胞壁，我记得还有线粒体？"></textarea>
             <div class="st-action-row">
-              <button class="st-btn-primary" id="study-expand-btn" onclick="studyExpandKnowledge()">✨ AI 扩充知识点</button>
+              <button class="st-btn-primary" id="study-expand-btn" onclick="studyExpandKnowledge()">✨ <span id="study-expand-btn-label">AI 扩充知识点</span></button>
             </div>
             <div id="study-expand-progress" style="display:none" class="st-progress">⏳ AI 正在扩充知识点，请稍候...</div>
             <div id="study-expand-result-wrap" style="display:none">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">✅ 扩充结果预览</span>
-                <span style="font-size:12px;color:rgba(255,255,255,0.3)">可向下滚动查看完整内容</span>
+                <span style="font-size:13px;font-weight:500;color:var(--text-secondary)" id="study-expand-preview-label">✅ 扩充结果预览</span>
+                <span style="font-size:12px;color:var(--text-muted)" id="study-expand-scroll-hint">可向下滚动查看完整内容</span>
               </div>
               <div class="st-result-box study-result-box" id="study-expand-result"></div>
               <div class="st-action-row" style="margin-top:10px">
-                <button class="st-btn-green" id="study-expand-save-btn" onclick="studyExpandSave()">📂 保存到知识库</button>
-                <button class="st-btn-sec" onclick="studyCopyResult('study-expand-result')">📋 复制内容</button>
+                <button class="st-btn-green" id="study-expand-save-btn" onclick="studyExpandSave()">📂 <span id="study-expand-savebtn-label">保存到知识库</span></button>
+                <button class="st-btn-sec" id="study-expand-copybtn" onclick="studyCopyResult('study-expand-result')">📋 <span id="study-expand-copybtn-label">复制内容</span></button>
               </div>
               <div id="study-expand-msg" style="display:none"></div>
             </div>
@@ -1054,11 +1055,11 @@
           <!-- ── 标签三：文章纠错 ── -->
           <div id="study-tab-essay" class="st-tab-panel nw-newnote-scope" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
 
-  <div class="st-info-tip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。纠错尺度偏宽松，日常口语化的表达、非正式书写中的省略（如缺少句末标点、时间写法不标准等）只要意思清楚就不会被判定为错误，只处理明显、确定无疑的错误。支持直接输入文字，或上传文章照片自动识别文字。</div>
+  <div class="st-info-tip" id="essay-infotip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。纠错尺度偏宽松，日常口语化的表达、非正式书写中的省略（如缺少句末标点、时间写法不标准等）只要意思清楚就不会被判定为错误，只处理明显、确定无疑的错误。支持直接输入文字，或上传文章照片自动识别文字。</div>
 
   <div class="st-tabs" style="margin-top:2px">
-    <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ 文字输入</button>
-    <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ 上传图片</button>
+    <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ <span id="essay-tab-text-label">文字输入</span></button>
+    <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ <span id="essay-tab-image-label">上传图片</span></button>
   </div>
 
   <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px">
@@ -1069,25 +1070,25 @@
     <div class="drop-zone" id="essay-drop-zone" onclick="essayPickImage()"
       style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px;cursor:pointer">
       <span style="font-size:22px">🖼️</span>
-      <span style="font-size:13px;color:#888780">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
+      <span style="font-size:13px;color:#888780" id="essay-dropzone-label">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
     </div>
     <div id="essay-image-preview" style="display:none;align-items:center;gap:12px">
-      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);flex-shrink:0">
+      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid var(--border-color);flex-shrink:0">
       <div style="flex:1;min-width:0">
         <div id="essay-image-name" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 识别图片文字</button>
+        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 <span id="essay-ocr-btn-label">识别图片文字</span></button>
       </div>
     </div>
     <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780"></div>
     <div>
-      <div style="font-size:12px;color:#888780;margin-bottom:6px">识别出的文字（可手动修正后再纠错）：</div>
+      <div style="font-size:12px;color:#888780;margin-bottom:6px" id="essay-ocr-result-label">识别出的文字（可手动修正后再纠错）：</div>
       <textarea class="st-textarea" id="essay-ocr-result-text" style="min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
     </div>
   </div>
 
   <div class="st-action-row">
-    <button class="st-btn-primary" id="essay-correct-btn" onclick="essayStartCorrect()">✅ 开始纠错</button>
-    <button class="st-btn-sec" onclick="essayClearAll()">🗑 清空</button>
+    <button class="st-btn-primary" id="essay-correct-btn" onclick="essayStartCorrect()">✅ <span id="essay-correct-btn-label">开始纠错</span></button>
+    <button class="st-btn-sec" id="essay-clear-btn" onclick="essayClearAll()">🗑 <span id="essay-clear-btn-label">清空</span></button>
     <div id="essay-correct-progress" style="font-size:13px;color:#888780"></div>
   </div>
 
@@ -1097,32 +1098,32 @@
     <div id="essay-punctuation-note" style="display:none;font-size:12px;color:var(--warn-text);background:var(--warn-bg);border:1px solid var(--warn-text);border-radius:6px;padding:6px 10px;"></div>
 
     <div>
-      <div class="section-title" style="margin-bottom:8px">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
+      <div class="section-title" style="margin-bottom:8px" id="essay-annotated-title">📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）</div>
       <div class="st-result-box study-result-box" id="essay-annotated-box" style="max-height:280px"></div>
     </div>
 
     <div>
-      <div class="section-title" style="margin-bottom:8px">📋 逐条错误说明</div>
+      <div class="section-title" style="margin-bottom:8px" id="essay-corrections-title">📋 逐条错误说明</div>
       <div id="essay-corrections-list" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
     <div>
-      <div class="section-title" style="margin-bottom:8px">✅ 修改后完整版本</div>
+      <div class="section-title" style="margin-bottom:8px" id="essay-clean-title">✅ 修改后完整版本</div>
       <div class="st-result-box study-result-box" id="essay-clean-box" style="max-height:280px"></div>
     </div>
 
-    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:14px">
-      <div class="section-title" style="margin-bottom:8px">💾 保存到知识库</div>
+    <div style="border-top:1px solid var(--border-color);padding-top:14px">
+      <div class="section-title" style="margin-bottom:8px" id="essay-save-title">💾 保存到知识库</div>
       <div class="st-row" style="margin-bottom:8px">
         <input type="text" class="st-input" id="essay-filename" placeholder="请输入文件名（不含扩展名）" style="flex:1">
-        <button class="st-btn-primary" onclick="essaySaveToVault()" id="essay-save-btn">💾 保存</button>
+        <button class="st-btn-primary" onclick="essaySaveToVault()" id="essay-save-btn">💾 <span id="essay-save-btn-label">保存</span></button>
       </div>
-      <p style="font-size:12px;color:#888780">保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。</p>
+      <p style="font-size:12px;color:#888780" id="essay-save-hint">保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。</p>
       <div id="essay-save-msg" style="display:none;margin-top:8px" class="import-result"></div>
     </div>
 
     <div>
-      <button class="btn-sm" onclick="essayBackToInput()">← 返回修改重新纠错</button>
+      <button class="btn-sm" id="essay-back-btn" onclick="essayBackToInput()">← 返回修改重新纠错</button>
     </div>
   </div>
 
@@ -1130,48 +1131,48 @@
 
           <!-- ── 标签四：复习备考 ── -->
           <div id="study-tab-review" class="st-tab-panel" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
-            <div class="st-info-tip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
+            <div class="st-info-tip" id="review-infotip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">选择知识库资料</span>
+                <span style="font-size:13px;font-weight:500;color:var(--text-secondary)" id="review-select-label">选择知识库资料</span>
                 <span class="st-selected-count" id="study-review-count">（未选择）</span>
               </div>
               <div class="st-folder-panel" style="grid-template-columns:200px 3fr 2fr;">
                 <div class="st-folder-left" id="study-review-folders">
-                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center">加载中...</div>
+                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center" id="review-folders-loading">加载中...</div>
                 </div>
                 <div class="st-folder-right" id="study-review-files">
-                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center">← 点击左侧文件夹</div>
+                  <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center" id="review-files-hint">← 点击左侧文件夹</div>
                 </div>
                 <div class="st-folder-right" id="study-review-selected" style="border-left:1px solid var(--border-color);">
-                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已选文件（可跨文件夹累加）</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;" id="review-selected-label">已选文件（可跨文件夹累加）</div>
                   <div id="study-review-selected-list">
-                    <div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>
+                    <div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px" id="review-noselect-tip">暂无已选文件</div>
                   </div>
                 </div>
               </div>
             </div>
             <div>
-              <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:10px">生成内容类型</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:10px" id="review-gentype-label">生成内容类型</div>
               <div class="st-gen-type">
-                <label><input type="radio" name="study-gen-type" value="review" checked> 📋 复习资料</label>
-                <label><input type="radio" name="study-gen-type" value="quiz"> ✏️ 练习题</label>
-                <label><input type="radio" name="study-gen-type" value="both"> 📚 复习资料 + 练习题</label>
+                <label><input type="radio" name="study-gen-type" value="review" checked> 📋 <span id="review-gentype-opt1">复习资料</span></label>
+                <label><input type="radio" name="study-gen-type" value="quiz"> ✏️ <span id="review-gentype-opt2">练习题</span></label>
+                <label><input type="radio" name="study-gen-type" value="both"> 📚 <span id="review-gentype-opt3">复习资料 + 练习题</span></label>
               </div>
             </div>
             <textarea class="st-textarea" id="study-review-requirement" style="min-height:80px"
               placeholder="（可选）补充说明：重点关注哪些知识点？有什么特别要求？&#10;示例：重点考察光合作用的暗反应部分；练习题多出一些计算题；请用英文生成..."></textarea>
             <div class="st-action-row">
-              <button class="st-btn-primary" id="study-review-btn" onclick="studyGenerateReview()">🤖 AI 生成复习内容</button>
+              <button class="st-btn-primary" id="study-review-btn" onclick="studyGenerateReview()">🤖 <span id="review-genbtn-label">AI 生成复习内容</span></button>
             </div>
             <div id="study-review-progress" style="display:none" class="st-progress">⏳ AI 正在生成复习内容，请稍候（内容较多时可能需要1~2分钟）...</div>
             <div id="study-review-result-wrap" style="display:none">
-              <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:6px">✅ 生成结果预览</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px" id="review-preview-label">✅ 生成结果预览</div>
               <div class="st-result-box study-result-box" id="study-review-result" style="max-height:420px"></div>
               <div class="st-action-row" style="margin-top:10px">
-                <button class="st-btn-green" id="study-review-save-btn" onclick="studyReviewSave()">📂 保存到知识库（md）</button>
-                <button class="st-btn-sec" id="study-review-pdf-btn" onclick="studyReviewDownloadPDF()">📄 下载 PDF</button>
-                <button class="st-btn-sec" onclick="studyCopyResult('study-review-result')">📋 复制内容</button>
+                <button class="st-btn-green" id="study-review-save-btn" onclick="studyReviewSave()">📂 <span id="review-savebtn-label">保存到知识库（md）</span></button>
+                <button class="st-btn-sec" id="study-review-pdf-btn" onclick="studyReviewDownloadPDF()">📄 <span id="review-pdfbtn-label">下载 PDF</span></button>
+                <button class="st-btn-sec" id="review-copybtn" onclick="studyCopyResult('study-review-result')">📋 <span id="review-copybtn-label">复制内容</span></button>
               </div>
               <div id="study-review-msg" style="display:none"></div>
             </div>
@@ -1197,67 +1198,67 @@
   </div>
 
   <!-- 主题设置 -->
-  <div class="section-title">界面主题 / Theme</div>
+  <div class="section-title" id="set-theme-title">界面主题 / Theme</div>
   <div class="settings-section">
     <div class="settings-row">
-      <div class="settings-label">主题模式</div>
+      <div class="settings-label" id="set-thememode-label">主题模式</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-sm" id="theme-btn-light" onclick="setTheme('light')">☀️ 燕麦白</button>
-        <button class="btn-sm" id="theme-btn-dark"  onclick="setTheme('dark')">🌙 深蓝夜间</button>
-        <button class="btn-sm" id="theme-btn-purple" onclick="setTheme('purple')">✨ 暗紫霓虹</button>
+        <button class="btn-sm" id="theme-btn-light" onclick="setTheme('light')">☀️ <span id="theme-btn-light-label">燕麦白</span></button>
+        <button class="btn-sm" id="theme-btn-dark"  onclick="setTheme('dark')">🌙 <span id="theme-btn-dark-label">深蓝夜间</span></button>
+        <button class="btn-sm" id="theme-btn-purple" onclick="setTheme('purple')">✨ <span id="theme-btn-purple-label">暗紫霓虹</span></button>
       </div>
     </div>
   </div>
 
   <!-- 路径设置 -->
   <div class="section-title" style="display:flex;align-items:center;gap:8px">
-    路径设置
-    <span onclick="toggleHelp('help-path')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none">说明 ▾</span>
+    <span id="set-path-title">路径设置</span>
+    <span onclick="toggleHelp('help-path')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none"><span id="set-path-help-toggle">说明</span> ▾</span>
   </div>
   <div id="help-path" style="display:none;background:#f5f4f0;border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:12px;color:#5f5e5a;line-height:1.9">
-    <b>1. 知识库路径</b>：选择本地知识库文件夹的路径，Notewell 将管理该文件夹下的所有内容。<br>
-    <b>2. 临时文件夹</b>：AI 处理时，无法判断分类的文件会存入临时文件夹，可手动整理。如不设置，导入时会自动在知识库根目录创建「00 Inbox」文件夹并使用。
+    <b id="set-path-help1-b">1. 知识库路径</b><span id="set-path-help1-text">：选择本地知识库文件夹的路径，Notewell 将管理该文件夹下的所有内容。</span><br>
+    <b id="set-path-help2-b">2. 临时文件夹</b><span id="set-path-help2-text">：AI 处理时，无法判断分类的文件会存入临时文件夹，可手动整理。如不设置，导入时会自动在知识库根目录创建「00 Inbox」文件夹并使用。</span>
   </div>
   <div class="settings-section">
     <div class="settings-row">
-      <div class="settings-label">📚 知识库路径</div>
+      <div class="settings-label" id="set-vaultpath-label">📚 知识库路径</div>
       <div class="settings-value" id="set-vault-path">未设置</div>
-      <button class="btn-sm" onclick="changeVault()">选择文件夹</button>
+      <button class="btn-sm" id="set-vaultpath-btn" onclick="changeVault()">选择文件夹</button>
     </div>
     <div class="settings-row">
-      <div class="settings-label">🗂️ 临时文件夹</div>
+      <div class="settings-label" id="set-inboxpath-label">🗂️ 临时文件夹</div>
       <div class="settings-value empty" id="set-inbox-folder">未设置（导入时自动创建知识库 00 Inbox）</div>
-      <button class="btn-sm" onclick="selectInboxFolder()">选择文件夹</button>
+      <button class="btn-sm" id="set-inboxpath-btn" onclick="selectInboxFolder()">选择文件夹</button>
     </div>
   </div>
 
   <!-- AI 功能设置 -->
-  <div class="section-title" style="margin-top:16px">AI 功能设置</div>
+  <div class="section-title" style="margin-top:16px" id="set-aifeature-title">AI 功能设置</div>
   <div class="settings-section">
     <div class="settings-row">
-      <div class="settings-label">🤖 AI 自动分类</div>
-      <div style="flex:1;font-size:13px;color:#5f5e5a">导入文件时由 AI 自动判断存入哪个文件夹</div>
+      <div class="settings-label" id="set-aiclassify-label">🤖 AI 自动分类</div>
+      <div style="flex:1;font-size:13px;color:#5f5e5a" id="set-aiclassify-desc">导入文件时由 AI 自动判断存入哪个文件夹</div>
       <label class="toggle-wrap">
         <input type="checkbox" id="ai-classify-toggle" onchange="saveAiSettings()">
         <span class="toggle-slider"></span>
       </label>
     </div>
     <div class="settings-row" style="align-items:flex-start;padding-top:12px">
-      <div class="settings-label" style="padding-top:2px">📌 Hub 文件名</div>
+      <div class="settings-label" style="padding-top:2px" id="set-hubname-label">📌 Hub 文件名</div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <label class="toggle-wrap" style="flex-shrink:0">
             <input type="checkbox" id="hub-custom-toggle" onchange="toggleHubCustom();saveAiSettings()">
             <span class="toggle-slider"></span>
           </label>
-          <span style="font-size:13px;color:#5f5e5a">手动指定 Hub 文件名（关闭则由 AI 自动识别）</span>
+          <span style="font-size:13px;color:#5f5e5a" id="set-hubname-desc">手动指定 Hub 文件名（关闭则由 AI 自动识别）</span>
         </div>
         <div id="hub-custom-input" style="display:none">
           <input type="text" id="hub-filename" placeholder="例如：Hub.md 或 readme.md（支持多个，用英文逗号分隔）"
             style="width:100%;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none;box-sizing:border-box"
             onchange="saveAiSettings()">
         </div>
-        <div style="font-size:11px;color:#b4b2a9;margin-top:5px;line-height:1.7">
+        <div style="font-size:11px;color:#b4b2a9;margin-top:5px;line-height:1.7" id="set-hubname-hint">
           Hub 文件是每个文件夹的「导航索引」，记录该文件夹内容的目录和链接。<br>
           AI 自动识别模式下，会在每个文件夹中寻找包含最多内部链接的 md 文件作为 Hub。<br>
           如果你的 Hub 文件有固定命名（如 readme.md、Hub.md），建议手动指定，更准确。
@@ -1265,53 +1266,53 @@
       </div>
     </div>
     <div class="settings-row">
-      <div class="settings-label">🔔 提醒功能</div>
-      <div style="flex:1;font-size:13px;color:#5f5e5a">检测今日备忘文件并发送系统提醒</div>
+      <div class="settings-label" id="set-reminder-label">🔔 提醒功能</div>
+      <div style="flex:1;font-size:13px;color:#5f5e5a" id="set-reminder-desc">检测今日备忘文件并发送系统提醒</div>
       <label class="toggle-wrap">
         <input type="checkbox" id="reminder-toggle" onchange="saveAiSettings()">
         <span class="toggle-slider"></span>
       </label>
     </div>
     <div class="settings-row" id="reminder-advance-row" style="display:none">
-      <div class="settings-label">⏰ 提前提醒</div>
+      <div class="settings-label" id="set-reminderadvance-label">⏰ 提前提醒</div>
       <select class="sort-select" id="reminder-advance" onchange="saveAiSettings()" style="font-size:13px;padding:5px 10px">
-        <option value="0">准时提醒</option>
-        <option value="5">提前 5 分钟</option>
-        <option value="15">提前 15 分钟</option>
-        <option value="30">提前 30 分钟</option>
-        <option value="60">提前 1 小时</option>
+        <option value="0" id="set-reminderopt-0">准时提醒</option>
+        <option value="5" id="set-reminderopt-5">提前 5 分钟</option>
+        <option value="15" id="set-reminderopt-15">提前 15 分钟</option>
+        <option value="30" id="set-reminderopt-30">提前 30 分钟</option>
+        <option value="60" id="set-reminderopt-60">提前 1 小时</option>
       </select>
     </div>
   </div>
 
   <!-- AI 模型设置 -->
   <div class="section-title" style="margin-top:16px;display:flex;align-items:center;gap:8px">
-    AI 模型设置
-    <span onclick="toggleHelp('help-model')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none">说明 ▾</span>
+    <span id="set-aimodel-title">AI 模型设置</span>
+    <span onclick="toggleHelp('help-model')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none"><span id="set-aimodel-help-toggle">说明</span> ▾</span>
   </div>
   <div id="help-model" style="display:none;background:#f5f4f0;border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:12px;color:#5f5e5a;line-height:1.9">
-    所有 AI 功能需要配置 AI 模型参数后方可生效。其中 AI 处理音频和视频需要模型能支持音频和视频的处理。<br>
-    推荐通过火山引擎方舟平台创建合适的模型接入点，也可以使用其他兼容的模型服务。<br>
-    如果文字模型和音视频模型使用同一家服务商（如火山引擎），两组可以填写相同的 API Key 和接入点。<br>
-    <b>⚠️ 注意：</b>系统调用 AI 模型后会产生相关费用，请在设置前了解所选模型的收费标准。
+    <span id="set-aimodel-help1">所有 AI 功能需要配置 AI 模型参数后方可生效。其中 AI 处理音频和视频需要模型能支持音频和视频的处理。</span><br>
+    <span id="set-aimodel-help2">推荐通过火山引擎方舟平台创建合适的模型接入点，也可以使用其他兼容的模型服务。</span><br>
+    <span id="set-aimodel-help3">如果文字模型和音视频模型使用同一家服务商（如火山引擎），两组可以填写相同的 API Key 和接入点。</span><br>
+    <b id="set-aimodel-help-warn">⚠️ 注意：</b><span id="set-aimodel-help-warntext">系统调用 AI 模型后会产生相关费用，请在设置前了解所选模型的收费标准。</span>
   </div>
   <div class="settings-section">
-    <div style="font-size:12px;font-weight:600;color:#888780;padding:6px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px">📝 文字模型</div>
+    <div style="font-size:12px;font-weight:600;color:#888780;padding:6px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px" id="set-textmodel-title">📝 文字模型</div>
     <div class="settings-row">
-      <div class="settings-label">🔑 API Key</div>
+      <div class="settings-label" id="set-textmodel-apikey-label">🔑 API Key</div>
       <input type="password" id="ai-api-key" placeholder="输入文字模型的 API Key"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
-      <button class="btn-sm" onclick="testAiConnection()" style="margin-left:8px">测试连接</button>
+      <button class="btn-sm" id="set-textmodel-testbtn" onclick="testAiConnection()" style="margin-left:8px">测试连接</button>
     </div>
     <div class="settings-row">
-      <div class="settings-label">🌐 接入点</div>
+      <div class="settings-label" id="set-textmodel-endpoint-label">🌐 接入点</div>
       <input type="text" id="ai-endpoint" placeholder="https://ark.cn-beijing.volces.com/api/v3"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
     </div>
     <div class="settings-row">
-      <div class="settings-label">📡 模型 ID</div>
+      <div class="settings-label" id="set-textmodel-id-label">📡 模型 ID</div>
       <input type="text" id="ai-model-id" placeholder="如 ep-20260813112220-v8v92"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
@@ -1320,35 +1321,35 @@
       <div class="settings-label"></div>
       <div id="ai-test-result" style="flex:1;font-size:12px;color:#888780"></div>
     </div>
-    <div style="font-size:12px;font-weight:600;color:#888780;padding:10px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px;margin-top:4px">🎙️ 图片和音视频模型</div>
+    <div style="font-size:12px;font-weight:600;color:#888780;padding:10px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px;margin-top:4px" id="set-audiomodel-title">🎙️ 图片和音视频模型</div>
     <div class="settings-row">
-      <div class="settings-label">🔑 API Key</div>
+      <div class="settings-label" id="set-audiomodel-apikey-label">🔑 API Key</div>
       <input type="password" id="ai-audio-api-key" placeholder="与文字模型相同则填写同一个 Key"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
     </div>
     <div class="settings-row">
-      <div class="settings-label">🌐 接入点</div>
+      <div class="settings-label" id="set-audiomodel-endpoint-label">🌐 接入点</div>
       <input type="text" id="ai-audio-endpoint" placeholder="与文字模型相同则填写同一个接入点"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
     </div>
     <div class="settings-row">
-      <div class="settings-label">📡 模型 ID</div>
+      <div class="settings-label" id="set-audiomodel-id-label">📡 模型 ID</div>
       <input type="text" id="ai-audio-model-id" placeholder="如 doubao-seed-2.0-lite 的接入点 ID"
         style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
         onchange="saveAiSettings()">
-      <button class="btn-sm" onclick="testAudioConnection()" style="margin-left:8px">测试连接</button>
+      <button class="btn-sm" id="set-audiomodel-testbtn" onclick="testAudioConnection()" style="margin-left:8px">测试连接</button>
     </div>
     <div class="settings-row">
       <div class="settings-label"></div>
       <div id="audio-test-result" style="flex:1;font-size:12px;color:#888780"></div>
     </div>
   </div>
-  <p style="font-size:12px;color:#888780;margin-top:4px">API Key 仅保存在本地，不会上传到任何服务器。</p>
+  <p style="font-size:12px;color:#888780;margin-top:4px" id="set-apikey-disclaimer">API Key 仅保存在本地，不会上传到任何服务器。</p>
 
   <!-- Token 使用统计 -->
-  <div class="section-title" style="margin-top:16px">Token 使用统计</div>
+  <div class="section-title" style="margin-top:16px" id="set-tokenstats-title">Token 使用统计</div>
   <div class="settings-section" id="token-stats-section">
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button id="token-tab-today" onclick="switchTokenTab('today')" class="btn-sm" style="background:#3b6d11;color:#fff">今天</button>
@@ -1356,14 +1357,14 @@
       <button id="token-tab-month" onclick="switchTokenTab('month')" class="btn-sm">最近30天</button>
     </div>
     <div id="token-stats-content" style="font-size:13px;color:#5f5e5a">
-      <div style="color:#b4b2a9">加载中...</div>
+      <div style="color:#b4b2a9" id="token-stats-loading">加载中...</div>
     </div>
   </div>
 
   <!-- 版本信息 -->
   <div style="margin-top:24px;padding:14px 16px;background:#f5f4f0;border-radius:10px;display:flex;align-items:center;justify-content:space-between">
     <div>
-      <span style="font-size:13px;color:#5f5e5a">当前版本</span>
+      <span style="font-size:13px;color:#5f5e5a" id="set-version-label">当前版本</span>
       <span id="app-version" style="font-size:13px;color:#2c2c2a;font-weight:500;margin-left:8px">v1.1.5</span>
     </div>
     <div id="update-status" style="font-size:12px;color:#888780"></div>
@@ -1379,32 +1380,32 @@
   <!-- 临时文件夹 -->
   <div style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <div class="section-title" style="margin:0">🗂️ 临时文件夹</div>
-      <button class="btn-sm" onclick="loadInboxFiles()">🔄 刷新</button>
+      <div class="section-title" style="margin:0" id="import-inbox-title">🗂️ 临时文件夹</div>
+      <button class="btn-sm" id="import-refresh-btn" onclick="loadInboxFiles()">🔄 刷新</button>
       <span id="inbox-folder-path-tip" style="font-size:11px;color:#888780;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       <div style="display:flex;gap:6px;align-items:center">
-        <button class="btn-sm" onclick="selectAllInbox(true)">全选</button>
-        <button class="btn-sm" onclick="selectAllInbox(false)">取消</button>
-        <button class="btn-sm" style="color:#a32d2d;border-color:#f0c0c0" onclick="deleteSelectedInboxFiles()">🗑 删除选中</button>
+        <button class="btn-sm" id="import-selectall-btn" onclick="selectAllInbox(true)">全选</button>
+        <button class="btn-sm" id="import-clearsel-btn" onclick="selectAllInbox(false)">取消</button>
+        <button class="btn-sm" id="import-deletesel-btn" style="color:#a32d2d;border-color:#f0c0c0" onclick="deleteSelectedInboxFiles()">🗑 删除选中</button>
         <span id="inbox-select-count" style="font-size:12px;color:#888780"></span>
       </div>
     </div>
     <div class="panel scrollable" id="inbox-file-panel" style="max-height:240px;margin-bottom:0">
-      <div class="empty-tip">加载中...</div>
+      <div class="empty-tip" id="import-inbox-loading">加载中...</div>
     </div>
   </div>
 
   <!-- 直接拖入文件 -->
   <div style="margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <div class="section-title" style="margin:0">+ 直接导入文件</div>
-      <span style="font-size:12px;color:#888780">点击或拖放添加文件，AI 分类后直接移入对应文件夹</span>
+      <div class="section-title" style="margin:0" id="import-direct-title">+ 直接导入文件</div>
+      <span style="font-size:12px;color:#888780" id="import-direct-hint">点击或拖放添加文件，AI 分类后直接移入对应文件夹</span>
     </div>
     <div class="drop-zone" id="drop-zone" onclick="pickFiles()"
       ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
       style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px">
       <span style="font-size:22px">📂</span>
-      <span style="font-size:13px;color:#888780">点击选择文件，或将文件拖放到此处</span>
+      <span style="font-size:13px;color:#888780" id="import-dropzone-label">点击选择文件，或将文件拖放到此处</span>
     </div>
     <div id="import-file-list" class="import-file-list hidden" style="margin-top:6px"></div>
   </div>
@@ -1422,7 +1423,7 @@
 
   <!-- 导入结果 -->
   <div id="import-ai-results" class="hidden" style="margin-top:12px">
-    <div class="section-title">导入结果</div>
+    <div class="section-title" id="import-results-title">导入结果</div>
     <div class="panel scrollable" id="import-results-list" style="max-height:180px"></div>
   </div>
 
@@ -1524,30 +1525,30 @@
         <!-- ══ 考试复盘内嵌面板 ══ -->
         <div id="nw-inner-exam" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
 
-  <div class="st-info-tip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
+  <div class="st-info-tip" id="exam-infotip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
 
   <div class="st-row" style="gap:14px;flex-wrap:wrap">
     <div style="display:flex;flex-direction:column;gap:5px;min-width:220px">
-      <label style="font-size:12px;color:#888780">科目文件夹（点击选择，支持任意层级）</label>
+      <label style="font-size:12px;color:#888780" id="exam-subject-label">科目文件夹（点击选择，支持任意层级）</label>
       <div style="display:flex;gap:6px;align-items:center;">
         <div id="exam-subject-display" style="flex:1;padding:8px 11px;border:1px solid var(--border-input);border-radius:8px;background:var(--bg-input);color:var(--text-primary);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">未选择</div>
-        <button class="btn-sm" onclick="examOpenSubjectPicker()">📁 选择</button>
+        <button class="btn-sm" id="exam-subject-pickbtn" onclick="examOpenSubjectPicker()">📁 选择</button>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
-      <label style="font-size:12px;color:#888780">考试日期</label>
+      <label style="font-size:12px;color:#888780" id="exam-date-label">考试日期</label>
       <input type="date" class="st-input" id="exam-date" style="width:100%">
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
-      <label style="font-size:12px;color:#888780">考试类型</label>
+      <label style="font-size:12px;color:#888780" id="exam-type-label">考试类型</label>
       <select class="st-select" id="exam-type-select" style="width:100%" onchange="examToggleCustomType()"></select>
     </div>
     <div id="exam-type-custom-wrap" style="display:none;flex-direction:column;gap:5px;min-width:160px">
-      <label style="font-size:12px;color:#888780">自定义类型</label>
+      <label style="font-size:12px;color:#888780" id="exam-customtype-label">自定义类型</label>
       <input type="text" class="st-input" id="exam-type-custom" placeholder="请输入考试类型" style="width:100%">
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
-      <label style="font-size:12px;color:#888780">分数（选填，得分 / 总分）</label>
+      <label style="font-size:12px;color:#888780" id="exam-score-label">分数（选填，得分 / 总分）</label>
       <div style="display:flex;align-items:center;gap:6px">
         <input type="number" class="st-input" id="exam-score" placeholder="得分" style="width:80px">
         <span style="color:#888780">/</span>
@@ -1555,19 +1556,19 @@
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
-      <label style="font-size:12px;color:#888780">等级评价（选填）</label>
+      <label style="font-size:12px;color:#888780" id="exam-grade-label">等级评价（选填）</label>
       <input type="text" class="st-input" id="exam-grade" placeholder="如 A / B+" style="width:100%">
     </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
-    <label style="font-size:12px;color:#888780">复盘内容（选填，哪里没考好、哪个知识点有欠缺等）</label>
+    <label style="font-size:12px;color:#888780" id="exam-review-label">复盘内容（选填，哪里没考好、哪个知识点有欠缺等）</label>
     <textarea class="st-textarea" id="exam-review-text" style="flex:1;min-height:220px" placeholder="写下这次考试的复盘…"></textarea>
   </div>
 
   <div class="st-action-row">
-    <button class="st-btn-primary" id="exam-save-btn" onclick="examSaveReview()">💾 保存复盘</button>
-    <button class="st-btn-sec" onclick="examClearForm()">🗑 清空</button>
+    <button class="st-btn-primary" id="exam-save-btn" onclick="examSaveReview()">💾 <span id="exam-savebtn-label">保存复盘</span></button>
+    <button class="st-btn-sec" id="exam-clear-btn" onclick="examClearForm()">🗑 <span id="exam-clearbtn-label">清空</span></button>
     <div id="exam-save-progress" style="font-size:13px;color:#888780"></div>
   </div>
 
@@ -2353,8 +2354,8 @@
     <div id="study-expand-progress" style="display:none" class="st-progress">⏳ AI 正在扩充知识点，请稍候...</div>
     <div id="study-expand-result-wrap" style="display:none">
       <div class="st-row" style="justify-content:space-between">
-        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">✅ 扩充结果预览</span>
-        <span style="font-size:12px;color:rgba(255,255,255,0.3)">可向下滚动查看完整内容</span>
+        <span style="font-size:13px;font-weight:500;color:var(--text-secondary)">✅ 扩充结果预览</span>
+        <span style="font-size:12px;color:var(--text-muted)">可向下滚动查看完整内容</span>
       </div>
       <div class="st-result-box study-result-box" id="study-expand-result"></div>
       <div class="st-action-row">
@@ -2370,7 +2371,7 @@
     <div class="st-info-tip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
     <div>
       <div class="st-row" style="margin-bottom:8px">
-        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">选择知识库资料</span>
+        <span style="font-size:13px;font-weight:500;color:var(--text-secondary)">选择知识库资料</span>
         <span class="st-selected-count" id="study-review-count">（未选择）</span>
       </div>
       <div class="st-folder-panel">
@@ -2383,7 +2384,7 @@
       </div>
     </div>
     <div>
-      <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:10px">生成内容类型</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:10px">生成内容类型</div>
       <div class="st-gen-type">
         <label><input type="radio" name="study-gen-type-old" value="review" checked> 📋 复习资料</label>
         <label><input type="radio" name="study-gen-type-old" value="quiz"> ✏️ 练习题</label>
@@ -2423,6 +2424,8 @@ let tagCloudLoaded = false, cachedRecent = []
 let lastCreatedNotePath = null
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // 启动时先按当前窗口尺寸应用一次整体缩放
+  if (typeof nwApplyWindowScale === 'function') nwApplyWindowScale()
   // 启动时应用保存的语言
   applyLanguage()
   // 初始化时强制隐藏所有页面
@@ -2779,10 +2782,10 @@ async function loadFilesByType(type, label, cardEl) {
 function loadRecentFiles(recent) {
   if (recent) _cachedRecent = recent
   const el = document.getElementById('folder-files')
-  document.getElementById('folder-files-title').textContent = '最近修改'
+  document.getElementById('folder-files-title').textContent = t('filesTitle')
   document.querySelectorAll('.tree-item.selected').forEach(e => e.classList.remove('selected'))
   ffShowActionBar(false)
-  if (!_cachedRecent.length) { el.innerHTML = '<div class="empty-tip">暂无文件</div>'; return }
+  if (!_cachedRecent.length) { el.innerHTML = `<div class="empty-tip">${t('noFilesTip')}</div>`; return }
   el.innerHTML = _cachedRecent.filter(f => !nwIsHubFile(f.name)).map(f => {
     const icon = fileIcon(f.name)
     const ep = esc(f.path)
@@ -2793,8 +2796,8 @@ function loadRecentFiles(recent) {
       <span class="ff-name" title="${f.relativePath}">${f.name}</span>
       <span class="ff-meta">${f.mtime}</span>
       <span class="ff-actions">
-        <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-        <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+        <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${t('openBtn')}</button>
+        <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${t('showInFolderBtn')}</button>
       </span>
     </div>`
   }).join('')
@@ -2804,10 +2807,10 @@ function loadRecentFiles(recent) {
 async function loadFolderFiles(folderPath, folderName) {
   const el = document.getElementById('folder-files')
   document.getElementById('folder-files-title').textContent = folderName
-  el.innerHTML = '<div class="loading">加载中...</div>'
+  el.innerHTML = `<div class="loading">${t('loadingTip')}</div>`
   const res = await window.api.listFolderFiles({ folderPath, vaultPath: currentVaultPath })
-  if (!res.success) { el.innerHTML = '<div class="empty-tip">读取失败</div>'; return }
-  if (!res.items.length) { el.innerHTML = '<div class="empty-tip">此文件夹为空</div>'; return }
+  if (!res.success) { el.innerHTML = `<div class="empty-tip">${t('readFailedTip')}</div>`; return }
+  if (!res.items.length) { el.innerHTML = `<div class="empty-tip">${t('emptyFolderTip')}</div>`; return }
   el.innerHTML = res.items.filter(f => f.isDir || !nwIsHubFile(f.name)).map(f => {
     if (f.isDir) return `<div class="folder-file-item"><span class="ff-icon">📁</span><span class="ff-name">${f.name}</span></div>`
     const icon = fileIcon(f.name)
@@ -2819,8 +2822,8 @@ async function loadFolderFiles(folderPath, folderName) {
       <span class="ff-name" title="${f.relativePath}">${f.name}</span>
       <span class="ff-meta">${f.mtime}</span>
       <span class="ff-actions">
-        <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-        <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+        <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${t('openBtn')}</button>
+        <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${t('showInFolderBtn')}</button>
       </span>
     </div>`
   }).join('')
@@ -3649,11 +3652,11 @@ function essayRenderResult(res) {
     listEl.innerHTML = '<div class="empty-tip" style="padding:12px">没有需要说明的修改</div>'
   } else {
     listEl.innerHTML = res.corrections.map(c => `
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 12px;font-size:13px">
+      <div style="background:var(--bg-hover);border:1px solid var(--border-color);border-radius:8px;padding:8px 12px;font-size:13px">
         <span style="color:#f09595;text-decoration:line-through">${essayEsc(c.original||'')}</span>
-        <span style="margin:0 6px;color:rgba(255,255,255,0.3)">→</span>
+        <span style="margin:0 6px;color:var(--text-placeholder)">→</span>
         <span style="color:#5dcaa5;font-weight:600">${essayEsc(c.corrected||'')}</span>
-        <span style="display:block;color:rgba(255,255,255,0.4);margin-top:3px;font-size:12px">${essayEsc(c.reason||'')}</span>
+        <span style="display:block;color:var(--text-muted);margin-top:3px;font-size:12px">${essayEsc(c.reason||'')}</span>
       </div>`).join('')
   }
 
@@ -5068,11 +5071,17 @@ function toggleHelp(id) {
 // ── Token 统计 ──
 let _tokenStats = null
 let _tokenTab = 'today'
-const FEATURE_LABELS = {
+const FEATURE_LABELS_ZH = {
   classify: 'AI 自动分类', youtube: 'YouTube 转笔记', webpage: '网页转笔记',
   audio: '音视频转笔记', analyze: '知识库分析', subscription: '订阅追踪',
   tag: '批量补写标签', save: '智能保存笔记'
 }
+const FEATURE_LABELS_EN = {
+  classify: 'AI auto-classify', youtube: 'YouTube to notes', webpage: 'Webpage to notes',
+  audio: 'Audio/video to notes', analyze: 'Vault analysis', subscription: 'Subscription tracking',
+  tag: 'Batch tag writing', save: 'Smart note saving'
+}
+function getFeatureLabels() { return nwLang === 'zh' ? FEATURE_LABELS_ZH : FEATURE_LABELS_EN }
 
 async function loadTokenStats() {
   _tokenStats = await window.api.getTokenStats()
@@ -5099,21 +5108,22 @@ function renderTokenStats() {
 
   let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
     <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px">
-      <div style="font-size:11px;color:#888780;margin-bottom:4px">📝 文字模型</div>
+      <div style="font-size:11px;color:#888780;margin-bottom:4px">${t('setTextmodelTitle')}</div>
       <div style="font-size:20px;font-weight:600;color:#2c2c2a">${textTotal.toLocaleString()}</div>
-      <div style="font-size:11px;color:#b4b2a9;margin-top:2px">输入 ${data.text.input.toLocaleString()} / 输出 ${data.text.output.toLocaleString()}</div>
+      <div style="font-size:11px;color:#b4b2a9;margin-top:2px">${t('tokenInputLabel')} ${data.text.input.toLocaleString()} / ${t('tokenOutputLabel')} ${data.text.output.toLocaleString()}</div>
     </div>
     <div style="background:#f5f4f0;border-radius:8px;padding:10px 14px">
-      <div style="font-size:11px;color:#888780;margin-bottom:4px">🎙️ 音视频模型</div>
+      <div style="font-size:11px;color:#888780;margin-bottom:4px">${t('setAudiomodelTitle')}</div>
       <div style="font-size:20px;font-weight:600;color:#2c2c2a">${audioTotal.toLocaleString()}</div>
-      <div style="font-size:11px;color:#b4b2a9;margin-top:2px">输入 ${data.audio.input.toLocaleString()} / 输出 ${data.audio.output.toLocaleString()}</div>
+      <div style="font-size:11px;color:#b4b2a9;margin-top:2px">${t('tokenInputLabel')} ${data.audio.input.toLocaleString()} / ${t('tokenOutputLabel')} ${data.audio.output.toLocaleString()}</div>
     </div>
   </div>`
 
   if (Object.keys(data.byFeature).length > 0) {
-    html += `<div style="font-size:12px;color:#888780;margin-bottom:6px">按功能分类</div>`
+    html += `<div style="font-size:12px;color:#888780;margin-bottom:6px">${t('tokenByFeatureLabel')}</div>`
+    const featureLabels = getFeatureLabels()
     for (const [feature, tokens] of Object.entries(data.byFeature)) {
-      const label = FEATURE_LABELS[feature] || feature
+      const label = featureLabels[feature] || feature
       const total = tokens.input + tokens.output
       html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid #f1efe8">
         <span style="color:#5f5e5a">${label}</span>
@@ -5121,7 +5131,7 @@ function renderTokenStats() {
       </div>`
     }
   } else {
-    html += `<div style="color:#b4b2a9;font-size:12px;text-align:center;padding:10px 0">暂无使用记录</div>`
+    html += `<div style="color:#b4b2a9;font-size:12px;text-align:center;padding:10px 0">${t('tokenNoUsageTip')}</div>`
   }
 
   el.innerHTML = html
@@ -5979,6 +5989,26 @@ function nwFitVaultHeight() {
 }
 window.addEventListener('resize', () => { if (currentVaultPath) nwFitVaultHeight() })
 
+/* ── 整体界面跟随「当前窗口大小 ÷ 显示器全屏可用大小」的比例缩放：
+     窗口占满全屏时比例为 1（不缩放，跟设计稿一致）；
+     窗口缩小到全屏的百分之多少，界面（导航图标、按钮、文字全部一起）就同比例缩小到多少，
+     确保窗口内始终能完整显示，不需要额外滚动 ── */
+let nwCurrentScale = 1
+function nwApplyWindowScale() {
+  const screenW = (window.screen && (window.screen.availWidth || window.screen.width)) || window.innerWidth
+  const screenH = (window.screen && (window.screen.availHeight || window.screen.height)) || window.innerHeight
+  const scaleW = window.innerWidth / screenW
+  const scaleH = window.innerHeight / screenH
+  // 下限 0.5，避免窗口拖得极小时文字缩到无法辨认
+  let scale = Math.min(scaleW, scaleH, 1)
+  scale = Math.max(0.5, scale)
+  nwCurrentScale = scale
+  document.documentElement.style.zoom = scale
+  // 缩放比例变化后，用像素精确计算高度的区域需要用新比例重新算一遍，避免用旧比例换算出错误高度
+  if (typeof nwFitVaultHeight === 'function' && currentVaultPath) nwFitVaultHeight()
+}
+window.addEventListener('resize', nwApplyWindowScale)
+
 /* ── nwRefreshAll: 复用原有 refreshAll 逻辑，适配首页暗色风格 ── */
 async function nwRefreshAll() {
   if (!currentVaultPath) return
@@ -6000,7 +6030,7 @@ async function nwRefreshAll() {
     const res = await window.api.getFolderTree(currentVaultPath)
     const treeEl = document.getElementById('folder-tree')
     if (!treeEl) return
-    if (!res.success || !res.tree) { treeEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(255,255,255,0.25);text-align:center">No folders</div>'; return }
+    if (!res.success || !res.tree) { treeEl.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-placeholder);text-align:center">No folders</div>'; return }
     treeEl.innerHTML = nwRenderDarkTree(res.tree, currentVaultPath, 0)
     // 自动加载最近修改
     loadRecentFiles && loadRecentFiles([])
@@ -6016,9 +6046,9 @@ function nwRenderDarkTree(node, vaultPath, depth) {
   const folderName = esc(label)
 
   // depth 0 = 根节点（默认展开）
-  // depth 1 = 一级目录（默认展开，显示文件数）
+  // depth 1 = 一级目录（默认折叠，显示文件数）
   // depth 2+ = 二级以下（默认折叠）
-  const defaultCollapsed = depth >= 2
+  const defaultCollapsed = depth >= 1
   const toggleSymbol = defaultCollapsed ? '▶' : '▼'
 
   const toggle = hasChildren
@@ -6035,12 +6065,12 @@ function nwRenderDarkTree(node, vaultPath, depth) {
       ? Math.max(0, node.fileCount - (node.name && hubPattern.test(node.name) ? 1 : 0))
       : node.fileCount
     if (displayCount > 0) {
-      countBadge = `<span style="font-size:10px;color:var(--text-muted);margin-left:auto;flex-shrink:0;padding-left:6px">${displayCount}</span>`
+      countBadge = `<span style="font-size:12px;color:var(--text-muted);margin-left:auto;flex-shrink:0;padding-left:6px">${displayCount}</span>`
     }
   }
 
   let html = `<div class="nw-tree-item" onclick="nwDtSelect(this,'${ep}','${folderName}')">
-    ${toggle}<span style="font-size:13px">${icon}</span>
+    ${toggle}<span style="font-size:16px">${icon}</span>
     <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${label}</span>
     ${countBadge}
   </div>`
@@ -6082,12 +6112,14 @@ async function nwLoadFilesByType(type, label) {
   const filesEl = document.getElementById('folder-files')
   const titleEl = document.getElementById('folder-files-title')
   if (!filesEl) return
-  if (titleEl) titleEl.textContent = label
-  filesEl.innerHTML = '<div class="loading">加载中...</div>'
+  const typeLabelKeys = { md:'statMd', pdf:'statPdf', image:'statImg', video:'statVideo', other:'statOther' }
+  const localizedLabel = t(typeLabelKeys[type] || label)
+  if (titleEl) titleEl.textContent = localizedLabel
+  filesEl.innerHTML = `<div class="loading">${t('loadingTip')}</div>`
   try {
     const res = await window.api.listFilesByType({ vaultPath: currentVaultPath, type })
     if (!res.success || !res.files.length) {
-      filesEl.innerHTML = `<div class="empty-tip">没有找到${label}</div>`
+      filesEl.innerHTML = `<div class="empty-tip">${t('noneFoundPrefix')}${localizedLabel}${t('noneFoundSuffix')}</div>`
       return
     }
     filesEl.innerHTML = res.files.map(f => {
@@ -6098,8 +6130,8 @@ async function nwLoadFilesByType(type, label) {
         <span class="ff-name" title="${f.name}">${f.name}</span>
         <span class="ff-meta">${f.mtime||''}</span>
         <span class="ff-actions">
-          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${t('openBtn')}</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${t('showInFolderBtn')}</button>
         </span>
       </div>`
     }).join('')
@@ -6117,7 +6149,7 @@ async function nwToggleTagFilter() {
   const isOpen = bar.style.display !== 'none';
   if (isOpen) {
     bar.style.display = 'none';
-    if (btn) { btn.style.background = 'none'; btn.style.color = 'rgba(255,255,255,0.35)'; }
+    if (btn) { btn.style.background = 'none'; btn.style.color = 'var(--text-muted)'; }
   } else {
     bar.style.display = 'flex';
     if (btn) { btn.style.background = 'rgba(83,74,183,0.2)'; btn.style.color = '#afa9ec'; }
@@ -6130,23 +6162,23 @@ async function nwHomeLoadTags() {
   if (!currentVaultPath) return;
   const tagsEl = document.getElementById('nw-home-tags');
   if (!tagsEl) return;
-  tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">加载中…</span>';
+  tagsEl.innerHTML = '<span style="font-size:11px;color:var(--text-placeholder);">加载中…</span>';
   try {
     const res = await window.api.getTagStats(currentVaultPath);
     if (!res || !res.tags || !res.tags.length) {
-      tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">没有找到标签</span>';
+      tagsEl.innerHTML = '<span style="font-size:11px;color:var(--text-placeholder);">没有找到标签</span>';
       return;
     }
     tagsEl.innerHTML = res.tags.map(t => {
       const isActive = nwHomeSearchTagFilter === t.tag;
       return `<button onclick="nwHomeSearchByTag('${t.tag.replace(/'/g,"\\'")}',this)"
-        style="font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid ${isActive?'#534ab7':'rgba(255,255,255,0.15)'};
-        background:${isActive?'#534ab7':'rgba(255,255,255,0.06)'};color:${isActive?'#fff':'rgba(255,255,255,0.55)'};
+        style="font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid ${isActive?'#534ab7':'var(--border-input)'};
+        background:${isActive?'#534ab7':'var(--bg-hover)'};color:${isActive?'#fff':'var(--text-secondary)'};
         cursor:pointer;font-family:inherit;transition:all 0.12s;white-space:nowrap;"
         data-tag="${t.tag}">#${t.tag} <span style="opacity:0.5">${t.count}</span></button>`;
     }).join('');
   } catch(e) {
-    tagsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.2);">加载失败</span>';
+    tagsEl.innerHTML = '<span style="font-size:11px;color:var(--text-placeholder);">加载失败</span>';
   }
 }
 
@@ -6162,9 +6194,9 @@ async function nwHomeSearchByTag(tag, btnEl) {
   if (tagsEl) {
     tagsEl.querySelectorAll('button[data-tag]').forEach(b => {
       const active = b.dataset.tag === nwHomeSearchTagFilter;
-      b.style.background = active ? '#534ab7' : 'rgba(255,255,255,0.06)';
-      b.style.borderColor = active ? '#534ab7' : 'rgba(255,255,255,0.15)';
-      b.style.color = active ? '#fff' : 'rgba(255,255,255,0.55)';
+      b.style.background = active ? '#534ab7' : 'var(--bg-hover)';
+      b.style.borderColor = active ? '#534ab7' : 'var(--border-input)';
+      b.style.color = active ? '#fff' : 'var(--text-secondary)';
     });
   }
   // 如果有激活标签则直接执行搜索
@@ -6188,8 +6220,8 @@ async function nwHomeSearch() {
   if (!filesEl) return;
 
   // 标题显示搜索状态
-  if (titleEl) titleEl.textContent = '搜索中…';
-  filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">搜索中…</div>';
+  if (titleEl) titleEl.textContent = t('searchingTip');
+  filesEl.innerHTML = `<div style="font-size:11px;color:var(--text-placeholder);padding:16px;text-align:center">${t('searchingTip')}</div>`;
 
   try {
     let files = [];
@@ -6213,10 +6245,10 @@ async function nwHomeSearch() {
     }
 
     const label = nwHomeSearchTagFilter ? `#${nwHomeSearchTagFilter}` : `"${query}"`;
-    if (titleEl) titleEl.textContent = `搜索 ${label} — ${files.length} 个结果`;
+    if (titleEl) titleEl.textContent = `${t('searchResultsPrefix')}${label} — ${files.length} ${t('searchResultsSuffix')}`;
 
     if (!files.length) {
-      filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">没有找到匹配的文件</div>';
+      filesEl.innerHTML = `<div style="font-size:11px;color:var(--text-placeholder);padding:16px;text-align:center">${t('noMatchTip')}</div>`;
       return;
     }
 
@@ -6231,18 +6263,18 @@ async function nwHomeSearch() {
         <span class="ff-icon">${icon}</span>
         <div style="flex:1;min-width:0;">
           <div class="ff-name" title="${esc(name)}">${name}</div>
-          ${snippet ? `<div style="font-size:10px;color:rgba(255,255,255,0.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${snippet}</div>` : ''}
+          ${snippet ? `<div style="font-size:10px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${snippet}</div>` : ''}
         </div>
         <span class="ff-meta">${mtime}</span>
         <span class="ff-actions">
-          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${t('openBtn')}</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${t('showInFolderBtn')}</button>
         </span>
       </div>`;
     }).join('');
   } catch(e) {
-    if (titleEl) titleEl.textContent = '搜索出错';
-    filesEl.innerHTML = `<div style="font-size:11px;color:rgba(240,149,149,0.7);padding:16px;text-align:center">搜索出错：${e.message}</div>`;
+    if (titleEl) titleEl.textContent = t('searchErrorTip');
+    filesEl.innerHTML = `<div style="font-size:11px;color:rgba(240,149,149,0.7);padding:16px;text-align:center">${t('searchErrorTip')}：${e.message}</div>`;
   }
 }
 
@@ -6254,16 +6286,16 @@ function nwHomeSearchClear() {
   const tagsEl = document.getElementById('nw-home-tags');
   if (tagsEl) {
     tagsEl.querySelectorAll('button[data-tag]').forEach(b => {
-      b.style.background = 'rgba(255,255,255,0.06)';
-      b.style.borderColor = 'rgba(255,255,255,0.15)';
-      b.style.color = 'rgba(255,255,255,0.55)';
+      b.style.background = 'var(--bg-hover)';
+      b.style.borderColor = 'var(--border-input)';
+      b.style.color = 'var(--text-secondary)';
     });
   }
   // 恢复文件列表标题，并清空列表让用户重新点文件夹
   const titleEl = document.getElementById('folder-files-title');
   const filesEl = document.getElementById('folder-files');
-  if (titleEl) titleEl.textContent = 'Recent files';
-  if (filesEl) filesEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">Select a folder</div>';
+  if (titleEl) titleEl.textContent = t('filesTitle');
+  if (filesEl) filesEl.innerHTML = `<div style="font-size:11px;color:var(--text-placeholder);padding:16px;text-align:center">${t('selectFolder')}</div>`;
 }
 
 /* ── Clock ── */
@@ -6487,7 +6519,7 @@ async function nwDeleteSelectedFolder() {
   }
   nwSelectedFolderPath = null
   document.getElementById('folder-files').innerHTML =
-    '<div style="font-size:11px;color:rgba(255,255,255,0.25);padding:16px;text-align:center">Select a folder</div>'
+    '<div style="font-size:11px;color:var(--text-placeholder);padding:16px;text-align:center">Select a folder</div>'
   document.getElementById('folder-files-title').textContent = 'Recent files'
   document.getElementById('ff-action-bar').style.display = 'none'
   await nwRefreshAll()
@@ -6843,7 +6875,7 @@ let nwCheckedFiles = new Set()
 async function nwLoadFolderTree() {
   const wrap = document.getElementById('nw-folder-tree-wrap')
   if (!wrap || !currentVaultPath) return
-  wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">Loading…</div>'
+  wrap.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">Loading…</div>'
   try {
     const res = await window.api.getFolderTree(currentVaultPath)
     // res.tree 是单个根节点对象 {name, path, children:[]}，取 children 渲染
@@ -6851,7 +6883,7 @@ async function nwLoadFolderTree() {
     // 如果没有子文件夹，直接把根节点当作一个文件夹展示
     const renderNodes = nodes.length ? nodes : (res.tree ? [res.tree] : [])
     if (!renderNodes.length) {
-      wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">No folders found</div>'
+      wrap.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">No folders found</div>'
       return
     }
     wrap.innerHTML = nwBuildTreeHTML(renderNodes)
@@ -6859,7 +6891,7 @@ async function nwLoadFolderTree() {
     const first = wrap.querySelector('.nw-tree-item')
     if (first) first.click()
   } catch(e) {
-    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:12px;text-align:center">Could not load</div>'
+    wrap.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">Could not load</div>'
   }
 }
 
@@ -6874,7 +6906,7 @@ function nwBuildTreeHTML(nodes, depth) {
     const toggle = hasChildren
       ? `<span class="nw-tree-toggle" id="tog-${uid}" onclick="nwToggleTree('${uid}',this);event.stopPropagation()">▶</span>`
       : `<span class="nw-tree-toggle"></span>`
-    const count = node.fileCount ? `<span style="font-size:9px;color:var(--text-muted);margin-left:auto">${node.fileCount}</span>` : ''
+    const count = node.fileCount ? `<span style="font-size:9px;color:#b4b2a9;margin-left:auto">${node.fileCount}</span>` : ''
     const children = hasChildren
       ? `<div class="nw-tree-children collapsed" id="${uid}">${nwBuildTreeHTML(node.children, depth+1)}</div>`
       : ''
@@ -6910,12 +6942,12 @@ async function nwSelectFolder(folderPath, itemEl) {
   // 加载文件
   const filesDiv = document.getElementById('nw-folder-files')
   if (!filesDiv) return
-  filesDiv.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">Loading…</div>'
+  filesDiv.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">Loading…</div>'
   try {
     const res = await window.api.listFolderFiles({ folderPath, vaultPath: currentVaultPath })
     const files = res.success ? (res.items || []).filter(f => !f.isDir) : []
     if (!res.success || !files.length) {
-      filesDiv.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">Empty folder</div>'
+      filesDiv.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">Empty folder</div>'
       document.getElementById('nw-ff-action-bar').style.display = 'none'
       return
     }
@@ -6931,7 +6963,7 @@ async function nwSelectFolder(folderPath, itemEl) {
       </div>`
     }).join('')
   } catch(e) {
-    filesDiv.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:12px;text-align:center">Error loading files</div>'
+    filesDiv.innerHTML = '<div style="font-size:11px;color:#b4b2a9;padding:12px;text-align:center">Error loading files</div>'
   }
 }
 
@@ -7028,6 +7060,103 @@ const NW_STRINGS = {
     // file ops
     selectAll:'Select all', clearSel:'Clear',
     moveSelected:'🗂 Move', deleteSelected:'🗑 Delete',
+    // home: search/tag/folder buttons, file list states
+    tagFilterLabel:'Tags', tagFilterBarLabel:'Filter by tag:', searchBtn:'Search',
+    newFolderBtn:'+ New', deleteFolderBtn:'Delete',
+    openBtn:'Open', showInFolderBtn:'Show in folder',
+    loadingTip:'Loading…', readFailedTip:'Failed to load', emptyFolderTip:'This folder is empty',
+    noFilesTip:'No files yet', noneFoundPrefix:'No ', noneFoundSuffix:' found',
+    searchingTip:'Searching…', searchResultsPrefix:'Search ', searchResultsSuffix:'results',
+    noMatchTip:'No matching files found', searchErrorTip:'Search error',
+    // AI Notes: tab bar
+    tabNote:'Study Notes', tabExpand:'Knowledge Expansion', tabEssay:'Essay Correction', tabReview:'Exam Prep',
+    outputLangLabel:'Output language:',
+    // AI Notes: tab 1 学习笔记
+    noteInfoTip:'📌 Jot down anything you\'re learning — AI will identify the topic and file it into the right folder. Uncategorizable notes go to your temp folder.',
+    noteAiPolishLabel:'AI formatting', noteSaveBtn:'Save note', noteClearBtn:'Clear',
+    noteTitlePh:'Note title (optional — AI generates one if left blank)',
+    noteContentPh:'Jot down your study notes here…\n\nAI formatting: AI will correct typos, polish the wording, and format it as Markdown — without changing the meaning.\nSave as-is: keeps exactly what you typed.',
+    // AI Notes: tab 2 知识点扩充
+    expandInfoTip:'🔬 Enter a topic and your understanding of it — AI will complete and correct the content, expanding it to a depth suited to the age group / curriculum you pick.',
+    ageElementary:'Elementary', ageMiddle:'Middle school', ageHigh:'High school', curriculumRegular:'Regular high school',
+    expandBtnLabel:'AI expand this topic', expandPreviewLabel:'✅ Result preview', expandScrollHint:'Scroll down to see the full result',
+    expandSaveBtnLabel:'Save to vault', expandCopyBtnLabel:'Copy content',
+    expandTitlePh:'Topic (e.g. animal cells, photosynthesis, Newton\'s second law…)',
+    expandDescPh:'Write down your own understanding of this topic (it\'s fine if it\'s incomplete or has mistakes — AI will correct and add to it)\n\nExample: Animal cells have a cell membrane, cytoplasm, and nucleus, no cell wall — and I think mitochondria too?',
+    // AI Notes: tab 3 文章纠错
+    essayInfoTip:'📌 Essay Correction: only checks objective errors — typos, grammar, punctuation, and fixed collocations. It doesn\'t judge content or ideas, and doesn\'t grade. The bar is fairly relaxed — casual, spoken-style phrasing and informal omissions (like a missing final punctuation mark or a loose way of writing times) are fine as long as the meaning is clear; only clear, unambiguous errors are flagged. You can type text directly, or upload a photo of the essay and have the text recognized automatically.',
+    essayTabTextLabel:'Text input', essayTabImageLabel:'Upload image',
+    essayDropzoneLabel:'Click to choose a photo of the essay (jpg / png / gif / webp)',
+    essayOcrBtnLabel:'Recognize text in image',
+    essayOcrResultLabel:'Recognized text (you can edit it before correcting):',
+    essayCorrectBtnLabel:'Start correction', essayClearBtnLabel:'Clear',
+    essayAnnotatedTitle:'📝 Tracked changes (strikethrough = original error, bold = correction)',
+    essayCorrectionsTitle:'📋 Error explanations',
+    essayCleanTitle:'✅ Corrected clean version',
+    essaySaveTitle:'💾 Save to vault', essaySaveBtnLabel:'Save',
+    essaySaveHint:'Saving creates two files: a tracked-changes version and a clean corrected version. AI will pick the matching subject folder automatically (falls back to your temp folder if none matches).',
+    essayBackBtn:'← Back to edit and re-correct',
+    essayInputPh:'Paste or type the essay text you want corrected here…',
+    essayOcrResultPh:'The recognized text will appear here — review and edit it, then click "Start correction" below',
+    essayFilenamePh:'Enter a file name (without extension)',
+    // AI Notes: tab 4 复习备考
+    reviewInfoTip:'📖 Choose material from your vault — AI will turn it into review notes or practice questions. You can save the result to your vault (as md) or download it as a PDF.',
+    reviewSelectLabel:'Select material from vault',
+    reviewFilesHint:'← Click a folder on the left',
+    reviewSelectedLabel:'Selected files (adds up across folders)',
+    reviewNoselectTip:'No files selected yet',
+    reviewGentypeLabel:'Content type to generate',
+    reviewGentypeOpt1:'Review notes', reviewGentypeOpt2:'Practice questions', reviewGentypeOpt3:'Review notes + practice questions',
+    reviewGenbtnLabel:'AI generate review content',
+    reviewPreviewLabel:'✅ Result preview',
+    reviewSavebtnLabel:'Save to vault (md)', reviewPdfbtnLabel:'Download PDF',
+    reviewRequirementPh:'(Optional) Anything specific to focus on or any special requirements?\nExample: focus on the dark reactions of photosynthesis; include more calculation questions; generate it in English...',
+    // Import page
+    importInboxTitle:'🗂️ Temp folder', importRefreshBtn:'🔄 Refresh', importDeleteselBtn:'🗑 Delete selected',
+    importDirectTitle:'+ Import files directly',
+    importDirectHint:'Click or drag files here — AI will classify and move them into the right folder automatically',
+    importDropzoneLabel:'Click to choose files, or drag and drop here',
+    btnImportLabel:'Confirm import', aiClassifyHintLabel:'🤖 AI classifies automatically and picks the folder',
+    importResultsTitle:'Import results',
+    // Exam Review page
+    examInfoTip:'📌 Exam Review: records the score and reflection for each test/exam exactly as written — it doesn\'t edit or analyze your text. One file per subject; new entries are appended below older ones with a divider, so history stays easy to browse.',
+    examSubjectLabel:'Subject folder (click to choose, any level)', examSubjectPickBtn:'📁 Choose',
+    examUnselected:'Not selected',
+    examDateLabel:'Exam date', examTypeLabel:'Exam type', examCustomTypeLabel:'Custom type',
+    examScoreLabel:'Score (optional, points / total)', examGradeLabel:'Grade (optional)',
+    examReviewLabel:'Reflection (optional — what went wrong, which topics need work, etc.)',
+    examSaveBtnLabel:'Save review', examClearBtnLabel:'Clear',
+    examCustomtypePh:'Enter exam type', examScorePh:'Score', examScoreTotalPh:'Total', examGradePh:'e.g. A / B+',
+    examReviewPh:'Write your reflection on this exam…',
+    // Settings: theme / path / AI features / model / tokens
+    setThemeModeLabel:'Theme mode', themeLight:'Oat White', themeDark:'Midnight Blue', themePurple:'Neon Purple',
+    setPathTitle:'Path settings', setHelpToggle:'Help',
+    setPathHelp1B:'1. Vault path', setPathHelp1Text:': choose your local vault folder — Notewell manages everything inside it.',
+    setPathHelp2B:'2. Temp folder', setPathHelp2Text:': files AI can\'t classify go here for you to sort manually. If not set, a "00 Inbox" folder is created automatically at the root of your vault on first import.',
+    setVaultpathLabel:'📚 Vault path', setChooseFolderBtn:'Choose folder',
+    setAifeatureTitle:'AI features',
+    setAiclassifyLabel:'🤖 AI auto-classify', setAiclassifyDesc:'AI automatically decides which folder to file imported items into',
+    setHubnameLabel:'📌 Hub filename', setHubnameDesc:'Manually specify the Hub filename (AI detects it automatically when off)',
+    setHubnameHint:'The Hub file is each folder\'s "navigation index," listing links to that folder\'s notes.<br>In auto-detect mode, the md file with the most internal links in a folder is used as its Hub.<br>If your Hub files use a fixed name (like readme.md or Hub.md), specifying it manually is more accurate.',
+    setReminderLabel:'🔔 Reminders', setReminderDesc:'Checks for today\'s reminder notes and sends a system notification',
+    setReminderadvanceLabel:'⏰ Remind ahead by',
+    reminderOpt0:'On time', reminderOpt5:'5 minutes before', reminderOpt15:'15 minutes before', reminderOpt30:'30 minutes before', reminderOpt60:'1 hour before',
+    setAimodelTitle:'AI model settings',
+    setAimodelHelp1:'All AI features require model settings to be configured first. Processing audio/video specifically requires a model that supports audio/video input.',
+    setAimodelHelp2:'We recommend creating a suitable model endpoint via Volcano Engine\'s Ark platform, though any compatible model service will also work.',
+    setAimodelHelp3:'If the text model and the audio/video model use the same provider (e.g. Volcano Engine), you can use the same API key and endpoint for both.',
+    setAimodelHelpWarn:'⚠️ Note:', setAimodelHelpWarntext:'Calling the AI model incurs cost. Please check the pricing of your chosen model before configuring it.',
+    setTextmodelTitle:'📝 Text model', apiKeyLabel:'🔑 API Key', testConnectionBtn:'Test connection',
+    endpointLabel:'🌐 Endpoint', modelIdLabel:'📡 Model ID',
+    setAudiomodelTitle:'🎙️ Image & audio/video model',
+    setApikeyDisclaimer:'Your API key is stored locally only and never uploaded to any server.',
+    setTokenstatsTitle:'Token usage', tokenTabToday:'Today', tokenTabWeek:'Last 7 days', tokenTabMonth:'Last 30 days',
+    tokenInputLabel:'Input', tokenOutputLabel:'Output', tokenByFeatureLabel:'By feature', tokenNoUsageTip:'No usage yet',
+    setVersionLabel:'Current version',
+    aiApiKeyPh:'Enter the text model\'s API key', aiModelIdPh:'e.g. ep-20260813112220-v8v92',
+    aiAudioApikeyPh:'Same as the text model? Use the same key', aiAudioEndpointPh:'Same as the text model? Use the same endpoint',
+    aiAudioModelidPh:'e.g. the endpoint ID for doubao-seed-2.0-lite',
+    hubFilenamePh:'e.g. Hub.md or readme.md (multiple allowed, comma-separated)',
     // settings
     setTitle:'Settings', setLangTitle:'Language / 语言', setLangLabel:'Interface language',
   },
@@ -7050,6 +7179,102 @@ const NW_STRINGS = {
     modalAlert:'请填写事件名称和日期。',
     selectAll:'全选', clearSel:'取消',
     moveSelected:'🗂 移动', deleteSelected:'🗑 删除',
+    tagFilterLabel:'标签', tagFilterBarLabel:'按标签筛选：', searchBtn:'搜索',
+    newFolderBtn:'+ 新增', deleteFolderBtn:'删除',
+    openBtn:'打开', showInFolderBtn:'文件管理器',
+    loadingTip:'加载中...', readFailedTip:'读取失败', emptyFolderTip:'此文件夹为空',
+    noFilesTip:'暂无文件', noneFoundPrefix:'没有找到', noneFoundSuffix:'',
+    searchingTip:'搜索中…', searchResultsPrefix:'搜索 ', searchResultsSuffix:'个结果',
+    noMatchTip:'没有找到匹配的文件', searchErrorTip:'搜索出错',
+    // AI笔记：标签栏
+    tabNote:'学习笔记', tabExpand:'知识点扩充', tabEssay:'文章纠错', tabReview:'复习备考',
+    outputLangLabel:'输出语言：',
+    // AI笔记：学习笔记
+    noteInfoTip:'📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。',
+    noteAiPolishLabel:'AI 整理格式', noteSaveBtn:'保存笔记', noteClearBtn:'清空',
+    noteTitlePh:'笔记标题（可选，不填则由 AI 自动生成）',
+    noteContentPh:'在这里随意记录你的学习笔记…\n\nAI 整理模式：AI 会帮你纠正错别字、润色语句，整理成 Markdown 格式，但不改变内容主旨。\n直接保存模式：原样保存你输入的内容。',
+    // AI笔记：知识点扩充
+    expandInfoTip:'🔬 输入一个知识点标题和你的理解，AI 会帮你完善内容、纠正错误，并根据年龄段/课程给出适当深度的扩展。',
+    ageElementary:'小学', ageMiddle:'初中', ageHigh:'高中', curriculumRegular:'普通高中',
+    expandBtnLabel:'AI 扩充知识点', expandPreviewLabel:'✅ 扩充结果预览', expandScrollHint:'可向下滚动查看完整内容',
+    expandSaveBtnLabel:'保存到知识库', expandCopyBtnLabel:'复制内容',
+    expandTitlePh:'知识点标题（如：动物细胞、光合作用、牛顿第二定律…）',
+    expandDescPh:'写下你对这个知识点的理解和描述（可以不完整、有错误，AI 会帮你纠正和补充）\n\n示例：动物细胞有细胞膜、细胞质和细胞核，没有细胞壁，我记得还有线粒体？',
+    // AI笔记：文章纠错
+    essayInfoTip:'📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。纠错尺度偏宽松，日常口语化的表达、非正式书写中的省略（如缺少句末标点、时间写法不标准等）只要意思清楚就不会被判定为错误，只处理明显、确定无疑的错误。支持直接输入文字，或上传文章照片自动识别文字。',
+    essayTabTextLabel:'文字输入', essayTabImageLabel:'上传图片',
+    essayDropzoneLabel:'点击选择一张文章图片（支持 jpg / png / gif / webp）',
+    essayOcrBtnLabel:'识别图片文字',
+    essayOcrResultLabel:'识别出的文字（可手动修正后再纠错）：',
+    essayCorrectBtnLabel:'开始纠错', essayClearBtnLabel:'清空',
+    essayAnnotatedTitle:'📝 修改痕迹版（删除线为原文错误，加粗高亮为修改后内容）',
+    essayCorrectionsTitle:'📋 逐条错误说明',
+    essayCleanTitle:'✅ 修改后完整版本',
+    essaySaveTitle:'💾 保存到知识库', essaySaveBtnLabel:'保存',
+    essaySaveHint:'保存后会自动生成两个文件：带修改痕迹的批改记录版 + 干净的修改后完整版，AI 会自动判断存入哪个科目文件夹（找不到合适文件夹时存入临时文件夹）。',
+    essayBackBtn:'← 返回修改重新纠错',
+    essayInputPh:'在这里粘贴或输入需要纠错的文章内容…',
+    essayOcrResultPh:'识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」',
+    essayFilenamePh:'请输入文件名（不含扩展名）',
+    // AI笔记：复习备考
+    reviewInfoTip:'📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。',
+    reviewSelectLabel:'选择知识库资料',
+    reviewFilesHint:'← 点击左侧文件夹',
+    reviewSelectedLabel:'已选文件（可跨文件夹累加）',
+    reviewNoselectTip:'暂无已选文件',
+    reviewGentypeLabel:'生成内容类型',
+    reviewGentypeOpt1:'复习资料', reviewGentypeOpt2:'练习题', reviewGentypeOpt3:'复习资料 + 练习题',
+    reviewGenbtnLabel:'AI 生成复习内容',
+    reviewPreviewLabel:'✅ 生成结果预览',
+    reviewSavebtnLabel:'保存到知识库（md）', reviewPdfbtnLabel:'下载 PDF',
+    reviewRequirementPh:'（可选）补充说明：重点关注哪些知识点？有什么特别要求？\n示例：重点考察光合作用的暗反应部分；练习题多出一些计算题；请用英文生成...',
+    // 导入资料页
+    importInboxTitle:'🗂️ 临时文件夹', importRefreshBtn:'🔄 刷新', importDeleteselBtn:'🗑 删除选中',
+    importDirectTitle:'+ 直接导入文件',
+    importDirectHint:'点击或拖放添加文件，AI 分类后直接移入对应文件夹',
+    importDropzoneLabel:'点击选择文件，或将文件拖放到此处',
+    btnImportLabel:'确认导入', aiClassifyHintLabel:'🤖 AI 自动分类，自动判断文件夹',
+    importResultsTitle:'导入结果',
+    // 考试复盘页
+    examInfoTip:'📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。',
+    examSubjectLabel:'科目文件夹（点击选择，支持任意层级）', examSubjectPickBtn:'📁 选择',
+    examUnselected:'未选择',
+    examDateLabel:'考试日期', examTypeLabel:'考试类型', examCustomTypeLabel:'自定义类型',
+    examScoreLabel:'分数（选填，得分 / 总分）', examGradeLabel:'等级评价（选填）',
+    examReviewLabel:'复盘内容（选填，哪里没考好、哪个知识点有欠缺等）',
+    examSaveBtnLabel:'保存复盘', examClearBtnLabel:'清空',
+    examCustomtypePh:'请输入考试类型', examScorePh:'得分', examScoreTotalPh:'总分', examGradePh:'如 A / B+',
+    examReviewPh:'写下这次考试的复盘…',
+    // 设置页：主题/路径/AI功能/模型/Token
+    setThemeModeLabel:'主题模式', themeLight:'燕麦白', themeDark:'深蓝夜间', themePurple:'暗紫霓虹',
+    setPathTitle:'路径设置', setHelpToggle:'说明',
+    setPathHelp1B:'1. 知识库路径', setPathHelp1Text:'：选择本地知识库文件夹的路径，Notewell 将管理该文件夹下的所有内容。',
+    setPathHelp2B:'2. 临时文件夹', setPathHelp2Text:'：AI 处理时，无法判断分类的文件会存入临时文件夹，可手动整理。如不设置，导入时会自动在知识库根目录创建「00 Inbox」文件夹并使用。',
+    setVaultpathLabel:'📚 知识库路径', setChooseFolderBtn:'选择文件夹',
+    setAifeatureTitle:'AI 功能设置',
+    setAiclassifyLabel:'🤖 AI 自动分类', setAiclassifyDesc:'导入文件时由 AI 自动判断存入哪个文件夹',
+    setHubnameLabel:'📌 Hub 文件名', setHubnameDesc:'手动指定 Hub 文件名（关闭则由 AI 自动识别）',
+    setHubnameHint:'Hub 文件是每个文件夹的「导航索引」，记录该文件夹内容的目录和链接。<br>AI 自动识别模式下，会在每个文件夹中寻找包含最多内部链接的 md 文件作为 Hub。<br>如果你的 Hub 文件有固定命名（如 readme.md、Hub.md），建议手动指定，更准确。',
+    setReminderLabel:'🔔 提醒功能', setReminderDesc:'检测今日备忘文件并发送系统提醒',
+    setReminderadvanceLabel:'⏰ 提前提醒',
+    reminderOpt0:'准时提醒', reminderOpt5:'提前 5 分钟', reminderOpt15:'提前 15 分钟', reminderOpt30:'提前 30 分钟', reminderOpt60:'提前 1 小时',
+    setAimodelTitle:'AI 模型设置',
+    setAimodelHelp1:'所有 AI 功能需要配置 AI 模型参数后方可生效。其中 AI 处理音频和视频需要模型能支持音频和视频的处理。',
+    setAimodelHelp2:'推荐通过火山引擎方舟平台创建合适的模型接入点，也可以使用其他兼容的模型服务。',
+    setAimodelHelp3:'如果文字模型和音视频模型使用同一家服务商（如火山引擎），两组可以填写相同的 API Key 和接入点。',
+    setAimodelHelpWarn:'⚠️ 注意：', setAimodelHelpWarntext:'系统调用 AI 模型后会产生相关费用，请在设置前了解所选模型的收费标准。',
+    setTextmodelTitle:'📝 文字模型', apiKeyLabel:'🔑 API Key', testConnectionBtn:'测试连接',
+    endpointLabel:'🌐 接入点', modelIdLabel:'📡 模型 ID',
+    setAudiomodelTitle:'🎙️ 图片和音视频模型',
+    setApikeyDisclaimer:'API Key 仅保存在本地，不会上传到任何服务器。',
+    setTokenstatsTitle:'Token 使用统计', tokenTabToday:'今天', tokenTabWeek:'最近7天', tokenTabMonth:'最近30天',
+    tokenInputLabel:'输入', tokenOutputLabel:'输出', tokenByFeatureLabel:'按功能分类', tokenNoUsageTip:'暂无使用记录',
+    setVersionLabel:'当前版本',
+    aiApiKeyPh:'输入文字模型的 API Key', aiModelIdPh:'如 ep-20260813112220-v8v92',
+    aiAudioApikeyPh:'与文字模型相同则填写同一个 Key', aiAudioEndpointPh:'与文字模型相同则填写同一个接入点',
+    aiAudioModelidPh:'如 doubao-seed-2.0-lite 的接入点 ID',
+    hubFilenamePh:'例如：Hub.md 或 readme.md（支持多个，用英文逗号分隔）',
     setTitle:'系统设置', setLangTitle:'Language / 语言', setLangLabel:'界面语言',
   }
 }
@@ -7106,6 +7331,7 @@ function applyLanguage() {
   const s = NW_STRINGS[nwLang] || NW_STRINGS.en
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val }
   const setPlh = (id, val) => { const el = document.getElementById(id); if(el) el.placeholder = val }
+  const setHTML = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val }
   const setQ = (sel, val) => { const el = document.querySelector(sel); if(el) el.textContent = val }
   const setQAll = (sel, vals) => { document.querySelectorAll(sel).forEach((el,i) => { if(vals[i]) el.textContent = vals[i] }) }
 
@@ -7134,6 +7360,11 @@ function applyLanguage() {
   setQ('#nw-folders-label', s.foldersLabel)
   setQ('#nw-refresh-btn', s.refreshBtn)
   set('folder-files-title', s.filesTitle)
+  set('nw-tag-filter-toggle-label', s.tagFilterLabel)
+  set('nw-tag-filter-bar-label', s.tagFilterBarLabel)
+  set('nw-search-btn', s.searchBtn)
+  set('nw-btn-new-folder', s.newFolderBtn)
+  set('nw-btn-del-folder', s.deleteFolderBtn)
 
   // file op buttons
   const setBtn = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val }
@@ -7167,6 +7398,181 @@ function applyLanguage() {
   setPlh('nw-cd-type-input', s.modalTypePh)
   document.querySelector('.nw-modal-cancel') && (document.querySelector('.nw-modal-cancel').textContent = s.modalCancel)
   document.querySelector('.nw-modal-save') && (document.querySelector('.nw-modal-save').textContent = s.modalSave)
+
+  // AI Notes: tab bar
+  set('study-tabbtn-note-label', s.tabNote)
+  set('study-tabbtn-expand-label', s.tabExpand)
+  set('study-tabbtn-essay-label', s.tabEssay)
+  set('study-tabbtn-review-label', s.tabReview)
+  set('study-outputlang-label', s.outputLangLabel)
+
+  // AI Notes: 学习笔记
+  set('study-note-infotip', s.noteInfoTip)
+  set('study-note-aipolish-label', s.noteAiPolishLabel)
+  set('study-note-savebtn-label', s.noteSaveBtn)
+  set('study-note-clearbtn-label', s.noteClearBtn)
+  setPlh('study-note-title', s.noteTitlePh)
+  setPlh('study-note-content', s.noteContentPh)
+
+  // AI Notes: 知识点扩充
+  set('study-expand-infotip', s.expandInfoTip)
+  set('study-expand-age-opt1', s.ageElementary)
+  set('study-expand-age-opt2', s.ageMiddle)
+  set('study-expand-age-opt3', s.ageHigh)
+  set('study-expand-curr-opt5', s.curriculumRegular)
+  set('study-expand-btn-label', s.expandBtnLabel)
+  set('study-expand-preview-label', s.expandPreviewLabel)
+  set('study-expand-scroll-hint', s.expandScrollHint)
+  set('study-expand-savebtn-label', s.expandSaveBtnLabel)
+  set('study-expand-copybtn-label', s.expandCopyBtnLabel)
+  setPlh('study-expand-title', s.expandTitlePh)
+  setPlh('study-expand-desc', s.expandDescPh)
+
+  // AI Notes: 文章纠错
+  set('essay-infotip', s.essayInfoTip)
+  set('essay-tab-text-label', s.essayTabTextLabel)
+  set('essay-tab-image-label', s.essayTabImageLabel)
+  set('essay-dropzone-label', s.essayDropzoneLabel)
+  set('essay-ocr-btn-label', s.essayOcrBtnLabel)
+  set('essay-ocr-result-label', s.essayOcrResultLabel)
+  set('essay-correct-btn-label', s.essayCorrectBtnLabel)
+  set('essay-clear-btn-label', s.essayClearBtnLabel)
+  set('essay-annotated-title', s.essayAnnotatedTitle)
+  set('essay-corrections-title', s.essayCorrectionsTitle)
+  set('essay-clean-title', s.essayCleanTitle)
+  set('essay-save-title', s.essaySaveTitle)
+  set('essay-save-btn-label', s.essaySaveBtnLabel)
+  set('essay-save-hint', s.essaySaveHint)
+  set('essay-back-btn', s.essayBackBtn)
+  setPlh('essay-input-text', s.essayInputPh)
+  setPlh('essay-ocr-result-text', s.essayOcrResultPh)
+  setPlh('essay-filename', s.essayFilenamePh)
+
+  // AI Notes: 复习备考
+  set('review-infotip', s.reviewInfoTip)
+  set('review-select-label', s.reviewSelectLabel)
+  set('review-folders-loading', s.loadingTip)
+  set('review-files-hint', s.reviewFilesHint)
+  set('review-selected-label', s.reviewSelectedLabel)
+  set('review-noselect-tip', s.reviewNoselectTip)
+  set('review-gentype-label', s.reviewGentypeLabel)
+  set('review-gentype-opt1', s.reviewGentypeOpt1)
+  set('review-gentype-opt2', s.reviewGentypeOpt2)
+  set('review-gentype-opt3', s.reviewGentypeOpt3)
+  set('review-genbtn-label', s.reviewGenbtnLabel)
+  set('review-preview-label', s.reviewPreviewLabel)
+  set('review-savebtn-label', s.reviewSavebtnLabel)
+  set('review-pdfbtn-label', s.reviewPdfbtnLabel)
+  set('review-copybtn-label', s.expandCopyBtnLabel)
+  setPlh('study-review-requirement', s.reviewRequirementPh)
+
+  // Import page
+  set('import-inbox-title', s.importInboxTitle)
+  set('import-refresh-btn', s.importRefreshBtn)
+  set('import-selectall-btn', s.selectAll)
+  set('import-clearsel-btn', s.clearSel)
+  set('import-deletesel-btn', s.importDeleteselBtn)
+  set('import-inbox-loading', s.loadingTip)
+  set('import-direct-title', s.importDirectTitle)
+  set('import-direct-hint', s.importDirectHint)
+  set('import-dropzone-label', s.importDropzoneLabel)
+  set('btn-import', s.btnImportLabel)
+  set('ai-classify-hint', s.aiClassifyHintLabel)
+  set('import-results-title', s.importResultsTitle)
+
+  // Exam Review page
+  set('exam-infotip', s.examInfoTip)
+  set('exam-subject-label', s.examSubjectLabel)
+  set('exam-subject-pickbtn', s.examSubjectPickBtn)
+  set('exam-date-label', s.examDateLabel)
+  set('exam-type-label', s.examTypeLabel)
+  set('exam-customtype-label', s.examCustomTypeLabel)
+  set('exam-score-label', s.examScoreLabel)
+  set('exam-grade-label', s.examGradeLabel)
+  set('exam-review-label', s.examReviewLabel)
+  set('exam-savebtn-label', s.examSaveBtnLabel)
+  set('exam-clearbtn-label', s.examClearBtnLabel)
+  setPlh('exam-type-custom', s.examCustomtypePh)
+  setPlh('exam-score', s.examScorePh)
+  setPlh('exam-score-total', s.examScoreTotalPh)
+  setPlh('exam-grade', s.examGradePh)
+  setPlh('exam-review-text', s.examReviewPh)
+  // "未选择/Not selected" 占位文字：只在还没实际选中科目文件夹时才替换，避免覆盖已选内容
+  const examSubjectEl = document.getElementById('exam-subject-display')
+  if (examSubjectEl) {
+    const allUnselected = [NW_STRINGS.en.examUnselected, NW_STRINGS.zh.examUnselected]
+    if (allUnselected.includes(examSubjectEl.textContent.trim())) examSubjectEl.textContent = s.examUnselected
+  }
+
+  // Settings: 主题
+  set('set-thememode-label', s.setThemeModeLabel)
+  set('theme-btn-light-label', s.themeLight)
+  set('theme-btn-dark-label', s.themeDark)
+  set('theme-btn-purple-label', s.themePurple)
+
+  // Settings: 路径设置
+  set('set-path-title', s.setPathTitle)
+  set('set-path-help-toggle', s.setHelpToggle)
+  set('set-path-help1-b', s.setPathHelp1B)
+  set('set-path-help1-text', s.setPathHelp1Text)
+  set('set-path-help2-b', s.setPathHelp2B)
+  set('set-path-help2-text', s.setPathHelp2Text)
+  set('set-vaultpath-label', s.setVaultpathLabel)
+  set('set-vaultpath-btn', s.setChooseFolderBtn)
+  set('set-inboxpath-label', s.importInboxTitle)
+  set('set-inboxpath-btn', s.setChooseFolderBtn)
+
+  // Settings: AI 功能设置
+  set('set-aifeature-title', s.setAifeatureTitle)
+  set('set-aiclassify-label', s.setAiclassifyLabel)
+  set('set-aiclassify-desc', s.setAiclassifyDesc)
+  set('set-hubname-label', s.setHubnameLabel)
+  set('set-hubname-desc', s.setHubnameDesc)
+  setHTML('set-hubname-hint', s.setHubnameHint)
+  set('set-reminder-label', s.setReminderLabel)
+  set('set-reminder-desc', s.setReminderDesc)
+  set('set-reminderadvance-label', s.setReminderadvanceLabel)
+  set('set-reminderopt-0', s.reminderOpt0)
+  set('set-reminderopt-5', s.reminderOpt5)
+  set('set-reminderopt-15', s.reminderOpt15)
+  set('set-reminderopt-30', s.reminderOpt30)
+  set('set-reminderopt-60', s.reminderOpt60)
+  setPlh('hub-filename', s.hubFilenamePh)
+
+  // Settings: AI 模型设置
+  set('set-aimodel-title', s.setAimodelTitle)
+  set('set-aimodel-help-toggle', s.setHelpToggle)
+  set('set-aimodel-help1', s.setAimodelHelp1)
+  set('set-aimodel-help2', s.setAimodelHelp2)
+  set('set-aimodel-help3', s.setAimodelHelp3)
+  set('set-aimodel-help-warn', s.setAimodelHelpWarn)
+  set('set-aimodel-help-warntext', s.setAimodelHelpWarntext)
+  set('set-textmodel-title', s.setTextmodelTitle)
+  set('set-textmodel-apikey-label', s.apiKeyLabel)
+  set('set-textmodel-testbtn', s.testConnectionBtn)
+  set('set-textmodel-endpoint-label', s.endpointLabel)
+  set('set-textmodel-id-label', s.modelIdLabel)
+  set('set-audiomodel-title', s.setAudiomodelTitle)
+  set('set-audiomodel-apikey-label', s.apiKeyLabel)
+  set('set-audiomodel-endpoint-label', s.endpointLabel)
+  set('set-audiomodel-id-label', s.modelIdLabel)
+  set('set-audiomodel-testbtn', s.testConnectionBtn)
+  set('set-apikey-disclaimer', s.setApikeyDisclaimer)
+  setPlh('ai-api-key', s.aiApiKeyPh)
+  setPlh('ai-model-id', s.aiModelIdPh)
+  setPlh('ai-audio-api-key', s.aiAudioApikeyPh)
+  setPlh('ai-audio-endpoint', s.aiAudioEndpointPh)
+  setPlh('ai-audio-model-id', s.aiAudioModelidPh)
+
+  // Settings: Token 使用统计
+  set('set-tokenstats-title', s.setTokenstatsTitle)
+  set('token-tab-today', s.tokenTabToday)
+  set('token-tab-week', s.tokenTabWeek)
+  set('token-tab-month', s.tokenTabMonth)
+  set('token-stats-loading', s.loadingTip)
+  set('set-version-label', s.setVersionLabel)
+  // Token 统计明细（输入/输出、按功能分类文案）需要重新渲染才能生效
+  if (typeof renderTokenStats === 'function' && typeof _tokenStats !== 'undefined' && _tokenStats) renderTokenStats()
 
   // settings page
   set('set-page-title', s.setTitle)
