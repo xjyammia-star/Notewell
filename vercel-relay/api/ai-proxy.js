@@ -38,7 +38,7 @@ export default async function handler(req, res) {
             type: 'image_url',
             image_url: {
               url: type === 'health_vision'
-                ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+                ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAFklEQVR4nGPYYmNDEmIY1TCqYfhqAAD19SwQ/QoZMQAAAABJRU5ErkJggg=='
                 : `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`
             }
           }
