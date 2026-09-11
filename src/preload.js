@@ -64,6 +64,7 @@ contextBridge.exposeInMainWorld('api', {
   moveNote:          (args)      => ipcRenderer.invoke('move-note', args),
   saveAiSettings:    (settings)  => ipcRenderer.invoke('save-ai-settings', settings),
   getAiSettings:     ()          => ipcRenderer.invoke('get-ai-settings'),
+  testRelayConnection: (kind)    => ipcRenderer.invoke('test-relay-connection', { kind }),
   selectInboxFolder: ()          => ipcRenderer.invoke('select-inbox-folder'),
   aiClassifyFile:    (args)      => ipcRenderer.invoke('ai-classify-file', args),
   aiImportFiles:     (args)      => ipcRenderer.invoke('ai-import-files', args),

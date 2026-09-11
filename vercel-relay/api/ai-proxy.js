@@ -29,12 +29,19 @@ export default async function handler(req, res) {
       return res.status(200).json(result)
     }
 
-    if (type === 'vision') {
+    if (type === 'vision' || type === 'health_vision') {
       const visionMessages = [{
         role: 'user',
         content: [
-          { type: 'text', text: prompt || '' },
-          { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
+          { type: 'text', text: type === 'health_vision' ? '这张图是什么颜色？一个词回答' : (prompt || '') },
+          {
+            type: 'image_url',
+            image_url: {
+              url: type === 'health_vision'
+                ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+                : `data:${mimeType || 'image/jpeg'};base64,${imageBase64}`
+            }
+          }
         ]
       }]
       const result = await callArk({
@@ -42,7 +49,7 @@ export default async function handler(req, res) {
         modelId: process.env.ARK_VISION_MODEL_ID,
         endpoint: process.env.ARK_VISION_ENDPOINT || process.env.ARK_ENDPOINT || 'https://ark.cn-beijing.volces.com/api/v3',
         messages: visionMessages,
-        maxTokens
+        maxTokens: type === 'health_vision' ? 5 : maxTokens
       })
       return res.status(200).json(result)
     }

@@ -13,6 +13,12 @@ const pdfParse = require('pdf-parse')
 const store = new Store()
 let mainWindow
 
+// ── AI 中转服务（Vercel）配置 ──
+// 部署好 Vercel 项目后，把下面两个值换成实际的部署网址和你在 Vercel 环境变量里
+// 填的 RELAY_SHARED_SECRET，两边必须完全一致，否则中转服务会拒绝请求（401）。
+const RELAY_URL = 'https://notewell-pi.vercel.app'
+const RELAY_SECRET = '63217767'
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1100, height: 720, minWidth: 800, minHeight: 600,
@@ -1042,9 +1048,6 @@ ipcMain.handle('scan-missing-summary', async (event, { scanPath, vaultPath }) =>
 // ── 为单篇笔记写入 AI 标签 ──
 ipcMain.handle('write-summary', async (event, { filePath }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先配置 API Key' }
-  }
   try {
     const raw = fs.readFileSync(filePath, 'utf-8')
     const body = raw.replace(/^---[\s\S]*?---\r?\n?/, '').trim().slice(0, 2000)
@@ -1152,6 +1155,24 @@ ipcMain.handle('save-ai-settings', async (event, settings) => {
   store.set('aiSettings', settings)
   return { success: true }
 })
+
+// ── 测试 AI 中转服务连接 ──
+ipcMain.handle('test-relay-connection', async (event, { kind } = {}) => {
+  try {
+    const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
+      body: JSON.stringify({ type: kind === 'vision' ? 'health_vision' : 'health' })
+    })
+    const data = await resp.json()
+    if (!resp.ok || !data.success) {
+      return { success: false, error: data.error || `中转服务返回错误（状态码 ${resp.status}）` }
+    }
+    return { success: true, reply: data.text }
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+})
 // ── Token 使用统计 ──
 function recordTokenUsage(feature, modelType, inputTokens, outputTokens) {
   try {
@@ -1233,25 +1254,20 @@ function logAICall(line) {
 
 // ── AI 调用（火山引擎）──
 function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry) {
+  // apiKey/modelId/endpoint 参数保留只是为了不用改调用这个函数的几十处代码，
+  // 实际已经不再使用——AI 请求现在统一发给 Vercel 中转服务，Key 由中转服务端保管。
   const timeoutMs = 120000
   const callId = Math.random().toString(36).slice(2, 8)
   const promptLen = JSON.stringify(messages).length
   const t0 = Date.now()
-  logAICall(`[${callId}] 发起请求 modelId=${modelId} endpoint=${endpoint} maxTokens=${maxTokens||500} promptLen=${promptLen} retry=${!!_isRetry}`)
+  logAICall(`[${callId}] 发起请求（中转服务）maxTokens=${maxTokens||500} promptLen=${promptLen} retry=${!!_isRetry}`)
   const apiCall = new Promise((resolve, reject) => {
-    // thinking:disabled 关掉模型的内部"思考"步骤。真正的原因找到了：这个模型是带"思考"模式的，
-    // 遇到有很多琐碎判断点的内容（比如这次网球那段话，里面有好几处标点/格式的模糊地带）时，
-    // 会在看不见的思考阶段里反复纠结，导致耗时远超正常水平甚至卡住不返回，跟网络、跟App完全无关，
-    // 已经用同样的内容在App外单独测试验证过：开着思考模式必卡，关掉之后4秒多就正常返回。
-    const body = JSON.stringify({ model: modelId, messages, max_tokens: maxTokens || 500, thinking: { type: 'disabled' } })
-    const fullUrl = endpoint.replace(/\/+$/, '') + '/chat/completions'
-    // 改用 Electron 自带的 net 模块（走 Chromium 的网络栈），不再用 Node 的 https 模块。
-    // Electron 28 内置的是 Node 18，跟这台电脑单独装的 Node（版本高出好几代）在网络底层实现上
-    // 差异不小，怀疑是 Node 18 在这类请求上的某个边界情况有问题——用 Chromium 的网络栈可以绕开
-    // Node 版本本身的这个不确定因素。
+    const body = JSON.stringify({ type: 'text', messages, maxTokens: maxTokens || 500 })
+    const fullUrl = RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy'
+    // 用 Electron 自带的 net 模块（走 Chromium 的网络栈），不用 Node 的 https 模块。
     const req = net.request({ method: 'POST', url: fullUrl })
     req.setHeader('Content-Type', 'application/json')
-    req.setHeader('Authorization', 'Bearer ' + apiKey)
+    req.setHeader('x-relay-secret', RELAY_SECRET)
 
     let stalled = false
     const stallTimer = setTimeout(() => {
@@ -1271,16 +1287,16 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
       res.on('end', () => {
         logAICall(`[${callId}] 响应结束 elapsed=${Date.now()-t0}ms bodyBytes=${Buffer.byteLength(data)}`)
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          reject(new Error('AI 服务返回错误（状态码 ' + res.statusCode + '）：' + data.slice(0, 300)))
+          reject(new Error('中转服务返回错误（状态码 ' + res.statusCode + '）：' + data.slice(0, 300)))
           return
         }
         try {
           const json = JSON.parse(data)
-          if (!json.choices || !json.choices[0]) {
-            reject(new Error('AI 返回结果格式异常：' + data.slice(0, 300)))
+          if (!json.success) {
+            reject(new Error(json.error || 'AI 返回结果异常'))
             return
           }
-          resolve({ content: json.choices?.[0]?.message?.content || '', usage: json.usage || {} })
+          resolve({ content: json.text || '', usage: json.usage || {} })
         } catch (e) { reject(e) }
       })
     })
@@ -1297,13 +1313,13 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
     req.end()
   })
   const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('AI 请求超时（120秒），可能是网络不稳定或 AI 服务响应较慢，请稍后重试；若反复出现，请检查网络连接，或到"设置"里确认 API Key / 模型 ID 是否正确')), timeoutMs)
+    setTimeout(() => reject(new Error('AI 请求超时（120秒），可能是网络不稳定或中转服务响应较慢，请稍后重试')), timeoutMs)
   )
   return Promise.race([apiCall, timeout]).then(result => {
     logAICall(`[${callId}] 成功 elapsed=${Date.now()-t0}ms`)
     return result
   }).catch(err => {
-    // 连接卡住（45秒内无任何响应）大多是偶发的跨境网络抖动，自动重试一次；
+    // 连接卡住（45秒内无任何响应）大多是偶发的网络抖动，自动重试一次；
     // 重试仍失败或其他类型的错误（认证失败、格式错误等）不会重试，直接把原始错误抛出去
     if (err && err.message === 'STALLED_NO_RESPONSE' && !_isRetry) {
       logAICall(`[${callId}] 判定卡住，准备自动重试`)
@@ -1311,7 +1327,7 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
     }
     if (err && err.message === 'STALLED_NO_RESPONSE') {
       logAICall(`[${callId}] 重试后仍卡住，放弃`)
-      throw new Error('AI 请求已重试一次仍无响应（45秒内没有收到任何数据），大概率是网络在国内节点间不稳定或被中间网络设备拦截，不是内容长度的问题，建议更换网络环境后再试')
+      throw new Error('AI 请求已重试一次仍无响应（45秒内没有收到任何数据），建议更换网络环境后再试')
     }
     logAICall(`[${callId}] 失败 elapsed=${Date.now()-t0}ms error=${err && err.message}`)
     throw err
@@ -1321,7 +1337,6 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
 // ── AI 分类单个文件 ──
 ipcMain.handle('ai-classify-file', async (event, { filePath, vaultPath, vaultFolders }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) return { success: false, error: '未设置 API Key 或模型ID' }
 
   const ext = path.extname(filePath).toLowerCase()
   const fileName = path.basename(filePath)
@@ -1443,7 +1458,6 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
         // 调 AI 分类
         const classify = await (async () => {
           try {
-            if (!settings.apiKey || !settings.modelId) return null
             const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
             const isImage = imageExts.includes(ext)
             let contentForAI = `文件名：${fileName}`
@@ -1680,9 +1694,6 @@ function buildTree(dir, depth) {
 // ── AI 分析文件夹（Map-Reduce：逐篇提取摘要 → 汇总生成报告）──
 ipcMain.handle('ai-analyze-folder', async (event, { filePaths, userPrompt }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
   const allFiles = (filePaths || []).filter(p => p.endsWith('.md') || p.endsWith('.pdf'))
   if (!allFiles.length) { return { success: false, error: '没有选择任何文件' } }
 
@@ -1996,6 +2007,8 @@ function callArkMultimodal(apiKey, modelId, endpoint, fileId, prompt, filePath) 
 // ── Doubao 视觉模型：用 base64 图片理解图片内容 ──
 // 复用音视频的 apiKey / endpoint / modelId，不需要额外上传文件
 function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxTokens) {
+  // apiKey/modelId/endpoint 参数保留只是为了不用改调用这个函数的几处代码，
+  // 实际已经不再使用——图片识别请求现在统一发给 Vercel 中转服务。
   return new Promise((resolve, reject) => {
     try {
       const ext = path.extname(imagePath).toLowerCase().slice(1)
@@ -2003,22 +2016,15 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxToken
       const mimeType = mimeMap[ext] || 'image/jpeg'
       const imageData = fs.readFileSync(imagePath)
       const base64 = imageData.toString('base64')
-      const messages = [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64}` } },
-          { type: 'text', text: prompt }
-        ]
-      }]
-      const body = JSON.stringify({ model: modelId, messages, max_tokens: maxTokens || 500 })
-      const url = new URL(endpoint + '/chat/completions')
+      const body = JSON.stringify({ type: 'vision', imageBase64: base64, mimeType, prompt, maxTokens: maxTokens || 500 })
+      const url = new URL(RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy')
       const options = {
         hostname: url.hostname,
         path: url.pathname,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey,
+          'x-relay-secret': RELAY_SECRET,
           'Content-Length': Buffer.byteLength(body)
         }
       }
@@ -2028,9 +2034,8 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxToken
         res.on('end', () => {
           try {
             const json = JSON.parse(data)
-            if (json.error) { reject(new Error('视觉API错误: ' + JSON.stringify(json.error))); return }
-            const content = json.choices?.[0]?.message?.content || ''
-            resolve({ content, usage: json.usage || {} })
+            if (!json.success) { reject(new Error(json.error || '图片识别失败')); return }
+            resolve({ content: json.text || '', usage: json.usage || {} })
           } catch (e) { reject(new Error('解析视觉响应失败: ' + data.slice(0, 200))) }
         })
       })
@@ -2095,9 +2100,6 @@ function buildAnnotatedText(original, corrections) {
 
 ipcMain.handle('essay-correct', async (event, { text }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
   const content = (text || '').trim()
   if (!content) return { success: false, error: '内容为空' }
 
@@ -2188,9 +2190,6 @@ ${content}`
 // ── 文章纠错：保存干净版 + 批改记录版到知识库（AI 判断科目文件夹）──
 ipcMain.handle('essay-save', async (event, { filename, correctedText, annotatedText, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
   const rawName = (filename || '').trim()
   if (!rawName) return { success: false, error: '请填写文件名' }
   const safeName = rawName.replace(/[\\/:*?"<>|]/g, '_').slice(0, 60)
@@ -2314,7 +2313,7 @@ ipcMain.handle('exam-get-subjects', async (event, { vaultPath }) => {
   const uncachedLabels = topLevel.map(f => f.label).filter(l => !(l in cache))
 
   if (uncachedLabels.length) {
-    if (settings.apiKey && settings.modelId) {
+    if (true) {
       try {
         const prompt = `你是一个帮助分类文件夹的助手。以下是一个学生知识库中若干一级文件夹的名称，请判断每一个是不是"学科/科目"类文件夹（例如：数学、英语、物理、化学、生物、Math、English、Biology、Chemistry、History 等学校科目），而不是其他类型的文件夹（例如：日记、临时文件夹、素材、其他、杂项、笔记、资料、Notes、Diary 等非学科类文件夹）。
 
@@ -2526,9 +2525,6 @@ function runYtDlp(ytDlpPath, args) {
 
 ipcMain.handle('youtube-to-note', async (event, { videoUrl, userPrompt }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
 
   const sendProgress = (msg) => {
     try { event.sender.send('youtube-note-progress', msg) } catch (_) {}
@@ -2771,9 +2767,6 @@ function fetchWebPage(pageUrl) {
 
 ipcMain.handle('webpage-to-note', async (event, { pageUrl, userPrompt, pasteContent, pasteTitle }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
   const sendProgress = (msg) => {
     try { event.sender.send('webpage-note-progress', msg) } catch (_) {}
   }
@@ -2871,9 +2864,6 @@ ${rawText.slice(0, 10000)}`
 // ── AI 智能保存笔记（识别内容、匹配文件夹、生成文件名和标签）──
 ipcMain.handle('ai-smart-save-note', async (event, { content, vaultPath, vaultFolders, inboxFolder, inboxPath, sourceType, sourceTitle }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
 
   // 构建文件夹列表供 AI 选择
   const folderList = (vaultFolders || [])
@@ -2999,9 +2989,6 @@ ${contentSnippet}
 // ── 整理订阅内容配文（支持翻译）──
 ipcMain.handle('process-feed-caption', async (event, { text, platform, sourceName, url, date, type }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先配置 API Key' }
-  }
   try {
     const platformNames = { youtube:'YouTube', xiaohongshu:'小红书', x:'X', instagram:'Instagram', facebook:'Facebook' }
     const platformName = platformNames[platform] || platform
@@ -3392,9 +3379,6 @@ ipcMain.handle('study-save-note', async (event, { title, content, aiPolish, outp
   const mathInstruction = '所有数学、物理、化学等公式，必须只用标准 LaTeX 语法表示一次（行内公式用 \\( ... \\)，独立公式用 \\[ ... \\]），不要额外用文字、Unicode 符号（如单独的"√"）或 "---" 分隔线去模拟或重复画一遍同一个公式/计算步骤，也不要把公式拆成多行手绘效果。'
 
   if (aiPolish) {
-    if (!settings.apiKey || !settings.modelId) {
-      return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-    }
     const polishPrompt = `你是一个笔记整理助手。${langInstruction}${mathInstruction}
 请对以下笔记内容进行整理：
 1. 纠正错别字和明显的语法错误
@@ -3431,9 +3415,6 @@ ${content}
 // ── 知识点扩充 ──
 ipcMain.handle('study-expand-knowledge', async (event, { title, description, ageGroup, curriculum, systemType, outputLang, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
 
   // 根据年龄段/课程/体系生成教学深度说明
   let levelDesc = ''
@@ -3503,9 +3484,6 @@ ${description || '（用户未提供描述）'}
 
 ipcMain.handle('study-generate-review', async (event, { filePaths, userRequirements, generateType, outputLang, vaultPath }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
 
   const allFiles = (filePaths || []).filter(p => p.endsWith('.md') || p.endsWith('.pdf'))
   if (!allFiles.length) return { success: false, error: '没有选择任何文件' }
@@ -3779,7 +3757,7 @@ async function matchFolderByFilenameAI(filename, vaultFolders, settings) {
     .filter(l => l && l !== '（根目录）')
     .join('、')
 
-  if (!folderList || !settings || !settings.apiKey || !settings.modelId) return ''
+  if (!folderList || !settings) return ''
 
   const prompt = `你是一个知识库文件归类助手。
 知识库现有文件夹：${folderList}
@@ -3883,8 +3861,5 @@ ipcMain.handle('read-file-content', async (event, filePath) => {
 // ── 学习助手：统一保存（知识点扩充、复习备考内容保存）──
 ipcMain.handle('study-smart-save', async (event, { content, vaultPath, vaultFolders, inboxFolder, inboxPath, sourceType, sourceTitle }) => {
   const settings = store.get('aiSettings', {})
-  if (!settings.apiKey || !settings.modelId) {
-    return { success: false, error: '请先在系统设置中配置 API Key 和模型 ID' }
-  }
   return await doSmartSave({ content, vaultPath, vaultFolders, inboxFolder, inboxPath, sourceType, sourceTitle, settings })
 })

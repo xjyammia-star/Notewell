@@ -1246,67 +1246,22 @@
   </div>
 
   <!-- AI 模型设置 -->
-  <div class="section-title" style="margin-top:16px;display:flex;align-items:center;gap:8px">
-    <span id="set-aimodel-title">AI 模型设置</span>
-    <span onclick="toggleHelp('help-model')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none"><span id="set-aimodel-help-toggle">说明</span> ▾</span>
-  </div>
-  <div id="help-model" style="display:none;background:#f5f4f0;border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:12px;color:#5f5e5a;line-height:1.9">
-    <span id="set-aimodel-help1">所有 AI 功能需要配置 AI 模型参数后方可生效。其中 AI 处理音频和视频需要模型能支持音频和视频的处理。</span><br>
-    <span id="set-aimodel-help2">推荐通过火山引擎方舟平台创建合适的模型接入点，也可以使用其他兼容的模型服务。</span><br>
-    <span id="set-aimodel-help3">如果文字模型和音视频模型使用同一家服务商（如火山引擎），两组可以填写相同的 API Key 和接入点。</span><br>
-    <b id="set-aimodel-help-warn">⚠️ 注意：</b><span id="set-aimodel-help-warntext">系统调用 AI 模型后会产生相关费用，请在设置前了解所选模型的收费标准。</span>
-  </div>
+  <div class="section-title" style="margin-top:16px" id="set-aimodel-title">AI 模型设置</div>
   <div class="settings-section">
-    <div style="font-size:12px;font-weight:600;color:#888780;padding:6px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px" id="set-textmodel-title">📝 文字模型</div>
     <div class="settings-row">
-      <div class="settings-label" id="set-textmodel-apikey-label">🔑 API Key</div>
-      <input type="password" id="ai-api-key" placeholder="输入文字模型的 API Key"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
-      <button class="btn-sm" id="set-textmodel-testbtn" onclick="testAiConnection()" style="margin-left:8px">测试连接</button>
+      <div style="flex:1;font-size:13px;color:#5f5e5a" id="set-aimodel-desc">AI 模型由服务端统一配置，无需在此填写 Key</div>
     </div>
     <div class="settings-row">
-      <div class="settings-label" id="set-textmodel-endpoint-label">🌐 接入点</div>
-      <input type="text" id="ai-endpoint" placeholder="https://ark.cn-beijing.volces.com/api/v3"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
+      <div class="settings-label">📝 文字模型</div>
+      <div id="relay-test-result-text" style="flex:1;font-size:12px;color:#888780"></div>
+      <button class="btn-sm" onclick="testRelayConnection('text')">测试连接</button>
     </div>
     <div class="settings-row">
-      <div class="settings-label" id="set-textmodel-id-label">📡 模型 ID</div>
-      <input type="text" id="ai-model-id" placeholder="如 ep-20260813112220-v8v92"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
-    </div>
-    <div class="settings-row">
-      <div class="settings-label"></div>
-      <div id="ai-test-result" style="flex:1;font-size:12px;color:#888780"></div>
-    </div>
-    <div style="font-size:12px;font-weight:600;color:#888780;padding:10px 0 4px 0;border-bottom:1px solid #f1efe8;margin-bottom:4px;margin-top:4px" id="set-audiomodel-title">🎙️ 图片和音视频模型</div>
-    <div class="settings-row">
-      <div class="settings-label" id="set-audiomodel-apikey-label">🔑 API Key</div>
-      <input type="password" id="ai-audio-api-key" placeholder="与文字模型相同则填写同一个 Key"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
-    </div>
-    <div class="settings-row">
-      <div class="settings-label" id="set-audiomodel-endpoint-label">🌐 接入点</div>
-      <input type="text" id="ai-audio-endpoint" placeholder="与文字模型相同则填写同一个接入点"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
-    </div>
-    <div class="settings-row">
-      <div class="settings-label" id="set-audiomodel-id-label">📡 模型 ID</div>
-      <input type="text" id="ai-audio-model-id" placeholder="如 doubao-seed-2.0-lite 的接入点 ID"
-        style="flex:1;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none"
-        onchange="saveAiSettings()">
-      <button class="btn-sm" id="set-audiomodel-testbtn" onclick="testAudioConnection()" style="margin-left:8px">测试连接</button>
-    </div>
-    <div class="settings-row">
-      <div class="settings-label"></div>
-      <div id="audio-test-result" style="flex:1;font-size:12px;color:#888780"></div>
+      <div class="settings-label">🖼️ 图片模型</div>
+      <div id="relay-test-result-vision" style="flex:1;font-size:12px;color:#888780"></div>
+      <button class="btn-sm" onclick="testRelayConnection('vision')">测试连接</button>
     </div>
   </div>
-  <p style="font-size:12px;color:#888780;margin-top:4px" id="set-apikey-disclaimer">API Key 仅保存在本地，不会上传到任何服务器。</p>
 
   <!-- Token 使用统计 -->
   <div class="section-title" style="margin-top:16px" id="set-tokenstats-title">Token 使用统计</div>
@@ -4993,12 +4948,6 @@ function esc(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'") }
 /* ── 设置页 ── */
 async function loadAiSettings() {
   const s = await window.api.getAiSettings()
-  document.getElementById('ai-api-key').value      = s.apiKey || ''
-  document.getElementById('ai-model-id').value     = s.modelId || ''
-  document.getElementById('ai-audio-model-id').value = s.audioModelId || ''
-  document.getElementById('ai-endpoint').value     = s.endpoint || 'https://ark.cn-beijing.volces.com/api/v3'
-  document.getElementById('ai-audio-api-key').value    = s.audioApiKey || ''
-  document.getElementById('ai-audio-endpoint').value   = s.audioEndpoint || 'https://ark.cn-beijing.volces.com/api/v3'
   document.getElementById('ai-classify-toggle').checked = s.aiClassifyEnabled || false
   const inboxFolderEl = document.getElementById('set-inbox-folder')
   if (inboxFolderEl && s.inboxFolder) { inboxFolderEl.textContent = s.inboxFolder; inboxFolderEl.classList.remove('empty') }
@@ -5090,18 +5039,7 @@ function renderTokenStats() {
 }
 
 async function saveAiSettings() {
-  const existing = await window.api.getAiSettings()
-  const apiKey       = document.getElementById('ai-api-key').value.trim()
-  const audioApiKey  = document.getElementById('ai-audio-api-key').value.trim()
-  const audioModelId = document.getElementById('ai-audio-model-id').value.trim()
-  const audioEndpointVal = document.getElementById('ai-audio-endpoint').value.trim()
   const s = {
-    apiKey:            apiKey || existing.apiKey || '',
-    modelId:           document.getElementById('ai-model-id').value.trim() || existing.modelId || '',
-    audioModelId:      audioModelId || existing.audioModelId || '',
-    audioApiKey:       audioApiKey || existing.audioApiKey || '',
-    audioEndpoint:     audioEndpointVal || existing.audioEndpoint || 'https://ark.cn-beijing.volces.com/api/v3',
-    endpoint:          document.getElementById('ai-endpoint').value.trim() || existing.endpoint || 'https://ark.cn-beijing.volces.com/api/v3',
     aiClassifyEnabled: document.getElementById('ai-classify-toggle').checked,
     inboxFolder:       document.getElementById('set-inbox-folder').textContent.includes('未设置') ? '' : document.getElementById('set-inbox-folder').textContent,
     ytCookiesFile:     (document.getElementById('yt-cookies-file')?.value || '').trim(),
@@ -5130,40 +5068,17 @@ async function selectInboxFolder() {
   }
 }
 
-async function testAiConnection() {
-  const resultEl = document.getElementById('ai-test-result')
+async function testRelayConnection(kind) {
+  const resultEl = document.getElementById(kind === 'vision' ? 'relay-test-result-vision' : 'relay-test-result-text')
   resultEl.textContent = '测试中...'
   resultEl.style.color = '#888780'
-  const apiKey  = document.getElementById('ai-api-key').value.trim()
-  const modelId = document.getElementById('ai-model-id').value.trim()
-  const endpoint = document.getElementById('ai-endpoint').value.trim() || 'https://ark.cn-beijing.volces.com/api/v3'
-  if (!apiKey || !modelId) { resultEl.textContent = '请先填写 API Key 和模型 ID'; resultEl.style.color = '#a32d2d'; return }
-  await window.api.saveAiSettings({ apiKey, modelId, endpoint, aiClassifyEnabled: document.getElementById('ai-classify-toggle').checked, inboxFolder: '' })
-  const res = await window.api.aiClassifyFile({ filePath: '', vaultPath: currentVaultPath||'', vaultFolders: [], testOnly: true })
-  if (res && res.error && res.error.includes('未设置')) {
-    resultEl.textContent = '❌ 请填写 API Key 和模型 ID'
-    resultEl.style.color = '#a32d2d'
-  } else {
+  const res = await window.api.testRelayConnection(kind)
+  if (res && res.success) {
     resultEl.textContent = '✅ 连接成功'
     resultEl.style.color = '#3b6d11'
-  }
-}
-
-async function testAudioConnection() {
-  const resultEl = document.getElementById('audio-test-result')
-  resultEl.textContent = '测试中...'
-  resultEl.style.color = '#888780'
-  const apiKey  = document.getElementById('ai-audio-api-key').value.trim() || document.getElementById('ai-api-key').value.trim()
-  const modelId = document.getElementById('ai-audio-model-id').value.trim()
-  const endpoint = document.getElementById('ai-audio-endpoint').value.trim() || 'https://ark.cn-beijing.volces.com/api/v3'
-  if (!apiKey || !modelId) { resultEl.textContent = '请先填写 API Key 和模型 ID'; resultEl.style.color = '#a32d2d'; return }
-  const res = await window.api.aiClassifyFile({ filePath: '', vaultPath: currentVaultPath||'', vaultFolders: [], testOnly: true, overrideApiKey: apiKey, overrideModelId: modelId, overrideEndpoint: endpoint })
-  if (res && res.error && res.error.includes('未设置')) {
-    resultEl.textContent = '❌ 请填写 API Key 和模型 ID'
-    resultEl.style.color = '#a32d2d'
   } else {
-    resultEl.textContent = '✅ 连接成功'
-    resultEl.style.color = '#3b6d11'
+    resultEl.textContent = '❌ ' + (res && res.error ? res.error : '连接失败')
+    resultEl.style.color = '#a32d2d'
   }
 }
 
@@ -7496,22 +7411,7 @@ function applyLanguage() {
   set('set-aimodel-help3', s.setAimodelHelp3)
   set('set-aimodel-help-warn', s.setAimodelHelpWarn)
   set('set-aimodel-help-warntext', s.setAimodelHelpWarntext)
-  set('set-textmodel-title', s.setTextmodelTitle)
-  set('set-textmodel-apikey-label', s.apiKeyLabel)
-  set('set-textmodel-testbtn', s.testConnectionBtn)
-  set('set-textmodel-endpoint-label', s.endpointLabel)
-  set('set-textmodel-id-label', s.modelIdLabel)
-  set('set-audiomodel-title', s.setAudiomodelTitle)
-  set('set-audiomodel-apikey-label', s.apiKeyLabel)
-  set('set-audiomodel-endpoint-label', s.endpointLabel)
-  set('set-audiomodel-id-label', s.modelIdLabel)
-  set('set-audiomodel-testbtn', s.testConnectionBtn)
-  set('set-apikey-disclaimer', s.setApikeyDisclaimer)
-  setPlh('ai-api-key', s.aiApiKeyPh)
-  setPlh('ai-model-id', s.aiModelIdPh)
-  setPlh('ai-audio-api-key', s.aiAudioApikeyPh)
-  setPlh('ai-audio-endpoint', s.aiAudioEndpointPh)
-  setPlh('ai-audio-model-id', s.aiAudioModelidPh)
+
 
   // Settings: Token 使用统计
   set('set-tokenstats-title', s.setTokenstatsTitle)
