@@ -1243,46 +1243,6 @@
         <span class="toggle-slider"></span>
       </label>
     </div>
-    <div class="settings-row" style="align-items:flex-start;padding-top:12px">
-      <div class="settings-label" style="padding-top:2px" id="set-hubname-label">📌 Hub 文件名</div>
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <label class="toggle-wrap" style="flex-shrink:0">
-            <input type="checkbox" id="hub-custom-toggle" onchange="toggleHubCustom();saveAiSettings()">
-            <span class="toggle-slider"></span>
-          </label>
-          <span style="font-size:13px;color:#5f5e5a" id="set-hubname-desc">手动指定 Hub 文件名（关闭则由 AI 自动识别）</span>
-        </div>
-        <div id="hub-custom-input" style="display:none">
-          <input type="text" id="hub-filename" placeholder="例如：Hub.md 或 readme.md（支持多个，用英文逗号分隔）"
-            style="width:100%;padding:6px 10px;border:1px solid #d3d1c7;border-radius:6px;font-size:13px;outline:none;box-sizing:border-box"
-            onchange="saveAiSettings()">
-        </div>
-        <div style="font-size:11px;color:#b4b2a9;margin-top:5px;line-height:1.7" id="set-hubname-hint">
-          Hub 文件是每个文件夹的「导航索引」，记录该文件夹内容的目录和链接。<br>
-          AI 自动识别模式下，会在每个文件夹中寻找包含最多内部链接的 md 文件作为 Hub。<br>
-          如果你的 Hub 文件有固定命名（如 readme.md、Hub.md），建议手动指定，更准确。
-        </div>
-      </div>
-    </div>
-    <div class="settings-row">
-      <div class="settings-label" id="set-reminder-label">🔔 提醒功能</div>
-      <div style="flex:1;font-size:13px;color:#5f5e5a" id="set-reminder-desc">检测今日备忘文件并发送系统提醒</div>
-      <label class="toggle-wrap">
-        <input type="checkbox" id="reminder-toggle" onchange="saveAiSettings()">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <div class="settings-row" id="reminder-advance-row" style="display:none">
-      <div class="settings-label" id="set-reminderadvance-label">⏰ 提前提醒</div>
-      <select class="sort-select" id="reminder-advance" onchange="saveAiSettings()" style="font-size:13px;padding:5px 10px">
-        <option value="0" id="set-reminderopt-0">准时提醒</option>
-        <option value="5" id="set-reminderopt-5">提前 5 分钟</option>
-        <option value="15" id="set-reminderopt-15">提前 15 分钟</option>
-        <option value="30" id="set-reminderopt-30">提前 30 分钟</option>
-        <option value="60" id="set-reminderopt-60">提前 1 小时</option>
-      </select>
-    </div>
   </div>
 
   <!-- AI 模型设置 -->
@@ -5040,9 +5000,6 @@ async function loadAiSettings() {
   document.getElementById('ai-audio-api-key').value    = s.audioApiKey || ''
   document.getElementById('ai-audio-endpoint').value   = s.audioEndpoint || 'https://ark.cn-beijing.volces.com/api/v3'
   document.getElementById('ai-classify-toggle').checked = s.aiClassifyEnabled || false
-  document.getElementById('reminder-toggle').checked    = s.reminderEnabled || false
-  document.getElementById('reminder-advance').value     = String(s.reminderAdvance || 0)
-  document.getElementById('reminder-advance-row').style.display = s.reminderEnabled ? 'flex' : 'none'
   const inboxFolderEl = document.getElementById('set-inbox-folder')
   if (inboxFolderEl && s.inboxFolder) { inboxFolderEl.textContent = s.inboxFolder; inboxFolderEl.classList.remove('empty') }
   const cookiesEl = document.getElementById('yt-cookies-file')
@@ -5054,11 +5011,6 @@ async function loadAiSettings() {
   }
   const hubFilenameEl = document.getElementById('hub-filename')
   if (hubFilenameEl) hubFilenameEl.value = s.hubFilenames || ''
-}
-
-function toggleHubCustom() {
-  const on = document.getElementById('hub-custom-toggle').checked
-  document.getElementById('hub-custom-input').style.display = on ? 'block' : 'none'
 }
 
 function toggleHelp(id) {
@@ -5151,15 +5103,12 @@ async function saveAiSettings() {
     audioEndpoint:     audioEndpointVal || existing.audioEndpoint || 'https://ark.cn-beijing.volces.com/api/v3',
     endpoint:          document.getElementById('ai-endpoint').value.trim() || existing.endpoint || 'https://ark.cn-beijing.volces.com/api/v3',
     aiClassifyEnabled: document.getElementById('ai-classify-toggle').checked,
-    reminderEnabled:   document.getElementById('reminder-toggle').checked,
-    reminderAdvance:   parseInt(document.getElementById('reminder-advance').value) || 0,
     inboxFolder:       document.getElementById('set-inbox-folder').textContent.includes('未设置') ? '' : document.getElementById('set-inbox-folder').textContent,
     ytCookiesFile:     (document.getElementById('yt-cookies-file')?.value || '').trim(),
     hubCustomEnabled:  document.getElementById('hub-custom-toggle')?.checked || false,
     hubFilenames:      (document.getElementById('hub-filename')?.value || '').trim()
   }
   await window.api.saveAiSettings(s)
-  document.getElementById('reminder-advance-row').style.display = s.reminderEnabled ? 'flex' : 'none'
 }
 
 async function selectYtCookiesFile() {
@@ -5189,7 +5138,7 @@ async function testAiConnection() {
   const modelId = document.getElementById('ai-model-id').value.trim()
   const endpoint = document.getElementById('ai-endpoint').value.trim() || 'https://ark.cn-beijing.volces.com/api/v3'
   if (!apiKey || !modelId) { resultEl.textContent = '请先填写 API Key 和模型 ID'; resultEl.style.color = '#a32d2d'; return }
-  await window.api.saveAiSettings({ apiKey, modelId, endpoint, aiClassifyEnabled: document.getElementById('ai-classify-toggle').checked, reminderEnabled: document.getElementById('reminder-toggle').checked, reminderAdvance: parseInt(document.getElementById('reminder-advance').value)||0, inboxFolder: '' })
+  await window.api.saveAiSettings({ apiKey, modelId, endpoint, aiClassifyEnabled: document.getElementById('ai-classify-toggle').checked, inboxFolder: '' })
   const res = await window.api.aiClassifyFile({ filePath: '', vaultPath: currentVaultPath||'', vaultFolders: [], testOnly: true })
   if (res && res.error && res.error.includes('未设置')) {
     resultEl.textContent = '❌ 请填写 API Key 和模型 ID'

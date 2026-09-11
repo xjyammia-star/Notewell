@@ -1,0 +1,6 @@
+{
+  "name": "notewell-ai-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Notewell AI 中转服务：把客户端的 AI 请求转发给火山引擎方舟平台，API Key 只保存在 Vercel 环境变量里，不出现在客户端代码里"
+}
