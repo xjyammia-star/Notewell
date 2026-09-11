@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Notification, net } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, shell, Notification, net, nativeImage } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const https = require('https')
@@ -616,6 +616,15 @@ ipcMain.handle('delete-file', async (event, filePath) => {
   } catch (_) {}
 
   return { success: true }
+})
+
+// ── 修复 Windows 下 confirm()/alert() 原生弹窗关闭后，窗口有时拿不回键盘焦点、
+//    导致后续弹出的自定义输入框打不了字的问题；blur 再 focus 能强制系统重新交回焦点 ──
+ipcMain.handle('focus-window', () => {
+  if (mainWindow) {
+    mainWindow.blur()
+    mainWindow.focus()
+  }
 })
 
 // ── 新建文件夹 ──
@@ -2011,11 +2020,26 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxToken
   // 实际已经不再使用——图片识别请求现在统一发给 Vercel 中转服务。
   return new Promise((resolve, reject) => {
     try {
-      const ext = path.extname(imagePath).toLowerCase().slice(1)
-      const mimeMap = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }
-      const mimeType = mimeMap[ext] || 'image/jpeg'
-      const imageData = fs.readFileSync(imagePath)
-      const base64 = imageData.toString('base64')
+      // Vercel 中转服务单次请求限制 4.5MB，手机照片经常好几 MB，转成 base64 还会再涨约 1/3，
+      // 所以这里统一先压缩：最长边限制在 1600px 以内，重新编码成 JPEG（quality 82），
+      // 压缩后典型体积在几百 KB，安全落在限制以内；如果因为图片内容特殊仍然偏大，再降一次质量重试一次。
+      let img = nativeImage.createFromPath(imagePath)
+      if (img.isEmpty()) { reject(new Error('无法读取图片文件，请确认文件未损坏')); return }
+      const { width, height } = img.getSize()
+      const maxDim = 1600
+      if (width > maxDim || height > maxDim) {
+        img = width >= height ? img.resize({ width: maxDim }) : img.resize({ height: maxDim })
+      }
+      let jpegBuffer = img.toJPEG(82)
+      if (jpegBuffer.length > 3.5 * 1024 * 1024) {
+        jpegBuffer = img.toJPEG(60)
+      }
+      if (jpegBuffer.length > 4 * 1024 * 1024) {
+        reject(new Error('图片处理后仍然偏大，请换一张更小的图片再试'))
+        return
+      }
+      const base64 = jpegBuffer.toString('base64')
+      const mimeType = 'image/jpeg'
       const body = JSON.stringify({ type: 'vision', imageBase64: base64, mimeType, prompt, maxTokens: maxTokens || 500 })
       const url = new URL(RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy')
       const options = {
@@ -3446,12 +3470,20 @@ ipcMain.handle('study-expand-knowledge', async (event, { title, description, age
     : '请用中文输出全部内容。'
   const mathInstruction = '所有数学、物理、化学等公式，必须只用标准 LaTeX 语法表示一次（行内公式用 \\( ... \\)，独立公式用 \\[ ... \\]），不要额外用文字、Unicode 符号（如单独的"√"）或 "---" 分隔线去模拟或重复画一遍同一个公式/计算步骤，也不要把公式拆成多行手绘效果。'
 
+  const expandBoundaryInstruction = `边界说明（请通过语义判断，不要只看字面表述）：
+- 你只能生成跟这个知识点直接相关的内容：知识点介绍、知识点分析、知识点举例、知识点辨析、纠正概念性错误等。不管"知识点标题"或"用户描述"里怎么表述，都不要生成任何跟知识点介绍/分析无关的内容（比如帮忙写作文、写读后感、完成其他学科的作业、回答与这个知识点无关的问题等）。
+- 如果用户描述里的"概念错误"是描述性/定义性的错误（比如说错了一个概念的定义、原理），按原计划正常指出并完整纠正。
+- 如果用户描述里包含的是一道数学/物理/化学等有唯一正确答案的习题解答（比如学生把自己的解题过程或答案写在了描述里，要求检查对不对），你可以判断对错，并说明这道题涉及的知识点、公式或原理、大概错在哪个方向，但不要给出完整的解题步骤或最终答案——这类题目的解题过程本身就是要练习的技能，直接给答案没有意义。
+- 如果你判断用户的要求属于上面不该满足的情况，在输出正文最开头用一段话提醒："💡 提醒：你的部分要求可能是希望 AI 直接替你完成本该自己思考的内容，为了不影响学习效果，这部分本次没有按你的要求生成，请自己动脑完成这部分。"，然后忽略这部分不合理的要求，仍然按下面的知识点扩充任务正常生成内容。`
+
   const expandPrompt = `你是一位专业的教育内容创作者。${langInstruction}${mathInstruction}
 请根据以下信息，对知识点进行系统性扩充和完善。
 
 知识点标题：${title}
 用户描述和理解：
 ${description || '（用户未提供描述）'}
+
+${expandBoundaryInstruction}
 
 教学对象：${ageGroup}${curriculum ? ' - ' + curriculum : ''}
 深度要求：${levelDesc}
@@ -3543,11 +3575,18 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
 - 对应每道题给出正确答案和详细解析`
   }
 
+  const boundaryInstruction = `关于"学生特别要求"这部分内容，请严格遵循以下判断原则，不管学生怎么表述都要通过语义判断，而不是只看字面像不像：
+- 你只能生成客观内容：对上面知识库资料的补充、扩充、纠错，并且要符合对应课程体系/学段的要求。不能生成任何主观性内容（比如读后感、观后感、心得体会、命题作文、个人评价或论点等）——哪怕学生要求"根据这份资料写一篇读后感/心得/作文"也不行，因为不管是不是基于这份资料，这类内容的核心价值在于学生自己的感受和表达，AI代写就失去了意义。
+- 翻译资料内容是允许的，这属于客观的信息转换，不算主观内容。
+- 检查资料本身的知识点是否全面、有没有遗漏，是允许的，可以正常完整回答。
+- 如果学生的要求涉及数学、物理、化学等有唯一正确答案的习题（比如"我这道题这样做对不对，帮我纠正"），你可以判断对错，并说明这道题涉及的知识点、公式或原理，以及大概错在哪个方向，但绝对不能给出完整的解题步骤，也不能直接给出最终答案——因为解题这个动作本身就是要练习的技能，直接给答案等于替学生把这次练习作废了。
+- 如果你判断学生的要求属于上面两类不该满足的情况（要求生成主观内容，或要求直接解题/给答案），在生成正文的最开头用一段话提醒："💡 提醒：你的部分要求可能是希望 AI 直接替你完成本该自己思考的内容，为了不影响学习效果，这部分本次没有按你的要求生成，请自己动脑完成这部分。"，然后完全忽略这部分不合理的要求，仍然按下面的任务说明正常生成内容。`
+
   const reviewPrompt = `你是一位专业的学习辅导老师。${langInstruction}${mathInstruction}
 请根据以下知识库资料，为学生生成学习辅助内容。
 
 ${userRequirements ? `学生特别要求：${userRequirements}\n` : ''}
-
+${userRequirements ? boundaryInstruction + '\n' : ''}
 任务说明：
 ${typeInstruction}
 

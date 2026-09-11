@@ -24,9 +24,9 @@
       --bg-hover:       #f1efe8;
       --bg-input:       #ffffff;
       --bg-select-opt:  #ffffff;
-      --border-color:   #d3d1c5;
-      --border-subtle:  #f1efe8;
-      --border-input:   #d3d1c7;
+      --border-color:   #b5b0a0;
+      --border-subtle:  #ddd8c9;
+      --border-input:   #b5b0a0;
       --text-primary:   #2c2c2a;
       --text-secondary: #5f5e5a;
       --text-muted:     #6f6e67;
@@ -366,9 +366,9 @@
 
     /* ── AI Tools 暗色风格 (st-*) ── */
     .st-tabs{display:flex;gap:6px;flex-shrink:0}
-    .st-tab-btn{font-size:13px;padding:8px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.04);cursor:pointer;color:rgba(255,255,255,0.45);transition:all 0.12s;font-family:inherit;white-space:nowrap}
+    .st-tab-btn{font-size:14px;padding:10px 22px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:rgba(255,255,255,0.04);cursor:pointer;color:rgba(255,255,255,0.45);transition:all 0.12s;font-family:inherit;white-space:nowrap}
     .st-tab-btn:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8)}
-    .st-tab-btn.active{background:rgba(83,74,183,0.3);border-color:rgba(83,74,183,0.6);color:#afa9ec;font-weight:600}
+    .st-tab-btn.active{background:#534ab7;border-color:#534ab7;color:#fff;font-weight:600;box-shadow:0 1px 4px rgba(83,74,183,0.4)}
     .st-tab-panel{display:none}
     .st-tab-panel.active{display:flex;flex-direction:column;gap:12px}
     .st-info-tip{font-size:12px;color:rgba(255,255,255,0.4);background:rgba(83,74,183,0.1);border:1px solid rgba(83,74,183,0.2);border-radius:7px;padding:9px 13px;line-height:1.7}
@@ -427,41 +427,45 @@
     /* ── 亮色主题下右侧栏文字修正 ── */
     [data-theme="light"] .nw-side-label { color: var(--text-secondary); font-weight: 600; }
     [data-theme="light"] #nw-tag-filter-toggle { color: var(--text-secondary) !important; border-color: var(--border-color) !important; }
+[data-theme="light"] #nw-btn-new-folder, [data-theme="light"] #nw-refresh-btn { color:#3c3489 !important; background:rgba(83,74,183,0.1) !important; border-color:rgba(83,74,183,0.45) !important; }
+[data-theme="light"] #nw-btn-new-folder:hover, [data-theme="light"] #nw-refresh-btn:hover { background:rgba(83,74,183,0.18) !important; }
+[data-theme="light"] #nw-btn-del-folder { color:#a32d2d !important; background:rgba(226,75,74,0.08) !important; border-color:rgba(226,75,74,0.4) !important; }
+[data-theme="light"] #nw-btn-del-folder:hover { background:rgba(226,75,74,0.15) !important; }
 
     /* ── 亮色主题下，st-* 系列文字颜色修正（只改颜色，不改背景和布局） ── */
-    [data-theme="light"] .st-tab-btn { color:rgba(0,0,0,0.5); border-color:rgba(0,0,0,0.12); background:rgba(0,0,0,0.04); }
-    [data-theme="light"] .st-tab-btn:hover { color:rgba(0,0,0,0.8); background:rgba(0,0,0,0.07); }
-    [data-theme="light"] .st-tab-btn.active { color:#3c3489; background:rgba(83,74,183,0.12); border-color:rgba(83,74,183,0.4); }
-    [data-theme="light"] .st-info-tip { color:rgba(0,0,0,0.55); background:rgba(83,74,183,0.06); border-color:rgba(83,74,183,0.15); }
-    [data-theme="light"] .st-input { color:#2c2c2a; background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
+    [data-theme="light"] .st-tab-btn { color:rgba(0,0,0,0.62); border-color:rgba(0,0,0,0.16); background:#fff; }
+    [data-theme="light"] .st-tab-btn:hover { color:#3c3489; background:rgba(83,74,183,0.08); border-color:rgba(83,74,183,0.35); }
+    [data-theme="light"] .st-tab-btn.active { color:#fff; background:#534ab7; border-color:#534ab7; box-shadow:0 1px 4px rgba(83,74,183,0.35); }
+    [data-theme="light"] .st-info-tip { color:rgba(0,0,0,0.55); background:rgba(83,74,183,0.06); border-color:rgba(83,74,183,0.32); }
+    [data-theme="light"] .st-input { color:#2c2c2a; background:#fff; border-color:rgba(0,0,0,0.3); }
     [data-theme="light"] .st-input::placeholder { color:rgba(0,0,0,0.3); }
-    [data-theme="light"] .st-textarea { color:#2c2c2a; background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.1); }
+    [data-theme="light"] .st-textarea { color:#2c2c2a; background:#fff; border-color:rgba(0,0,0,0.28); }
     [data-theme="light"] .st-textarea::placeholder { color:rgba(0,0,0,0.3); }
-    [data-theme="light"] .st-select { color:#2c2c2a; background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.12); }
+    [data-theme="light"] .st-select { color:#2c2c2a; background:#fff; border-color:rgba(0,0,0,0.3); }
     [data-theme="light"] .st-select option { background:#fff; color:#2c2c2a; }
-    [data-theme="light"] .st-radio-group { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
+    [data-theme="light"] .st-radio-group { background:#fff; border-color:rgba(0,0,0,0.28); }
     [data-theme="light"] .st-radio-label { color:rgba(0,0,0,0.5); }
     [data-theme="light"] .st-radio-label:has(input:checked) { color:#3c3489; background:rgba(83,74,183,0.12); }
     [data-theme="light"] .st-check-label { color:rgba(0,0,0,0.55); }
-    [data-theme="light"] .st-btn-sec { color:rgba(0,0,0,0.6); background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.15); }
+    [data-theme="light"] .st-btn-sec { color:rgba(0,0,0,0.6); background:#fff; border-color:rgba(0,0,0,0.32); }
     [data-theme="light"] .st-btn-sec:hover { color:#2c2c2a; background:rgba(0,0,0,0.08); }
     [data-theme="light"] .st-progress { color:#534ab7; }
-    [data-theme="light"] .st-result-box { color:#2c2c2a; background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.08); }
+    [data-theme="light"] .st-result-box { color:#2c2c2a; background:#fff; border-color:rgba(0,0,0,0.24); }
     [data-theme="light"] .st-result-box h1 { color:#1a1a1a; border-color:rgba(83,74,183,0.3); }
     [data-theme="light"] .st-result-box h2 { color:#534ab7; }
     [data-theme="light"] .st-result-box h3 { color:rgba(0,0,0,0.65); }
     [data-theme="light"] .st-result-box strong { color:#1a1a1a; }
-    [data-theme="light"] .st-result-box hr { border-color:rgba(0,0,0,0.08); }
-    [data-theme="light"] .st-lang-bar { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.1); }
+    [data-theme="light"] .st-result-box hr { border-color:rgba(0,0,0,0.2); }
+    [data-theme="light"] .st-lang-bar { background:#fff; border-color:rgba(0,0,0,0.28); }
     [data-theme="light"] .st-lang-bar span { color:rgba(0,0,0,0.45); }
-    [data-theme="light"] .st-folder-panel { border-color:rgba(0,0,0,0.1); }
-    [data-theme="light"] .st-folder-left { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.08); }
-    [data-theme="light"] .st-folder-right { background:rgba(0,0,0,0.02); }
-    [data-theme="light"] .st-folder-item { color:rgba(0,0,0,0.55); }
-    [data-theme="light"] .st-folder-item:hover { color:#2c2c2a; background:rgba(0,0,0,0.06); }
-    [data-theme="light"] .st-folder-item.selected { color:#3c3489; background:rgba(83,74,183,0.1); }
-    [data-theme="light"] .st-file-check-item { color:rgba(0,0,0,0.7); border-color:rgba(0,0,0,0.07); }
-    [data-theme="light"] .st-gen-type label { color:rgba(0,0,0,0.5); border-color:rgba(0,0,0,0.12); }
+    [data-theme="light"] .st-folder-panel { border-color:rgba(0,0,0,0.3); }
+    [data-theme="light"] .st-folder-left { background:#fff; border-color:rgba(0,0,0,0.28); }
+    [data-theme="light"] .st-folder-right { background:#fff; }
+    [data-theme="light"] .st-folder-item { color:rgba(0,0,0,0.78); }
+    [data-theme="light"] .st-folder-item:hover { color:#000; background:rgba(0,0,0,0.08); }
+    [data-theme="light"] .st-folder-item.selected { color:#3c3489; background:rgba(83,74,183,0.16); font-weight:600; }
+    [data-theme="light"] .st-file-check-item { color:rgba(0,0,0,0.7); border-color:rgba(0,0,0,0.22); }
+    [data-theme="light"] .st-gen-type label { color:rgba(0,0,0,0.5); border-color:rgba(0,0,0,0.3); }
     [data-theme="light"] .st-gen-type label:has(input:checked) { color:#3c3489; border-color:rgba(83,74,183,0.5); background:rgba(83,74,183,0.08); }
     [data-theme="light"] .st-selected-count { color:rgba(0,0,0,0.4); }
 
@@ -488,7 +492,7 @@
     .nw-settings-scope #help-path, .nw-settings-scope #help-model {
       background:var(--bg-hover) !important; color:var(--text-secondary) !important; }
     .nw-settings-scope #help-path b, .nw-settings-scope #help-model b { color:var(--text-primary); }
-    .nw-settings-scope div[style*="border-bottom:1px solid #f1efe8"] { border-bottom-color:var(--border-subtle) !important; color:var(--text-muted) !important; }
+    .nw-settings-scope div[style*="border-bottom:1px solid var(--border-subtle)"] { border-bottom-color:var(--border-subtle) !important; color:var(--text-muted) !important; }
     .nw-settings-scope p { color:var(--text-muted); }
     .nw-settings-scope div[style*="background:#f5f4f0"] { background:var(--bg-hover) !important; }
     .nw-settings-scope #token-stats-content { color:var(--text-secondary) !important; }
@@ -557,7 +561,7 @@
     .nw-import-scope span[style*="color:#888780"] { color:var(--text-muted) !important; }
     .nw-import-scope div[style*="background:#faeeda"] { background:var(--warn-bg) !important; border-color:var(--accent-border) !important; }
     .nw-import-scope span[style*="color:#854f0b"] { color:var(--warn-text) !important; }
-    .nw-import-scope div[style*="background:#fff;border:1px solid #e0dfd8"] { background:var(--bg-card) !important; border-color:var(--border-color) !important; }
+    .nw-import-scope div[style*="background:#fff;border:1px solid var(--border-color)"] { background:var(--bg-card) !important; border-color:var(--border-color) !important; }
 
     /* ── 文章纠错页配色（跟随主题变量） ── */
     .nw-newnote-scope { color:var(--text-secondary); }
@@ -576,7 +580,7 @@
     .nw-newnote-scope .folder-select option { background:var(--sidebar-panel-bg); color:var(--text-primary); }
     .nw-newnote-scope .import-result.success { background:var(--success-bg); color:var(--success-text); }
     .nw-newnote-scope .import-result.error { background:var(--error-bg); color:var(--error-text); }
-    .nw-newnote-scope div[style*="border-top:1px solid #e0dfd8"] { border-top-color:var(--border-color) !important; }
+    .nw-newnote-scope div[style*="border-top:1px solid var(--border-color)"] { border-top-color:var(--border-color) !important; }
     .nw-newnote-scope p[style*="color:#888780"] { color:var(--text-muted) !important; }
 
     /* ── 学习助手结果框内容样式 ── */
@@ -587,29 +591,29 @@
     .study-result-box p  { margin: 5px 0; line-height: 1.8; }
     .study-result-box ul { margin: 5px 0 5px 18px; }
     .study-result-box li { margin: 3px 0; line-height: 1.7; }
-    .study-result-box hr { border: none; border-top: 1px solid #e0dfd8; margin: 12px 0; }
+    .study-result-box hr { border: none; border-top: 1px solid var(--border-color); margin: 12px 0; }
     .study-result-box strong { font-weight: 600; color: #1a1a1a; }
     .study-result-box em { font-style: italic; color: #444; }
     .study-result-box .katex-display { margin: 10px 0; overflow-x: auto; }
     .study-result-box .katex { font-size: 1.05em; }
     .study-result-box .katex-display-wrap { text-align: center; margin: 12px 0; overflow-x: auto; }
-    .study-tabs { display:flex; gap:4px; margin-bottom:18px; border-bottom:2px solid #e0dfd8; padding-bottom:0; }
+    .study-tabs { display:flex; gap:4px; margin-bottom:18px; border-bottom:2px solid var(--border-color); padding-bottom:0; }
     .study-tab-btn { font-size:14px; padding:9px 20px; border:none; background:none; cursor:pointer; color:#888780; border-bottom:2px solid transparent; margin-bottom:-2px; border-radius:6px 6px 0 0; transition:all 0.12s; }
     .study-tab-btn:hover { background:#f1efe8; color:#444441; }
     .study-tab-btn.active { color:#534ab7; border-bottom-color:#534ab7; font-weight:600; background:#eeedfe; }
     .study-tab-panel { display:none; }
     .study-tab-panel.active { display:block; }
     .study-title-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-    .study-title-input { flex:1; border:1px solid #d3d1c7; border-radius:8px; padding:9px 14px; font-size:15px; font-weight:500; outline:none; }
+    .study-title-input { flex:1; border:1px solid var(--border-input); border-radius:8px; padding:9px 14px; font-size:15px; font-weight:500; outline:none; }
     .study-title-input:focus { border-color:#534ab7; }
-    .study-big-textarea { width:100%; min-height:220px; padding:14px 16px; border:1px solid #d3d1c7; border-radius:8px; font-size:14px; font-family:-apple-system,'Microsoft YaHei',sans-serif; line-height:1.8; resize:vertical; outline:none; background:#fff; }
+    .study-big-textarea { width:100%; min-height:220px; padding:14px 16px; border:1px solid var(--border-input); border-radius:8px; font-size:14px; font-family:-apple-system,'Microsoft YaHei',sans-serif; line-height:1.8; resize:vertical; outline:none; background:#fff; }
     .study-big-textarea:focus { border-color:#534ab7; }
     .study-big-textarea::placeholder { color:#b4b2a9; }
     .study-option-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
     .study-label { font-size:13px; color:#5f5e5a; }
-    .study-select { border:1px solid #d3d1c7; border-radius:6px; padding:5px 10px; font-size:13px; outline:none; background:#fff; color:#444441; }
+    .study-select { border:1px solid var(--border-input); border-radius:6px; padding:5px 10px; font-size:13px; outline:none; background:#fff; color:#444441; }
     .study-select:focus { border-color:#534ab7; }
-    .study-result-box { background:#fff; border:1px solid #e0dfd8; border-radius:10px; padding:16px 18px; margin-top:14px; font-size:14px; line-height:1.8; word-break:break-word; max-height:440px; overflow-y:auto; }
+    .study-result-box { background:#fff; border:1px solid var(--border-color); border-radius:10px; padding:16px 18px; margin-top:14px; font-size:14px; line-height:1.8; word-break:break-word; max-height:440px; overflow-y:auto; }
     .study-action-row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center; }
     .btn-study-primary { background:#534ab7; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:14px; cursor:pointer; font-weight:500; }
     .btn-study-primary:hover { background:#3c3489; }
@@ -627,23 +631,13 @@
     .study-save-err { font-size:12px; color:#a32d2d; background:#fcebeb; border-radius:6px; padding:8px 12px; margin-top:8px; }
     .study-progress { font-size:13px; color:#534ab7; padding:8px 0; }
     /* 复习备考文件选择区 */
-    .study-folder-panel { display:grid; grid-template-columns:220px 1fr; gap:12px; border:1px solid #e0dfd8; border-radius:10px; overflow:hidden; height:280px; margin-bottom:14px; }
-    .study-folder-left { background:#fafaf8; border-right:1px solid #e0dfd8; overflow-y:auto; padding:8px 4px; }
-    .study-folder-right { overflow-y:auto; padding:8px 10px; }
-    .study-folder-item { padding:4px 10px; font-size:13px; cursor:pointer; border-radius:4px; color:#444441; }
-    .study-folder-item:hover { background:#f1efe8; }
-    .study-folder-item.selected { background:#eeedfe; color:#3c3489; font-weight:500; }
-    .study-file-check-item { display:flex; align-items:center; gap:7px; padding:5px 2px; font-size:13px; border-bottom:1px solid #f1efe8; }
-    .study-file-check-item:last-child { border-bottom:none; }
-    .study-file-check-item input { width:15px; height:15px; accent-color:#534ab7; cursor:pointer; flex-shrink:0; }
-    .study-file-check-item label { cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .study-selected-item { display:flex; align-items:center; justify-content:space-between; gap:4px; padding:5px 2px; font-size:12px; border-bottom:1px solid var(--border-subtle); }
     .study-selected-item:last-child { border-bottom:none; }
     .study-selected-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-primary); }
     .study-selected-remove { flex-shrink:0; cursor:pointer; color:var(--text-muted); font-size:11px; padding-left:6px; }
     .study-selected-remove:hover { color:#e05252; }
     .study-gen-type { display:flex; gap:8px; flex-wrap:wrap; }
-    .study-gen-type label { display:flex; align-items:center; gap:5px; font-size:13px; color:#5f5e5a; cursor:pointer; padding:5px 12px; border:1px solid #d3d1c7; border-radius:6px; }
+    .study-gen-type label { display:flex; align-items:center; gap:5px; font-size:13px; color:#5f5e5a; cursor:pointer; padding:5px 12px; border:1px solid var(--border-input); border-radius:6px; }
     .study-gen-type label:has(input:checked) { border-color:#534ab7; background:#eeedfe; color:#3c3489; }
     .study-selected-count { font-size:12px; color:#888780; }
 
@@ -998,7 +992,7 @@
                 <input type="checkbox" id="study-note-ai-polish" checked> <span id="study-note-aipolish-label">AI 整理格式</span>
               </label>
             </div>
-            <textarea class="st-textarea" id="study-note-content" style="flex:1;min-height:260px"
+            <textarea class="st-textarea" id="study-note-content" style="flex:1;min-height:220px"
               placeholder="在这里随意记录你的学习笔记…&#10;&#10;AI 整理模式：AI 会帮你纠正错别字、润色语句，整理成 Markdown 格式，但不改变内容主旨。&#10;直接保存模式：原样保存你输入的内容。"></textarea>
             <div class="st-action-row">
               <button class="st-btn-primary" id="study-note-save-btn" onclick="studySaveNote()">💾 <span id="study-note-savebtn-label">保存笔记</span></button>
@@ -1137,7 +1131,7 @@
                 <span style="font-size:13px;font-weight:500;color:var(--text-secondary)" id="review-select-label">选择知识库资料</span>
                 <span class="st-selected-count" id="study-review-count">（未选择）</span>
               </div>
-              <div class="st-folder-panel" style="grid-template-columns:200px 3fr 2fr;">
+              <div class="st-folder-panel" style="grid-template-columns:400px 6fr 5fr;">
                 <div class="st-folder-left" id="study-review-folders">
                   <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center" id="review-folders-loading">加载中...</div>
                 </div>
@@ -1213,7 +1207,7 @@
   <!-- 路径设置 -->
   <div class="section-title" style="display:flex;align-items:center;gap:8px">
     <span id="set-path-title">路径设置</span>
-    <span onclick="toggleHelp('help-path')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid #d3d1c7;border-radius:10px;padding:1px 8px;user-select:none"><span id="set-path-help-toggle">说明</span> ▾</span>
+    <span onclick="toggleHelp('help-path')" style="cursor:pointer;font-size:12px;color:#888780;border:1px solid var(--border-input);border-radius:10px;padding:1px 8px;user-select:none"><span id="set-path-help-toggle">说明</span> ▾</span>
   </div>
   <div id="help-path" style="display:none;background:#f5f4f0;border-radius:8px;padding:12px 16px;margin-bottom:10px;font-size:12px;color:#5f5e5a;line-height:1.9">
     <b id="set-path-help1-b">1. 知识库路径</b><span id="set-path-help1-text">：选择本地知识库文件夹的路径，Notewell 将管理该文件夹下的所有内容。</span><br>
@@ -1326,7 +1320,7 @@
   </div>
 
   <!-- 确认导入 + 存入位置（横向一行）-->
-  <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e0dfd8;border-radius:12px;padding:14px 16px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--border-color);border-radius:12px;padding:14px 16px;margin-bottom:10px">
     <button class="btn-primary" onclick="doSmartImport()" id="btn-import" style="white-space:nowrap;flex-shrink:0">确认导入</button>
     <div id="ai-classify-hint" style="font-size:12px;color:#534ab7;display:none;white-space:nowrap">
       🤖 AI 自动分类，自动判断文件夹
@@ -1385,10 +1379,10 @@
         </label>
         <div id="summary-folder-picker" style="display:none;position:relative;min-width:180px">
           <div id="summary-folder-btn" onclick="toggleSummaryFolderDropdown()"
-            style="padding:4px 28px 4px 8px;border:1px solid #d3d1c7;border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative">
+            style="padding:4px 28px 4px 8px;border:1px solid var(--border-input);border-radius:6px;font-size:12px;cursor:pointer;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative">
             选择文件夹 <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:#888780">▼</span>
           </div>
-          <div id="summary-folder-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d3d1c7;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:280px;overflow-y:auto;z-index:999;margin-top:2px"></div>
+          <div id="summary-folder-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border-input);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);max-height:280px;overflow-y:auto;z-index:999;margin-top:2px"></div>
         </div>
         <button class="btn-sm" onclick="scanMissingSummary()" id="btn-scan-summary">🔍 扫描</button>
       </div>
@@ -1627,7 +1621,7 @@
     <div style="font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:6px">🗂 移动到文件夹</div>
     <div id="ff-move-file-count" style="font-size:12px;color:#888780;margin-bottom:14px"></div>
     <div style="font-size:12px;color:#888780;margin-bottom:6px">选择目标文件夹：</div>
-    <div id="ff-move-folder-list" style="overflow-y:auto;border:1px solid #e0dfd8;border-radius:8px;max-height:340px"></div>
+    <div id="ff-move-folder-list" style="overflow-y:auto;border:1px solid var(--border-color);border-radius:8px;max-height:340px"></div>
     <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
       <button class="btn-sm" onclick="ffCloseMoveOverlay()">取消</button>
       <button class="btn-sm green" id="ff-move-confirm-btn" onclick="ffConfirmMove()" style="opacity:0.4;pointer-events:none">确认移动</button>
@@ -1691,7 +1685,7 @@
   <div id="ai-sub" style="display:none">
     <!-- 返回按钮 -->
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <button onclick="showAiHome()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid #d3d1c7;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#5f5e5a;font-family:inherit">
+      <button onclick="showAiHome()" style="display:flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--border-input);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#5f5e5a;font-family:inherit">
         ← 返回
       </button>
       <div id="ai-sub-title" style="font-size:15px;font-weight:500;color:#2c2c2a"></div>
@@ -1704,13 +1698,13 @@
         <div class="section-title" style="margin:0">📁 知识库内容分析</div>
         <span style="font-size:12px;color:#888780" id="ai-analyze-file-count"></span>
       </div>
-      <div style="display:grid;grid-template-columns:200px 1fr;border:1px solid #d3d1c7;border-radius:8px;overflow:hidden;height:280px;margin-bottom:8px">
-        <div style="border-right:1px solid #d3d1c7;overflow-y:auto;background:#f5f4f0">
-          <div style="padding:7px 12px;font-size:11px;color:#888780;font-weight:500;border-bottom:1px solid #d3d1c7;letter-spacing:.3px">文件夹</div>
+      <div style="display:grid;grid-template-columns:200px 1fr;border:1px solid var(--border-input);border-radius:8px;overflow:hidden;height:280px;margin-bottom:8px">
+        <div style="border-right:1px solid var(--border-input);overflow-y:auto;background:#f5f4f0">
+          <div style="padding:7px 12px;font-size:11px;color:#888780;font-weight:500;border-bottom:1px solid var(--border-input);letter-spacing:.3px">文件夹</div>
           <div id="analyze-folder-tree" style="padding:4px 0"></div>
         </div>
         <div style="display:flex;flex-direction:column;overflow:hidden;background:#fff">
-          <div style="padding:7px 12px;font-size:11px;color:#888780;font-weight:500;border-bottom:1px solid #d3d1c7;display:flex;align-items:center;justify-content:space-between">
+          <div style="padding:7px 12px;font-size:11px;color:#888780;font-weight:500;border-bottom:1px solid var(--border-input);display:flex;align-items:center;justify-content:space-between">
             <span id="analyze-folder-label">请先选择文件夹</span>
             <span style="display:flex;gap:8px">
               <span onclick="analyzeCheckAll(true)" style="cursor:pointer;color:#6c63d4;font-size:11px">全选</span>
@@ -1734,7 +1728,7 @@
           <span class="chip" onclick="fillPrompt(this)">找出知识空缺</span>
           <span class="chip" onclick="fillPrompt(this)">翻译成中文</span>
         </div>
-        <textarea id="analyze-prompt" rows="3" placeholder="例如：帮我生成一份知识分析报告&#10;或者：把这些笔记整合成一篇完整的文章" style="width:100%;padding:10px 14px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.7;box-sizing:border-box"></textarea>
+        <textarea id="analyze-prompt" rows="3" placeholder="例如：帮我生成一份知识分析报告&#10;或者：把这些笔记整合成一篇完整的文章" style="width:100%;padding:10px 14px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.7;box-sizing:border-box"></textarea>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
         <button class="btn-primary" onclick="doAnalyzeFolder()" id="btn-analyze">开始分析</button>
@@ -1761,11 +1755,11 @@
       <!-- 第一行：左=链接输入框，右=说明提示 -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;align-items:stretch">
         <!-- 左：链接输入区 -->
-        <div style="border:2px dashed #d3d1c7;border-radius:10px;padding:22px 18px;background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+        <div style="border:2px dashed var(--border-input);border-radius:10px;padding:22px 18px;background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
           <div style="font-size:30px">▶️</div>
           <div style="font-size:13px;color:#5f5e5a;margin-top:8px;font-weight:500">粘贴 YouTube 链接</div>
           <input id="yt-url-input" type="text" placeholder="https://www.youtube.com/watch?v=xxxxx"
-            style="width:100%;margin-top:12px;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;text-align:left"
+            style="width:100%;margin-top:12px;padding:8px 12px;border:1px solid var(--border-input);border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;text-align:left"
             oninput="ytClearResult()" onkeydown="if(event.key==='Enter')doYoutubeToNote()">
           <div style="font-size:11px;color:#b4b2a9;margin-top:6px">支持 youtube.com 和 youtu.be 短链接</div>
         </div>
@@ -1793,7 +1787,7 @@
           </div>
         </div>
         <textarea id="yt-prompt" rows="3" placeholder="例如：这是一段英语课程，请用中文整理笔记；或：重点提取其中的操作步骤..."
-          style="width:100%;padding:10px 14px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
+          style="width:100%;padding:10px 14px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
       </div>
 
       <!-- 第三行：按钮 + 进度 -->
@@ -1832,7 +1826,7 @@
               <button class="btn-sm green" onclick="saveYtCaption()">💾 保存字幕为笔记</button>
             </div>
           </div>
-          <div id="yt-raw-caption" style="display:none;margin-top:8px;padding:12px;background:#fafaf8;border:1px solid #e0dfd8;border-radius:8px;font-size:12px;color:#888780;line-height:1.8;max-height:320px;overflow-y:auto;white-space:pre-wrap"></div>
+          <div id="yt-raw-caption" style="display:none;margin-top:8px;padding:12px;background:#fafaf8;border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:#888780;line-height:1.8;max-height:320px;overflow-y:auto;white-space:pre-wrap"></div>
         </div>
       </div>
       </div>
@@ -1846,7 +1840,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;align-items:stretch">
         <!-- 左：文件选择框 -->
         <div>
-          <div id="audio-file-zone" style="border:2px dashed #d3d1c7;border-radius:10px;padding:22px 18px;text-align:center;cursor:pointer;transition:border-color 0.12s;background:#fafaf8;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center" onclick="selectAudioFile()">
+          <div id="audio-file-zone" style="border:2px dashed var(--border-input);border-radius:10px;padding:22px 18px;text-align:center;cursor:pointer;transition:border-color 0.12s;background:#fafaf8;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center" onclick="selectAudioFile()">
             <div style="font-size:30px">🎬</div>
             <div style="font-size:13px;color:#5f5e5a;margin-top:8px;font-weight:500">点击选择文件</div>
             <div style="font-size:11px;color:#b4b2a9;margin-top:3px">MP3 / MP4 / M4A / WAV / MOV 等</div>
@@ -1884,7 +1878,7 @@
         </div>
         <!-- 统一大框：上半输入要求，下半显示结果 -->
         <textarea id="audio-note-prompt" rows="3" placeholder="例如：这是一段英语课程录音，请用中文整理笔记；或：重点提取其中的行动建议..."
-          style="width:100%;padding:10px 14px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
+          style="width:100%;padding:10px 14px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
       </div>
 
       <!-- 第三行：按钮 + 进度 -->
@@ -1903,7 +1897,7 @@
             <button class="btn-sm green" onclick="saveAudioNote()" id="btn-save-audio-note">💾 保存为笔记</button>
           </div>
         </div>
-        <div id="audio-note-content" style="width:100%;background:#f5f4f0;border:1px solid #e0dfd8;border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.9;white-space:pre-wrap;box-sizing:border-box"></div>
+        <div id="audio-note-content" style="width:100%;background:#f5f4f0;border:1px solid var(--border-color);border-radius:8px;padding:16px 20px;font-size:13px;line-height:1.9;white-space:pre-wrap;box-sizing:border-box"></div>
       </div>
       </div>
     </div>
@@ -1914,11 +1908,11 @@
 
       <!-- 第一行：左=链接输入，右=说明 -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;align-items:stretch">
-        <div style="border:2px dashed #d3d1c7;border-radius:10px;padding:22px 18px;background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+        <div style="border:2px dashed var(--border-input);border-radius:10px;padding:22px 18px;background:#fafaf8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
           <div style="font-size:30px">🌐</div>
           <div style="font-size:13px;color:#5f5e5a;margin-top:8px;font-weight:500">粘贴网页链接</div>
           <input id="web-url-input" type="text" placeholder="https://example.com/article"
-            style="width:100%;margin-top:12px;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;text-align:left"
+            style="width:100%;margin-top:12px;padding:8px 12px;border:1px solid var(--border-input);border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;text-align:left"
             oninput="webClearResult()" onkeydown="if(event.key==='Enter')doWebpageToNote()">
           <div style="font-size:11px;color:#b4b2a9;margin-top:6px">支持大多数新闻、博客、文章类网页</div>
         </div>
@@ -1947,7 +1941,7 @@
           </div>
         </div>
         <textarea id="web-prompt" rows="3" placeholder="例如：这是一篇英文文章，请用中文整理笔记；或：重点提取其中的数据和结论..."
-          style="width:100%;padding:10px 14px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
+          style="width:100%;padding:10px 14px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;box-sizing:border-box"></textarea>
       </div>
 
       <!-- 第三行：按钮 + 进度 -->
@@ -1985,7 +1979,7 @@
               <button class="btn-sm" onclick="copyWebRaw()">📋 复制原文</button>
             </div>
           </div>
-          <div id="web-raw-content" style="display:none;margin-top:8px;padding:12px;background:#fafaf8;border:1px solid #e0dfd8;border-radius:8px;font-size:12px;color:#888780;line-height:1.8;max-height:320px;overflow-y:auto;white-space:pre-wrap"></div>
+          <div id="web-raw-content" style="display:none;margin-top:8px;padding:12px;background:#fafaf8;border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:#888780;line-height:1.8;max-height:320px;overflow-y:auto;white-space:pre-wrap"></div>
         </div>
       </div>
     </div>
@@ -2060,23 +2054,23 @@
       <div style="font-size:12px;color:#888780;margin-bottom:6px">平台</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="feed-platform-btns">
         <button onclick="selectFeedPlatform('youtube')" class="feed-platform-btn active" data-platform="youtube" style="padding:6px 14px;border-radius:6px;border:1px solid #534ab7;background:#534ab7;color:#fff;font-size:12px;cursor:pointer;font-family:inherit">▶️ YouTube</button>
-        <button onclick="selectFeedPlatform('xiaohongshu')" class="feed-platform-btn" data-platform="xiaohongshu" style="padding:6px 14px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">🔴 小红书</button>
-        <button onclick="selectFeedPlatform('x')" class="feed-platform-btn" data-platform="x" style="padding:6px 14px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">𝕏 X</button>
-        <button onclick="selectFeedPlatform('instagram')" class="feed-platform-btn" data-platform="instagram" style="padding:6px 14px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">📷 Instagram</button>
-        <button onclick="selectFeedPlatform('facebook')" class="feed-platform-btn" data-platform="facebook" style="padding:6px 14px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">👤 Facebook</button>
+        <button onclick="selectFeedPlatform('xiaohongshu')" class="feed-platform-btn" data-platform="xiaohongshu" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border-input);background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">🔴 小红书</button>
+        <button onclick="selectFeedPlatform('x')" class="feed-platform-btn" data-platform="x" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border-input);background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">𝕏 X</button>
+        <button onclick="selectFeedPlatform('instagram')" class="feed-platform-btn" data-platform="instagram" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border-input);background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">📷 Instagram</button>
+        <button onclick="selectFeedPlatform('facebook')" class="feed-platform-btn" data-platform="facebook" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border-input);background:#fff;color:#5f5e5a;font-size:12px;cursor:pointer;font-family:inherit">👤 Facebook</button>
       </div>
     </div>
 
     <div style="margin-bottom:12px">
       <div style="font-size:12px;color:#888780;margin-bottom:6px">账号备注名称</div>
       <input id="feed-name-input" type="text" placeholder="例如：我关注的AI博主"
-        style="width:100%;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
+        style="width:100%;padding:8px 12px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
     </div>
 
     <div style="margin-bottom:6px">
       <div style="font-size:12px;color:#888780;margin-bottom:6px">账号主页链接</div>
       <input id="feed-url-input" type="text" placeholder="粘贴账号主页链接"
-        style="width:100%;padding:8px 12px;border:1px solid #d3d1c7;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
+        style="width:100%;padding:8px 12px;border:1px solid var(--border-input);border-radius:8px;font-size:13px;outline:none;box-sizing:border-box">
     </div>
     <div id="feed-url-hint" style="font-size:11px;color:#b4b2a9;margin-bottom:16px;line-height:1.6">
       例如：https://www.youtube.com/@channelname
@@ -2096,236 +2090,7 @@
 <!-- ══════════════════════════════════════ -->
 <!-- 学习助手页面（暗色风格模板，内容由 showPage 注入 #nw-main-scroll） -->
 <!-- ══════════════════════════════════════ -->
-<div id="page-study" style="display:none!important;visibility:hidden;position:absolute;top:-9999px;pointer-events:none" aria-hidden="true">
-<style>
-  /* ── AI Tools 暗色风格 ── */
-  .st-tabs { display:flex; gap:6px; margin-bottom:0; padding:0; flex-shrink:0; }
-  .st-tab-btn { font-size:13px; padding:8px 18px; border:1px solid rgba(255,255,255,0.1);
-    border-radius:8px; background:rgba(255,255,255,0.04); cursor:pointer;
-    color:rgba(255,255,255,0.45); transition:all 0.12s; font-family:inherit; white-space:nowrap; }
-  .st-tab-btn:hover { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.8); }
-  .st-tab-btn.active { background:rgba(83,74,183,0.3); border-color:rgba(83,74,183,0.6); color:#afa9ec; font-weight:600; }
-  .st-tab-panel { display:none; }
-  .st-tab-panel.active { display:flex; flex-direction:column; gap:14px; }
-  .st-info-tip { font-size:12px; color:rgba(255,255,255,0.4); background:rgba(83,74,183,0.1);
-    border:1px solid rgba(83,74,183,0.2); border-radius:7px; padding:9px 13px; line-height:1.7; }
-  .st-label { font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:5px; }
-  .st-input { width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
-    border-radius:8px; padding:9px 13px; font-size:14px; font-weight:500; color:#fff;
-    outline:none; font-family:inherit; box-sizing:border-box; }
-  .st-input:focus { border-color:#534ab7; }
-  .st-input::placeholder { color:rgba(255,255,255,0.2); font-weight:400; }
-  .st-textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-    border-radius:8px; padding:12px 14px; font-size:13px; color:rgba(255,255,255,0.85);
-    outline:none; font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
-    line-height:1.8; resize:vertical; box-sizing:border-box; }
-  .st-textarea:focus { border-color:#534ab7; }
-  .st-textarea::placeholder { color:rgba(255,255,255,0.2); }
-  .st-select { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
-    border-radius:7px; padding:6px 10px; font-size:13px; color:rgba(255,255,255,0.8);
-    outline:none; font-family:inherit; cursor:pointer; }
-  .st-select:focus { border-color:#534ab7; }
-  .st-select option { background:#1a2130; color:#fff; }
-  .st-radio-group { display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.1); border-radius:7px; padding:4px; }
-  .st-radio-label { display:flex; align-items:center; gap:5px; font-size:13px;
-    cursor:pointer; padding:4px 10px; border-radius:5px; color:rgba(255,255,255,0.5);
-    transition:background 0.1s,color 0.1s; user-select:none; }
-  .st-radio-label:has(input:checked) { background:rgba(83,74,183,0.3); color:#afa9ec; }
-  .st-radio-label input { accent-color:#534ab7; }
-  .st-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .st-check-label { display:flex; align-items:center; gap:6px; font-size:13px;
-    color:rgba(255,255,255,0.5); cursor:pointer; user-select:none; }
-  .st-check-label input { accent-color:#534ab7; width:15px; height:15px; }
-  .st-btn-primary { background:#534ab7; color:#fff; border:none; border-radius:8px;
-    padding:9px 22px; font-size:13px; cursor:pointer; font-weight:500; font-family:inherit;
-    transition:background 0.12s; }
-  .st-btn-primary:hover { background:#3c3489; }
-  .st-btn-primary:disabled { background:rgba(83,74,183,0.3); cursor:not-allowed; }
-  .st-btn-sec { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6);
-    border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:8px 18px;
-    font-size:13px; cursor:pointer; font-family:inherit; transition:background 0.12s; }
-  .st-btn-sec:hover { background:rgba(255,255,255,0.1); color:#fff; }
-  .st-btn-sec:disabled { opacity:0.35; cursor:not-allowed; }
-  .st-btn-green { background:rgba(15,110,86,0.25); color:#5dcaa5;
-    border:1px solid rgba(93,202,165,0.3); border-radius:8px; padding:8px 18px;
-    font-size:13px; cursor:pointer; font-family:inherit; transition:background 0.12s; }
-  .st-btn-green:hover { background:rgba(15,110,86,0.4); }
-  .st-btn-green:disabled { opacity:0.35; cursor:not-allowed; }
-  .st-action-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .st-progress { font-size:13px; color:#afa9ec; padding:6px 0; }
-  .st-result-box { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-    border-radius:10px; padding:16px 18px; font-size:13px; line-height:1.8;
-    word-break:break-word; max-height:480px; overflow-y:auto; color:rgba(255,255,255,0.85); }
-  .st-result-box h1 { font-size:17px; color:#fff; border-bottom:1px solid rgba(83,74,183,0.4); padding-bottom:5px; margin:12px 0 8px; }
-  .st-result-box h2 { font-size:14px; color:#afa9ec; margin:10px 0 6px; }
-  .st-result-box h3 { font-size:13px; color:rgba(255,255,255,0.7); margin:8px 0 4px; }
-  .st-result-box p  { margin:4px 0; }
-  .st-result-box ul { margin:4px 0 4px 18px; }
-  .st-result-box li { margin:2px 0; }
-  .st-result-box strong { color:#fff; }
-  .st-result-box hr { border:none; border-top:1px solid rgba(255,255,255,0.08); margin:10px 0; }
-  .st-msg-ok  { font-size:12px; color:#5dcaa5; background:rgba(15,110,86,0.15); border:1px solid rgba(93,202,165,0.25); border-radius:6px; padding:7px 12px; }
-  .st-msg-err { font-size:12px; color:#f09595; background:rgba(226,75,74,0.12); border:1px solid rgba(240,149,149,0.25); border-radius:6px; padding:7px 12px; }
-  /* 语言选择 */
-  .st-lang-bar { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:5px 12px; flex-shrink:0; }
-  .st-lang-bar span { font-size:12px; color:rgba(255,255,255,0.35); white-space:nowrap; }
-  /* 文件夹选择面板 */
-  .st-folder-panel { display:grid; grid-template-columns:200px 1fr; gap:0; border:1px solid rgba(255,255,255,0.08);
-    border-radius:10px; overflow:hidden; height:260px; }
-  .st-folder-left { background:rgba(255,255,255,0.03); border-right:1px solid rgba(255,255,255,0.08);
-    overflow-y:auto; padding:6px 4px; }
-  .st-folder-right { background:rgba(255,255,255,0.02); overflow-y:auto; padding:8px 10px; }
-  .st-folder-item { padding:5px 10px; font-size:12px; cursor:pointer; border-radius:5px;
-    color:rgba(255,255,255,0.55); }
-  .st-folder-item:hover { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.9); }
-  .st-folder-item.selected { background:rgba(83,74,183,0.25); color:#afa9ec; font-weight:500; }
-  .st-file-check-item { display:flex; align-items:center; gap:7px; padding:5px 3px;
-    font-size:12px; border-bottom:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.7); }
-  .st-file-check-item:last-child { border-bottom:none; }
-  .st-file-check-item input { accent-color:#534ab7; cursor:pointer; flex-shrink:0; }
-  .st-file-check-item label { cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .st-gen-type { display:flex; gap:8px; flex-wrap:wrap; }
-  .st-gen-type label { display:flex; align-items:center; gap:5px; font-size:13px;
-    color:rgba(255,255,255,0.5); cursor:pointer; padding:6px 13px;
-    border:1px solid rgba(255,255,255,0.1); border-radius:7px; transition:all 0.1s; }
-  .st-gen-type label:has(input:checked) { border-color:rgba(83,74,183,0.6); background:rgba(83,74,183,0.2); color:#afa9ec; }
-  .st-selected-count { font-size:12px; color:rgba(255,255,255,0.35); }
-  .st-expand-system-hint { font-size:12px; color:rgba(255,255,255,0.3); line-height:1.6; }
-  .st-expand-system-hint-wrap { background:rgba(255,255,255,0.03); border-radius:6px; padding:7px 11px; }
-</style>
 
-  <!-- 顶部：标签栏 + 语言选择 -->
-  <div class="st-row" style="justify-content:space-between;flex-wrap:nowrap;align-items:center">
-    <div class="st-tabs">
-      <button class="st-tab-btn active" onclick="switchStudyTab('note', this)">📝 学习笔记</button>
-      <button class="st-tab-btn" onclick="switchStudyTab('expand', this)">🔬 知识点扩充</button>
-      <button class="st-tab-btn" onclick="switchStudyTab('review', this)">📖 复习备考</button>
-    </div>
-    <div class="st-lang-bar">
-      <span>输出语言：</span>
-      <label class="st-radio-label" style="padding:3px 8px">
-        <input type="radio" name="study-output-lang-old" value="中文"> 中文
-      </label>
-      <label class="st-radio-label" style="padding:3px 8px">
-        <input type="radio" name="study-output-lang-old" value="英文" checked> English
-      </label>
-    </div>
-  </div>
-
-  <!-- ── 标签一：学习笔记 ── -->
-  <div id="study-tab-note-old" class="st-tab-panel active">
-    <div class="st-info-tip">📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。</div>
-    <div class="st-row">
-      <input type="text" class="st-input" id="study-note-title" placeholder="笔记标题（可选，不填则由 AI 自动生成）" style="flex:1">
-      <label class="st-check-label">
-        <input type="checkbox" id="study-note-ai-polish" checked> AI 整理格式
-      </label>
-    </div>
-    <textarea class="st-textarea" id="study-note-content" style="min-height:320px"
-      placeholder="在这里随意记录你的学习笔记…&#10;&#10;AI 整理模式：AI 会帮你纠正错别字、润色语句，整理成 Markdown 格式，但不改变内容主旨。&#10;直接保存模式：原样保存你输入的内容。"></textarea>
-    <div class="st-action-row">
-      <button class="st-btn-primary" id="study-note-save-btn" onclick="studySaveNote()">💾 保存笔记</button>
-      <button class="st-btn-sec" onclick="document.getElementById('study-note-content').value='';document.getElementById('study-note-title').value=''">🗑 清空</button>
-    </div>
-    <div id="study-note-msg" style="display:none"></div>
-  </div>
-
-  <!-- ── 标签二：知识点扩充 ── -->
-  <div id="study-tab-expand" class="st-tab-panel">
-    <div class="st-info-tip">🔬 输入一个知识点标题和你的理解，AI 会帮你完善内容、纠正错误，并根据年龄段/课程给出适当深度的扩展。</div>
-    <div class="st-row">
-      <input type="text" class="st-input" id="study-expand-title" placeholder="知识点标题（如：动物细胞、光合作用、牛顿第二定律…）" style="flex:1">
-      <select class="st-select" id="study-expand-age" onchange="updateCurriculumSelect()">
-        <option value="小学">小学</option>
-        <option value="初中" selected>初中</option>
-        <option value="高中">高中</option>
-      </select>
-      <div id="study-expand-system-wrap-old" class="st-radio-group">
-        <label class="st-radio-label" id="study-sys-label-cn-old">
-          <input type="radio" name="study-expand-system-old" value="国内" onchange="updateSystemLabel()"> 国内体系
-        </label>
-        <label class="st-radio-label" id="study-sys-label-intl-old">
-          <input type="radio" name="study-expand-system-old" value="国际" checked onchange="updateSystemLabel()"> 国际体系
-        </label>
-      </div>
-      <select class="st-select" id="study-expand-curriculum-old" style="display:none">
-        <option value="IGCSE">IGCSE</option>
-        <option value="A-Level">A-Level</option>
-        <option value="AP">AP</option>
-        <option value="IB">IB</option>
-        <option value="普通高中">普通高中</option>
-      </select>
-    </div>
-    <div id="study-expand-system-hint" class="st-expand-system-hint-wrap">
-      <span class="st-expand-system-hint">🌏 国际体系：参照 Cambridge Lower Secondary / IB MYP 课程框架，注重概念理解和批判性思维</span>
-    </div>
-    <textarea class="st-textarea" id="study-expand-desc" style="min-height:200px"
-      placeholder="写下你对这个知识点的理解和描述（可以不完整、有错误，AI 会帮你纠正和补充）&#10;&#10;示例：动物细胞有细胞膜、细胞质和细胞核，没有细胞壁，我记得还有线粒体？"></textarea>
-    <div class="st-action-row">
-      <button class="st-btn-primary" id="study-expand-btn" onclick="studyExpandKnowledge()">✨ AI 扩充知识点</button>
-    </div>
-    <div id="study-expand-progress" style="display:none" class="st-progress">⏳ AI 正在扩充知识点，请稍候...</div>
-    <div id="study-expand-result-wrap" style="display:none">
-      <div class="st-row" style="justify-content:space-between">
-        <span style="font-size:13px;font-weight:500;color:var(--text-secondary)">✅ 扩充结果预览</span>
-        <span style="font-size:12px;color:var(--text-muted)">可向下滚动查看完整内容</span>
-      </div>
-      <div class="st-result-box study-result-box" id="study-expand-result"></div>
-      <div class="st-action-row">
-        <button class="st-btn-green" id="study-expand-save-btn" onclick="studyExpandSave()">📂 保存到知识库</button>
-        <button class="st-btn-sec" onclick="studyCopyResult('study-expand-result')">📋 复制内容</button>
-      </div>
-      <div id="study-expand-msg" style="display:none"></div>
-    </div>
-  </div>
-
-  <!-- ── 标签三：复习备考 ── -->
-  <div id="study-tab-review" class="st-tab-panel">
-    <div class="st-info-tip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
-    <div>
-      <div class="st-row" style="margin-bottom:8px">
-        <span style="font-size:13px;font-weight:500;color:var(--text-secondary)">选择知识库资料</span>
-        <span class="st-selected-count" id="study-review-count">（未选择）</span>
-      </div>
-      <div class="st-folder-panel">
-        <div class="st-folder-left" id="study-review-folders">
-          <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:14px;text-align:center">加载中...</div>
-        </div>
-        <div class="st-folder-right" id="study-review-files">
-          <div style="font-size:11px;color:rgba(255,255,255,0.25);padding:14px;text-align:center">← 点击左侧文件夹查看文件</div>
-        </div>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:10px">生成内容类型</div>
-      <div class="st-gen-type">
-        <label><input type="radio" name="study-gen-type-old" value="review" checked> 📋 复习资料</label>
-        <label><input type="radio" name="study-gen-type-old" value="quiz"> ✏️ 练习题</label>
-        <label><input type="radio" name="study-gen-type-old" value="both"> 📚 复习资料 + 练习题</label>
-      </div>
-    </div>
-    <textarea class="st-textarea" id="study-review-requirement" style="min-height:90px"
-      placeholder="（可选）补充说明：重点关注哪些知识点？有什么特别要求？&#10;&#10;示例：重点考察光合作用的暗反应部分；练习题多出一些计算题；请用英文生成..."></textarea>
-    <div class="st-action-row">
-      <button class="st-btn-primary" id="study-review-btn" onclick="studyGenerateReview()">🤖 AI 生成复习内容</button>
-    </div>
-    <div id="study-review-progress" style="display:none" class="st-progress">⏳ AI 正在生成复习内容，请稍候（内容较多时可能需要1~2分钟）...</div>
-    <div id="study-review-result-wrap" style="display:none">
-      <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.7)">✅ 生成结果预览</div>
-      <div class="st-result-box study-result-box" id="study-review-result" style="max-height:500px"></div>
-      <div class="st-action-row">
-        <button class="st-btn-green" id="study-review-save-btn" onclick="studyReviewSave()">📂 保存到知识库（md）</button>
-        <button class="st-btn-sec" id="study-review-pdf-btn" onclick="studyReviewDownloadPDF()">📄 下载 PDF</button>
-        <button class="st-btn-sec" onclick="studyCopyResult('study-review-result')">📋 复制内容</button>
-      </div>
-      <div id="study-review-msg" style="display:none"></div>
-    </div>
-  </div>
-
-</div>
-<!-- ／学习助手页面 -->
 
 
 
@@ -3054,7 +2819,7 @@ async function scanMissingSummary() {
 
   const panel = document.getElementById('summary-files-panel')
   panel.innerHTML = _summaryFiles.map((f, i) =>
-    `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #f1efe8;font-size:13px">
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border-subtle);font-size:13px">
       <input type="checkbox" class="summary-cb" data-index="${i}" checked style="width:15px;height:15px;accent-color:#534ab7;flex-shrink:0">
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${f.relativePath}">📝 ${f.name}</span>
       <span style="font-size:11px;color:#b4b2a9;flex-shrink:0">${f.relativePath.split('/').slice(0,-1).join('/')}</span>
@@ -3154,7 +2919,7 @@ async function runHubBatchUpdate() {
       </div>
     </div>
     ${_hubScanItems.map((item, i) => `
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-top:1px solid #f1efe8;font-size:13px">
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-top:1px solid var(--border-subtle);font-size:13px">
         <input type="checkbox" class="hub-cb" data-index="${i}" checked style="width:15px;height:15px;accent-color:#534ab7;flex-shrink:0">
         <span style="font-size:14px">${item.status === 'create' ? '🆕' : '📝'}</span>
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.relativePath}">${item.folderName}</span>
@@ -3194,7 +2959,7 @@ async function doHubUpdate() {
   listEl.innerHTML = `
     <div style="color:#0f6e56;padding:8px;font-size:13px;font-weight:500">✅ 已完成 ${updated.length} 个文件夹的 Hub 补全</div>
     ${updated.map(r => `
-      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-top:1px solid #f1efe8;font-size:13px">
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-top:1px solid var(--border-subtle);font-size:13px">
         <span style="color:#0f6e56">📌</span>
         <span style="flex:1">${r.folderName}</span>
         <span style="font-size:11px;color:#888780">${r.added ? `+${r.added} 条` : ''}${r.removed ? ` -${r.removed} 条` : ''} ${r.added === 0 && r.removed === 0 ? '（已创建）' : ''}</span>
@@ -3221,13 +2986,19 @@ async function loadInboxFiles() {
   if (!res.success || !res.files.length) {
     panel.innerHTML = '<div class="empty-tip">临时文件夹里没有文件</div>'
   } else {
-    panel.innerHTML = res.files.map(f => `
+    panel.innerHTML = res.files.map(f => {
+      const ep = esc(f.path)
+      return `
       <div class="inbox-file-item" onclick="toggleInboxCheck(this)">
         <input type="checkbox" class="inbox-check" data-path="${f.path}" onclick="event.stopPropagation();updateInboxCount()">
         <span class="ff-icon">${fileIcon(f.name)}</span>
         <span class="inbox-file-name" title="${f.path}">${f.name}</span>
         <span class="inbox-file-meta">${f.mtime}</span>
-      </div>`).join('')
+        <span class="ff-actions">
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+        </span>
+      </div>`}).join('')
     updateInboxCount()
   }
 }
@@ -3360,7 +3131,7 @@ async function runDuplicates() {
   const total = res.duplicates.reduce((s, g) => s + g.length, 0)
   el.innerHTML = `<div style="font-size:13px;color:#888780;margin-bottom:10px">发现 ${res.duplicates.length} 组重复文件（共 ${total} 个），同组内文件名和大小完全相同</div>` +
     res.duplicates.map((group, gi) => `
-      <div style="background:#fafaf8;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;margin-bottom:8px">
+      <div style="background:#fafaf8;border:1px solid var(--border-color);border-radius:8px;padding:10px 12px;margin-bottom:8px">
         <div style="font-size:12px;color:#888780;margin-bottom:6px">第 ${gi+1} 组 · ${group[0].name} · ${formatSize(group[0].size)}</div>
         ${group.map(f => `<div class="check-item" style="padding:5px 0">
           <div style="flex:1;min-width:0">
@@ -4288,7 +4059,7 @@ async function renderFeedList() {
       const lastCheck = f.lastCheck
         ? new Date(f.lastCheck).toLocaleString('zh-CN', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' })
         : '从未检查'
-      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 12px 7px 44px;border-top:1px solid #f1efe8;font-size:13px">
+      return `<div style="display:flex;align-items:center;gap:8px;padding:7px 12px 7px 44px;border-top:1px solid var(--border-subtle);font-size:13px">
         <div style="flex:1;min-width:0">
           <span style="color:#2c2c2a">${f.name}</span>
           <span style="font-size:11px;color:#b4b2a9;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.url}</span>
@@ -4316,7 +4087,7 @@ async function renderFeedList() {
             const typeInfo = { video:{label:'视频',color:'#534ab7',canProcess:true,action:'整理配文'}, article:{label:'图文',color:'#0f6e56',canProcess:true,action:'AI整理'}, tweet:{label:'推文',color:'#0f6e56',canProcess:true,action:'AI整理'}, image:{label:'图片',color:'#888780',canProcess:true,action:'整理配文'}, unknown:{label:'未知',color:'#888780',canProcess:true,action:'AI整理'} }
             const t = typeInfo[item.type] || typeInfo.unknown
             const date = formatFeedTime(item.publishedAt)
-            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-top:1px solid #f1efe8;background:#fff">
+            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-top:1px solid var(--border-subtle);background:#fff">
               <input type="checkbox" class="feed-item-cb" data-index="${globalIdx}" style="margin-top:3px;width:15px;height:15px;accent-color:#534ab7;flex-shrink:0">
               <div style="flex:1;min-width:0">
                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap">
@@ -4375,7 +4146,7 @@ function selectFeedPlatform(platform) {
     const active = btn.dataset.platform === platform
     btn.style.background = active ? '#534ab7' : '#fff'
     btn.style.color = active ? '#fff' : '#5f5e5a'
-    btn.style.borderColor = active ? '#534ab7' : '#d3d1c7'
+    btn.style.borderColor = active ? '#534ab7' : 'var(--border-input)'
   })
   const p = FEED_PLATFORMS[platform]
   document.getElementById('feed-url-hint').textContent = p?.hint || ''
@@ -5026,7 +4797,7 @@ function renderTokenStats() {
     for (const [feature, tokens] of Object.entries(data.byFeature)) {
       const label = featureLabels[feature] || feature
       const total = tokens.input + tokens.output
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid #f1efe8">
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:1px solid var(--border-subtle)">
         <span style="color:#5f5e5a">${label}</span>
         <span style="font-weight:500;color:#2c2c2a">${total.toLocaleString()} tokens</span>
       </div>`
@@ -5379,7 +5150,7 @@ async function studyReviewLoadFolders() {
 function renderStudyReviewFolderTree(node, container, vaultPath) {
   // 根目录
   const rootEl = document.createElement('div')
-  rootEl.className = 'study-folder-item'
+  rootEl.className = 'st-folder-item'
   rootEl.textContent = '📁 ' + node.name
   rootEl.onclick = () => studyReviewLoadFiles(vaultPath, rootEl)
   container.appendChild(rootEl)
@@ -5387,7 +5158,7 @@ function renderStudyReviewFolderTree(node, container, vaultPath) {
   const renderChildren = (children, parent) => {
     for (const child of (children || [])) {
       const el = document.createElement('div')
-      el.className = 'study-folder-item'
+      el.className = 'st-folder-item'
       el.style.paddingLeft = (child.depth * 10 + 10) + 'px'
       el.textContent = '📁 ' + child.name
       el.dataset.folderPath = child.path
@@ -5401,7 +5172,7 @@ function renderStudyReviewFolderTree(node, container, vaultPath) {
 
 async function studyReviewLoadFiles(folderPath, clickedEl) {
   // 高亮选中文件夹
-  document.querySelectorAll('#study-review-folders .study-folder-item').forEach(el => el.classList.remove('selected'))
+  document.querySelectorAll('#study-review-folders .st-folder-item').forEach(el => el.classList.remove('selected'))
   if (clickedEl) clickedEl.classList.add('selected')
 
   const fileList = document.getElementById('study-review-files')
@@ -5416,7 +5187,7 @@ async function studyReviewLoadFiles(folderPath, clickedEl) {
     fileList.innerHTML = ''
     for (const file of res.files) {
       const item = document.createElement('div')
-      item.className = 'study-file-check-item'
+      item.className = 'st-file-check-item'
       const checkbox = document.createElement('input')
       checkbox.type = 'checkbox'
       checkbox.id = 'study-review-file-' + encodeURIComponent(file.path)
@@ -5433,10 +5204,26 @@ async function studyReviewLoadFiles(folderPath, clickedEl) {
       }
       const label = document.createElement('label')
       label.htmlFor = checkbox.id
+      label.style.flex = '1'
+      label.style.minWidth = '0'
       const icon = file.type === 'pdf' ? '📄' : '📝'
       label.textContent = icon + ' ' + file.name
+      const actions = document.createElement('span')
+      actions.className = 'ff-actions'
+      actions.onclick = (e) => e.stopPropagation()
+      const openBtn = document.createElement('button')
+      openBtn.className = 'ff-btn'
+      openBtn.textContent = '打开'
+      openBtn.onclick = () => window.api.openFileDirectly(file.path)
+      const showBtn = document.createElement('button')
+      showBtn.className = 'ff-btn'
+      showBtn.textContent = '文件管理器'
+      showBtn.onclick = () => openFile(file.path)
+      actions.appendChild(openBtn)
+      actions.appendChild(showBtn)
       item.appendChild(checkbox)
       item.appendChild(label)
+      item.appendChild(actions)
       fileList.appendChild(item)
     }
   } catch(e) {
@@ -5989,7 +5776,9 @@ async function nwLoadFilesByType(type, label) {
     filesEl.innerHTML = res.files.map(f => {
       const icon = fileIcon(f.name)
       const ep = esc(f.path)
-      return `<div class="folder-file-item">
+      const dp = encodeURIComponent(f.path)
+      return `<div class="folder-file-item" onclick="ffToggleItem(this)">
+        <input type="checkbox" class="ff-checkbox" data-path="${dp}" onclick="event.stopPropagation()" onchange="this.closest('.folder-file-item').classList.toggle('ff-selected',this.checked);ffUpdateCount()">
         <span class="ff-icon">${icon}</span>
         <span class="ff-name" title="${f.name}">${f.name}</span>
         <span class="ff-meta">${f.mtime||''}</span>
@@ -5999,6 +5788,7 @@ async function nwLoadFilesByType(type, label) {
         </span>
       </div>`
     }).join('')
+    ffShowActionBar(true)
   } catch(e) {}
 }
 
@@ -6322,7 +6112,10 @@ function nwOpenNewFolderModal() {
   if (input) input.value = ''
   const modal = document.getElementById('nw-folder-modal')
   modal.style.display = 'flex'
-  // 用 requestAnimationFrame 确保 DOM 渲染完成后再聚焦
+  // 之前用 confirm()/alert() 弹过窗（比如删除文件夹的确认框）之后，Windows 有时不会把
+  // 键盘焦点还给窗口，导致这里 input.focus() 看着聚焦了但打不出字；先让主进程强制把
+  // 焦点抢回窗口，再走原来的双重 requestAnimationFrame 聚焦输入框逻辑。
+  window.api.focusWindow().catch(() => {})
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       if (input) { input.focus(); input.select() }
