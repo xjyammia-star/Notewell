@@ -9,6 +9,8 @@ if (typeof globalThis.DOMMatrix === 'undefined') {
   globalThis.DOMMatrix = class DOMMatrix { constructor() {} }
 }
 const pdfParse = require('pdf-parse')
+const mammoth = require('mammoth')
+const { Document: DocxDocument, Packer: DocxPacker, Paragraph: DocxParagraph, HeadingLevel: DocxHeadingLevel, TextRun: DocxTextRun } = require('docx')
 
 const store = new Store()
 let mainWindow
@@ -346,6 +348,22 @@ ipcMain.handle('get-folder-md-files', async (event, folderPath) => {
       if (item.endsWith('.icloud') && item.includes('.md')) {
         const realName = item.replace(/^\./, '').replace(/\.icloud$/, '')
         files.push({ name: realName, path: full, mtime: '', cloud: true, type: 'md' })
+      }
+    }
+    return { success: true, files }
+  } catch (err) { return { success: false, error: err.message } }
+})
+// -- get-folder-all-files: 文件夹内所有文件（不限扩展名，非递归）——供"资料转换"选择文件用 --
+ipcMain.handle('get-folder-all-files', async (event, folderPath) => {
+  try {
+    const files = []
+    for (const item of fs.readdirSync(folderPath)) {
+      if (item.startsWith('.')) continue
+      const full = path.join(folderPath, item)
+      const stat = fs.lstatSync(full)
+      if (!stat.isDirectory()) {
+        const ext = path.extname(item).toLowerCase()
+        files.push({ name: item, path: full, mtime: stat.mtime.toISOString().slice(0,10), type: ext ? ext.slice(1) : '' })
       }
     }
     return { success: true, files }
@@ -3613,6 +3631,241 @@ ${combinedContent}`
     return { success: true, result: replyObj.content, fileCount: fileSummaries.length }
   } catch (err) {
     return { success: false, error: 'AI 生成失败：' + err.message }
+  }
+})
+
+// ── 资料转换：资料翻译（目前只支持 md / pdf，其他格式需先做格式转换）──
+ipcMain.handle('convert-translate', async (event, { filePath, targetLang }) => {
+  const settings = store.get('aiSettings', {})
+  if (!filePath) return { success: false, error: '未指定文件' }
+
+  const ext = path.extname(filePath).toLowerCase()
+  if (ext !== '.md' && ext !== '.pdf') {
+    return { success: false, error: '暂时只支持翻译 md 或 pdf 格式的文件，其他格式请等待"格式转换"功能上线后再试' }
+  }
+
+  let body = ''
+  try {
+    if (ext === '.pdf') {
+      body = await extractPdfText(filePath, 6000)
+      // 检测公式渲染导致的文字提取错乱：本工具"下载 PDF"功能生成的 PDF，公式的可复制文字层
+      // 经常被拆散成一堆单字符/短碎片行（如 "a" "+" "b" "=" "c" "2"），这种情况下文字在提取
+      // 这一步就已经损坏了，翻译只会原样照抄这堆碎片，所以提前检测并提示，而不是硬翻译出乱码。
+      const lines = body.split('\n').map(l => l.trim()).filter(Boolean)
+      if (lines.length > 15) {
+        const shortLineCount = lines.filter(l => l.length <= 3).length
+        if (shortLineCount / lines.length > 0.25) {
+          return { success: false, error: '这份 PDF 里可能包含数学/物理等公式，生成 PDF 时公式的文字层被拆散成了零碎片段（这是"网页转 PDF"方式的限制，不是翻译本身的问题），直接翻译会出现乱码。建议改为翻译知识库里对应的原始 md 笔记文件（如果这份内容是由"复习备考"生成并保存过 md 版本的话），公式会是完整的代码，翻译不会有问题。' }
+        }
+      }
+    } else {
+      const raw = fs.readFileSync(filePath, 'utf-8')
+      body = raw.replace(/^---[\s\S]*?---\n?/, '').trim().slice(0, 6000)
+    }
+  } catch (e) {
+    return { success: false, error: '读取文件失败：' + e.message }
+  }
+  if (!body) return { success: false, error: '文件内容为空或无法读取' }
+
+  const langNameMap = { '中文': '中文', '英文': 'English', '泰文': 'ภาษาไทย（泰文）' }
+  const targetLangName = langNameMap[targetLang] || targetLang
+
+  const prompt = `请将以下资料内容完整翻译成${targetLangName}。
+要求：
+- 只做语言翻译，不要增删内容、不要总结、不要评论、不要改写原意
+- 尽量保留原有的段落结构和 Markdown 格式（如标题、列表、加粗等）
+- 专有名词、数字保持准确
+- 所有数学、物理、化学等公式，必须原样保留，一个字符都不要改动，包括 \\( ... \\) 和 \\[ ... \\] 这样的 LaTeX 定界符——公式本身不需要也不能翻译或转换成其他表示形式（比如不要改成 Unicode 上下标或纯文字描述），直接照抄原文里的公式代码
+- 直接输出翻译结果，不要加任何"以下是翻译结果"之类的说明性文字
+
+原文内容：
+${body}`
+
+  try {
+    const replyObj = await callVolcanoAI(settings.apiKey, settings.modelId, settings.endpoint,
+      [{ role: 'user', content: prompt }], 6000)
+    recordTokenUsage('convert', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
+
+    if (!replyObj.content) return { success: false, error: 'AI 返回内容为空' }
+
+    return { success: true, result: replyObj.content }
+  } catch (err) {
+    return { success: false, error: 'AI 翻译失败：' + err.message }
+  }
+})
+
+// ── 资料转换：保存翻译结果（存到原文件所在文件夹，生成新文件，原文件不受影响；支持存成 md 或 pdf）──
+ipcMain.handle('convert-translate-save', async (event, { content, htmlBody, format, sourceFilePath, targetLang }) => {
+  if (!sourceFilePath) return { success: false, error: '未指定原文件' }
+  const fmt = format === 'pdf' ? 'pdf' : 'md'
+  if (fmt === 'md' && !content) return { success: false, error: '没有可保存的内容' }
+  if (fmt === 'pdf' && !htmlBody) return { success: false, error: '没有可保存的内容' }
+
+  try {
+    const dir = path.dirname(sourceFilePath)
+    const srcExt = path.extname(sourceFilePath)
+    const base = path.basename(sourceFilePath, srcExt)
+    const suffix = (targetLang || '翻译').replace(/[\\/:*?"<>|]/g, '_')
+    const outExt = fmt === 'pdf' ? '.pdf' : '.md'
+
+    let filePath = path.join(dir, `${base}-${suffix}${outExt}`)
+    if (fs.existsSync(filePath)) {
+      let i = 2
+      while (fs.existsSync(path.join(dir, `${base}-${suffix}(${i})${outExt}`))) i++
+      filePath = path.join(dir, `${base}-${suffix}(${i})${outExt}`)
+    }
+
+    if (fmt === 'pdf') {
+      const pdfBuffer = await renderHtmlToPdfBuffer(htmlBody, `${base}-${suffix}`)
+      fs.writeFileSync(filePath, pdfBuffer)
+    } else {
+      fs.writeFileSync(filePath, content, 'utf-8')
+    }
+    return { success: true, filename: path.basename(filePath) }
+  } catch (err) {
+    return { success: false, error: '保存失败：' + err.message }
+  }
+})
+
+// ── 简易 Markdown → docx 转换（标题/加粗/列表/普通段落，公式以原始代码形式保留，不做渲染）──
+async function markdownToDocxBuffer(mdText, title) {
+  const children = []
+  if (title) children.push(new DocxParagraph({ text: title, heading: DocxHeadingLevel.HEADING_1 }))
+
+  const lines = (mdText || '').replace(/\r\n/g, '\n').split('\n')
+  for (const line of lines) {
+    if (!line.trim()) { children.push(new DocxParagraph({ text: '' })); continue }
+    let m
+    if ((m = line.match(/^###\s+(.*)/))) {
+      children.push(new DocxParagraph({ text: m[1], heading: DocxHeadingLevel.HEADING_3 }))
+    } else if ((m = line.match(/^##\s+(.*)/))) {
+      children.push(new DocxParagraph({ text: m[1], heading: DocxHeadingLevel.HEADING_2 }))
+    } else if ((m = line.match(/^#\s+(.*)/))) {
+      children.push(new DocxParagraph({ text: m[1], heading: DocxHeadingLevel.HEADING_1 }))
+    } else if ((m = line.match(/^[-*]\s+(.*)/))) {
+      children.push(new DocxParagraph({ text: m[1], bullet: { level: 0 } }))
+    } else {
+      // 普通段落：把 **加粗** 拆成对应的加粗文字片段，其余原样保留（包括数字列表、公式代码等）
+      const runs = []
+      const parts = line.split(/(\*\*[^*]+\*\*)/g)
+      for (const part of parts) {
+        if (!part) continue
+        const boldMatch = part.match(/^\*\*([^*]+)\*\*$/)
+        runs.push(boldMatch ? new DocxTextRun({ text: boldMatch[1], bold: true }) : new DocxTextRun(part))
+      }
+      children.push(new DocxParagraph({ children: runs.length ? runs : [new DocxTextRun(line)] }))
+    }
+  }
+
+  const doc = new DocxDocument({ sections: [{ children }] })
+  return await DocxPacker.toBuffer(doc)
+}
+
+// ── 资料转换：图片直接嵌入 PDF（不做文字识别，保留原图效果，供图片转 PDF 时二选一）──
+ipcMain.handle('convert-image-to-pdf', async (event, { filePath }) => {
+  if (!filePath) return { success: false, error: '未指定文件' }
+  try {
+    const dir = path.dirname(filePath)
+    const srcExt = path.extname(filePath)
+    const base = path.basename(filePath, srcExt)
+    let outPath = path.join(dir, `${base}.pdf`)
+    if (fs.existsSync(outPath)) {
+      let i = 2
+      while (fs.existsSync(path.join(dir, `${base}(${i}).pdf`))) i++
+      outPath = path.join(dir, `${base}(${i}).pdf`)
+    }
+    const imgUrl = pathToFileURL(filePath).href
+    const htmlBody = `<div style="text-align:center;margin-top:10px"><img src="${imgUrl}" style="max-width:100%;height:auto;"></div>`
+    const pdfBuffer = await renderHtmlToPdfBuffer(htmlBody, base)
+    fs.writeFileSync(outPath, pdfBuffer)
+    return { success: true, filename: path.basename(outPath) }
+  } catch (err) {
+    return { success: false, error: '转换失败：' + err.message }
+  }
+})
+
+// ── 资料转换：格式转换 —— 第一步，读取/提取源文件的文字内容 ──
+// 目前支持的源格式：md / txt / pdf（文字提取）/ docx（用 mammoth 转成 markdown）/ jpg・jpeg・png（AI 识别文字）
+// 暂不支持 xlsx 等表格类格式（表格转文字/文字转表格是完全不同的转换逻辑，需要单独设计）
+ipcMain.handle('convert-format-extract', async (event, { filePath }) => {
+  if (!filePath) return { success: false, error: '未指定文件' }
+  const ext = path.extname(filePath).toLowerCase()
+  const supportedExt = ['.md', '.txt', '.pdf', '.docx', '.jpg', '.jpeg', '.png']
+  if (!supportedExt.includes(ext)) {
+    return { success: false, error: '暂不支持这种源文件格式的转换。目前支持：md / txt / pdf / docx，以及 jpg / png 图片（AI 识别文字）。' }
+  }
+
+  try {
+    let content = ''
+    if (ext === '.md') {
+      const raw = fs.readFileSync(filePath, 'utf-8')
+      content = raw.replace(/^---[\s\S]*?---\n?/, '').trim()
+    } else if (ext === '.txt') {
+      content = fs.readFileSync(filePath, 'utf-8').trim()
+    } else if (ext === '.pdf') {
+      content = await extractPdfText(filePath, 8000)
+    } else if (ext === '.docx') {
+      const result = await mammoth.convertToMarkdown({ path: filePath })
+      content = (result.value || '').trim()
+    } else {
+      // 图片：复用"文章纠错"里已经在用的 AI 图片文字识别能力
+      const settings = store.get('aiSettings', {})
+      const visionApiKey = settings.audioApiKey || settings.apiKey
+      const visionModelId = settings.audioModelId || ''
+      const visionEndpoint = settings.audioEndpoint || settings.endpoint
+      if (!visionApiKey || !visionModelId) return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
+      const prompt = '请提取这张图片中的所有文字内容，按原文的顺序和分段完整输出，不要遗漏任何文字，不要添加任何解释、总结、标题或者标点符号以外的内容。如果图片中的某部分不是文字（如插图、图表），可以忽略，不用描述。'
+      const res = await callDoubaoVision(visionApiKey, visionModelId, visionEndpoint, filePath, prompt, 4000)
+      recordTokenUsage('convert', 'vision', res.usage.prompt_tokens||0, res.usage.completion_tokens||0)
+      content = (res.content || '').trim()
+    }
+    if (!content) return { success: false, error: '文件内容为空或无法读取' }
+    return { success: true, content }
+  } catch (err) {
+    return { success: false, error: '读取文件失败：' + err.message }
+  }
+})
+
+// ── 资料转换：格式转换 —— 第二步，把提取出的内容写成目标格式的新文件（原文件不受影响）──
+// pdf 需要渲染进程先把内容转成带 KaTeX 公式的 HTML（htmlBody）再传进来；md/txt/docx 直接用提取出的文字内容
+ipcMain.handle('convert-format-save', async (event, { content, htmlBody, format, sourceFilePath }) => {
+  if (!sourceFilePath) return { success: false, error: '未指定原文件' }
+  const fmt = ['md', 'txt', 'pdf', 'docx'].includes(format) ? format : 'md'
+  if (fmt !== 'pdf' && !content) return { success: false, error: '没有可保存的内容' }
+  if (fmt === 'pdf' && !htmlBody) return { success: false, error: '没有可保存的内容' }
+
+  try {
+    const dir = path.dirname(sourceFilePath)
+    const srcExt = path.extname(sourceFilePath)
+    const base = path.basename(sourceFilePath, srcExt)
+    const outExt = '.' + fmt
+
+    let filePath = path.join(dir, `${base}${outExt}`)
+    if (fs.existsSync(filePath)) {
+      let i = 2
+      while (fs.existsSync(path.join(dir, `${base}(${i})${outExt}`))) i++
+      filePath = path.join(dir, `${base}(${i})${outExt}`)
+    }
+
+    if (fmt === 'pdf') {
+      const pdfBuffer = await renderHtmlToPdfBuffer(htmlBody, base)
+      fs.writeFileSync(filePath, pdfBuffer)
+    } else if (fmt === 'docx') {
+      const docxBuffer = await markdownToDocxBuffer(content, base)
+      fs.writeFileSync(filePath, docxBuffer)
+    } else if (fmt === 'txt') {
+      const plain = content
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/\*(.+?)\*/g, '$1')
+        .replace(/^[-*]\s+/gm, '• ')
+      fs.writeFileSync(filePath, plain, 'utf-8')
+    } else {
+      fs.writeFileSync(filePath, content, 'utf-8')
+    }
+    return { success: true, filename: path.basename(filePath) }
+  } catch (err) {
+    return { success: false, error: '保存失败：' + err.message }
   }
 })
 

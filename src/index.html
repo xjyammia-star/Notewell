@@ -449,6 +449,8 @@
     [data-theme="light"] .st-check-label { color:rgba(0,0,0,0.55); }
     [data-theme="light"] .st-btn-sec { color:rgba(0,0,0,0.6); background:#fff; border-color:rgba(0,0,0,0.32); }
     [data-theme="light"] .st-btn-sec:hover { color:#2c2c2a; background:rgba(0,0,0,0.08); }
+    [data-theme="light"] .st-btn-green { color:#0f6e56; background:#e3f6ef; border-color:rgba(15,110,86,0.45); }
+    [data-theme="light"] .st-btn-green:hover { background:rgba(15,110,86,0.18); }
     [data-theme="light"] .st-progress { color:#534ab7; }
     [data-theme="light"] .st-result-box { color:#2c2c2a; background:#fff; border-color:rgba(0,0,0,0.24); }
     [data-theme="light"] .st-result-box h1 { color:#1a1a1a; border-color:rgba(83,74,183,0.3); }
@@ -880,9 +882,9 @@
               <span class="nw-nav-icon">📥</span>
               <span class="nw-nav-label" id="nwnav-label-import">Import</span>
             </button>
-            <button class="nw-nav-btn" id="nwnav-exam" onclick="showPage('exam')">
-              <span class="nw-nav-icon">🧾</span>
-              <span class="nw-nav-label" id="nwnav-label-exam">考试复盘</span>
+            <button class="nw-nav-btn" id="nwnav-convert" onclick="showPage('convert')">
+              <span class="nw-nav-icon">🔄</span>
+              <span class="nw-nav-label" id="nwnav-label-convert">资料转换</span>
             </button>
             <button class="nw-nav-btn" id="nwnav-settings" onclick="showPage('settings')">
               <span class="nw-nav-icon">⚙️</span>
@@ -971,6 +973,7 @@
               <button class="st-tab-btn" id="study-tabbtn-expand" onclick="switchStudyTab('expand', this)">🔬 <span id="study-tabbtn-expand-label">知识点扩充</span></button>
               <button class="st-tab-btn" id="study-tabbtn-essay" onclick="switchStudyTab('essay', this)">✏️ <span id="study-tabbtn-essay-label">文章纠错</span></button>
               <button class="st-tab-btn" id="study-tabbtn-review" onclick="switchStudyTab('review', this)">📖 <span id="study-tabbtn-review-label">复习备考</span></button>
+              <button class="st-tab-btn" id="study-tabbtn-exam" onclick="switchStudyTab('exam', this)">🧾 <span id="study-tabbtn-exam-label">考试复盘</span></button>
             </div>
             <div class="st-lang-bar">
               <span id="study-outputlang-label">输出语言：</span>
@@ -1170,6 +1173,60 @@
               </div>
               <div id="study-review-msg" style="display:none"></div>
             </div>
+          </div>
+
+          <!-- ── 标签五：考试复盘 ── -->
+          <div id="study-tab-exam" class="st-tab-panel nw-newnote-scope" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:14px;">
+
+  <div class="st-info-tip" id="exam-infotip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
+
+  <div class="st-row" style="gap:14px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:220px">
+      <label style="font-size:12px;color:#888780" id="exam-subject-label">科目文件夹（点击选择，支持任意层级）</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div id="exam-subject-display" style="flex:1;padding:8px 11px;border:1px solid var(--border-input);border-radius:8px;background:var(--bg-input);color:var(--text-primary);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">未选择</div>
+        <button class="btn-sm" id="exam-subject-pickbtn" onclick="examOpenSubjectPicker()">📁 选择</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
+      <label style="font-size:12px;color:#888780" id="exam-date-label">考试日期</label>
+      <input type="date" class="st-input" id="exam-date" style="width:100%">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
+      <label style="font-size:12px;color:#888780" id="exam-type-label">考试类型</label>
+      <select class="st-select" id="exam-type-select" style="width:100%" onchange="examToggleCustomType()"></select>
+    </div>
+    <div id="exam-type-custom-wrap" style="display:none;flex-direction:column;gap:5px;min-width:160px">
+      <label style="font-size:12px;color:#888780" id="exam-customtype-label">自定义类型</label>
+      <input type="text" class="st-input" id="exam-type-custom" placeholder="请输入考试类型" style="width:100%">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
+      <label style="font-size:12px;color:#888780" id="exam-score-label">分数（选填，得分 / 总分）</label>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="number" class="st-input" id="exam-score" placeholder="得分" style="width:80px">
+        <span style="color:#888780">/</span>
+        <input type="number" class="st-input" id="exam-score-total" placeholder="总分" style="width:80px">
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
+      <label style="font-size:12px;color:#888780" id="exam-grade-label">等级评价（选填）</label>
+      <input type="text" class="st-input" id="exam-grade" placeholder="如 A / B+" style="width:100%">
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
+    <label style="font-size:12px;color:#888780" id="exam-review-label">复盘内容（选填，哪里没考好、哪个知识点有欠缺等）</label>
+    <textarea class="st-textarea" id="exam-review-text" style="flex:1;min-height:220px" placeholder="写下这次考试的复盘…"></textarea>
+  </div>
+
+  <div class="st-action-row">
+    <button class="st-btn-primary" id="exam-save-btn" onclick="examSaveReview()">💾 <span id="exam-savebtn-label">保存复盘</span></button>
+    <button class="st-btn-sec" id="exam-clear-btn" onclick="examClearForm()">🗑 <span id="exam-clearbtn-label">清空</span></button>
+    <div id="exam-save-progress" style="font-size:13px;color:#888780"></div>
+  </div>
+
+  <div id="exam-save-msg" style="display:none;margin-top:4px" class="import-result"></div>
+
           </div>
 
         </div><!-- /#nw-inner-study -->
@@ -1431,59 +1488,90 @@
 
         </div><!-- /#nw-inner-import -->
 
-        <!-- ══ 考试复盘内嵌面板 ══ -->
-        <div id="nw-inner-exam" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
+        <!-- ══ 资料转换内嵌面板 ══ -->
+        <div id="nw-inner-convert" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-newnote-scope">
 
-  <div class="st-info-tip" id="exam-infotip">📌 考试复盘：记录每次测试/考试的成绩和复盘内容，只负责原样保存，不会修改或分析你写的内容。每个科目一个文件，新记录会追加在原有内容下方，并用分界线隔开，方便查看历史记录。</div>
+  <div class="st-info-tip" id="convert-infotip">🔄 从知识库选择资料，翻译成中/英/泰文，或转换成其他文档格式（doc/pdf/md/txt/xls 互转，图片支持 AI 识别转文字）。原文件不会被修改。为避免处理超时，每次仅支持选择 1 个文件进行翻译或转换。</div>
 
-  <div class="st-row" style="gap:14px;flex-wrap:wrap">
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:220px">
-      <label style="font-size:12px;color:#888780" id="exam-subject-label">科目文件夹（点击选择，支持任意层级）</label>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <div id="exam-subject-display" style="flex:1;padding:8px 11px;border:1px solid var(--border-input);border-radius:8px;background:var(--bg-input);color:var(--text-primary);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">未选择</div>
-        <button class="btn-sm" id="exam-subject-pickbtn" onclick="examOpenSubjectPicker()">📁 选择</button>
+  <div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:13px;font-weight:500;color:var(--text-secondary)" id="convert-select-label">选择知识库资料</span>
+      <span class="st-selected-count" id="convert-select-count">（未选择）</span>
+      <button class="btn-sm" onclick="convertRefreshBrowser()">🔄 <span id="convert-refresh-btn-label">刷新</span></button>
+    </div>
+    <div class="st-folder-panel" style="grid-template-columns:400px 6fr 5fr;">
+      <div class="st-folder-left" id="convert-folders">
+        <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center" id="convert-folders-loading">加载中...</div>
+      </div>
+      <div class="st-folder-right" id="convert-files">
+        <div style="font-size:11px;color:var(--text-muted);padding:14px;text-align:center" id="convert-files-hint">← 点击左侧文件夹</div>
+      </div>
+      <div class="st-folder-right" id="convert-selected" style="border-left:1px solid var(--border-color);">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;" id="convert-selected-label">已选文件（仅支持单选 1 个文件）</div>
+        <div id="convert-selected-list">
+          <div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px" id="convert-noselect-tip">暂无已选文件</div>
+        </div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
-      <label style="font-size:12px;color:#888780" id="exam-date-label">考试日期</label>
-      <input type="date" class="st-input" id="exam-date" style="width:100%">
-    </div>
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:160px">
-      <label style="font-size:12px;color:#888780" id="exam-type-label">考试类型</label>
-      <select class="st-select" id="exam-type-select" style="width:100%" onchange="examToggleCustomType()"></select>
-    </div>
-    <div id="exam-type-custom-wrap" style="display:none;flex-direction:column;gap:5px;min-width:160px">
-      <label style="font-size:12px;color:#888780" id="exam-customtype-label">自定义类型</label>
-      <input type="text" class="st-input" id="exam-type-custom" placeholder="请输入考试类型" style="width:100%">
-    </div>
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:150px">
-      <label style="font-size:12px;color:#888780" id="exam-score-label">分数（选填，得分 / 总分）</label>
-      <div style="display:flex;align-items:center;gap:6px">
-        <input type="number" class="st-input" id="exam-score" placeholder="得分" style="width:80px">
-        <span style="color:#888780">/</span>
-        <input type="number" class="st-input" id="exam-score-total" placeholder="总分" style="width:80px">
+  </div>
+
+  <!-- ── 资料翻译 + 格式转换：操作区左右并排（不含翻译预览，预览区独占整行宽度） ── -->
+  <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+
+    <!-- 左：资料翻译 -->
+    <div id="convert-panel-translate" style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:12px;">
+      <div class="section-title" style="margin:0">🌐 <span id="convert-translate-title">资料翻译</span></div>
+      <div class="st-row" style="gap:10px;align-items:center;">
+        <label style="font-size:13px;color:var(--text-secondary)" id="convert-translate-lang-label">目标语言：</label>
+        <select class="st-select" id="convert-translate-lang" style="width:180px">
+          <option value="中文">中文</option>
+          <option value="英文" selected>English</option>
+          <option value="泰文">ภาษาไทย（泰文）</option>
+        </select>
       </div>
+      <div class="st-action-row">
+        <button class="st-btn-primary" id="convert-translate-btn" onclick="convertStartTranslate()">🌐 <span id="convert-translate-btn-label">开始翻译</span></button>
+      </div>
+      <div id="convert-translate-progress" style="display:none" class="st-progress">⏳ AI 正在翻译，请稍候...</div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:5px;min-width:140px">
-      <label style="font-size:12px;color:#888780" id="exam-grade-label">等级评价（选填）</label>
-      <input type="text" class="st-input" id="exam-grade" placeholder="如 A / B+" style="width:100%">
+
+    <!-- 右：格式转换 -->
+    <div id="convert-panel-format" style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:12px;">
+      <div class="section-title" style="margin:0">🔄 <span id="convert-format-title">格式转换</span></div>
+      <div class="st-row" style="gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--text-secondary)" id="convert-format-target-label">转换为：</label>
+        <select class="st-select" id="convert-format-target" style="width:180px">
+          <option value="docx">Word（.docx）</option>
+          <option value="pdf">PDF（.pdf）</option>
+          <option value="md">Markdown（.md）</option>
+          <option value="txt">纯文本（.txt）</option>
+        </select>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted)" id="convert-format-imagehint">图片文件会先由 AI 识别文字，再转换为所选格式</div>
+      <div class="st-action-row">
+        <button class="st-btn-primary" id="convert-format-btn" onclick="convertStartFormat()">🔄 <span id="convert-format-btn-label">开始转换</span></button>
+      </div>
+      <div id="convert-format-progress" style="display:none" class="st-progress">⏳ 正在转换，请稍候...</div>
+      <div id="convert-format-msg" style="display:none"></div>
     </div>
+
   </div>
 
-  <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
-    <label style="font-size:12px;color:#888780" id="exam-review-label">复盘内容（选填，哪里没考好、哪个知识点有欠缺等）</label>
-    <textarea class="st-textarea" id="exam-review-text" style="flex:1;min-height:220px" placeholder="写下这次考试的复盘…"></textarea>
+  <!-- ── 翻译结果预览：独占整行宽度 ── -->
+  <div id="convert-translate-result-wrap" style="display:none;flex:1;min-height:0;">
+    <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px" id="convert-translate-preview-label">✅ 翻译结果预览</div>
+    <div class="st-result-box study-result-box" id="convert-translate-result" style="max-height:420px"></div>
+    <div class="st-action-row" style="margin-top:10px;align-items:center;">
+      <select class="st-select" id="convert-translate-save-format" style="width:150px">
+        <option value="pdf" selected>PDF（.pdf）</option>
+        <option value="md">Markdown（.md）</option>
+      </select>
+      <button class="st-btn-green" id="convert-translate-save-btn" onclick="convertTranslateSave()">📂 <span id="convert-translate-savebtn-label">保存到知识库</span></button>
+    </div>
+    <div id="convert-translate-msg" style="display:none"></div>
   </div>
 
-  <div class="st-action-row">
-    <button class="st-btn-primary" id="exam-save-btn" onclick="examSaveReview()">💾 <span id="exam-savebtn-label">保存复盘</span></button>
-    <button class="st-btn-sec" id="exam-clear-btn" onclick="examClearForm()">🗑 <span id="exam-clearbtn-label">清空</span></button>
-    <div id="exam-save-progress" style="font-size:13px;color:#888780"></div>
-  </div>
-
-  <div id="exam-save-msg" style="display:none;margin-top:4px" class="import-result"></div>
-
-        </div><!-- /#nw-inner-exam -->
+        </div><!-- /#nw-inner-convert -->
 
         </div><!-- /#nw-main-scroll -->
       </div><!-- /#nw-main -->
@@ -2187,7 +2275,7 @@ function showMainUI(vaultPath) {
 }
 function showPage(name) {
   // 更新导航栏按钮 active 状态
-  const nwNavMap = { home:'nwnav-home', import:'nwnav-import', study:'nwnav-study', exam:'nwnav-exam', settings:'nwnav-settings' }
+  const nwNavMap = { home:'nwnav-home', import:'nwnav-import', study:'nwnav-study', convert:'nwnav-convert', settings:'nwnav-settings' }
   document.querySelectorAll('.nw-nav-btn').forEach(btn => btn.classList.remove('active'))
   if (nwNavMap[name]) { const nb = document.getElementById(nwNavMap[name]); if(nb) nb.classList.add('active') }
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'))
@@ -2208,12 +2296,12 @@ function showPage(name) {
     const is = document.getElementById('nw-inner-study')
     const isg = document.getElementById('nw-inner-settings')
     const isi = document.getElementById('nw-inner-import')
-    const ise = document.getElementById('nw-inner-exam')
+    const isc = document.getElementById('nw-inner-convert')
     if (hc) { hc.style.display = ''; hc.classList.remove('hidden') }
     if (is) { is.style.display = 'none'; is.classList.add('hidden') }
     if (isg) { isg.style.display = 'none'; isg.classList.add('hidden') }
     if (isi) { isi.style.display = 'none'; isi.classList.add('hidden') }
-    if (ise) { ise.style.display = 'none'; ise.classList.add('hidden') }
+    if (isc) { isc.style.display = 'none'; isc.classList.add('hidden') }
     nwInitHome()
     return
   }
@@ -2222,13 +2310,13 @@ function showPage(name) {
   if (pageHome) { pageHome.style.display = 'block'; pageHome.classList.remove('hidden') }
 
   // 所有 inner 面板
-  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-exam']
+  const panels = ['nw-home-content','nw-inner-study','nw-inner-settings','nw-inner-import','nw-inner-convert']
   panels.forEach(id => {
     const el = document.getElementById(id)
     if (el) { el.style.display = 'none'; el.classList.add('hidden') }
   })
 
-  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', exam:'nw-inner-exam' }
+  const innerMap = { study:'nw-inner-study', settings:'nw-inner-settings', import:'nw-inner-import', convert:'nw-inner-convert' }
   const innerId = innerMap[name]
   if (innerId) {
     const el = document.getElementById(innerId)
@@ -2256,7 +2344,7 @@ function showPage(name) {
   }
   if (name === 'import') { loadFolders(); loadInboxFiles(); const ir=document.getElementById('import-result');if(ir)ir.classList.add('hidden');const ia=document.getElementById('import-ai-results');if(ia)ia.classList.add('hidden');const il=document.getElementById('import-results-list');if(il)il.innerHTML='' }
   if (name === 'settings') { loadAiSettings(); loadTokenStats() }
-  if (name === 'exam') examInitPage()
+  if (name === 'convert') nwConvertInitPage()
   if (name === 'ai') { showAiHome() }
 }
 
@@ -2264,6 +2352,344 @@ async function refreshAll() {
   // 重新加载概览
   await loadOverview()
   tagCloudLoaded = false
+}
+
+// ── 资料转换页面初始化 ──
+function nwConvertInitPage() {
+  convertLoadFolders()
+}
+
+let convertSelectedFiles = []
+let convertCurrentFolderPath = ''
+
+async function convertLoadFolders() {
+  const vaultPath = await window.api.getVaultPath()
+  if (!vaultPath) {
+    document.getElementById('convert-folders').innerHTML = '<div class="empty-tip" style="font-size:12px">请先选择知识库</div>'
+    return
+  }
+  try {
+    const res = await window.api.studyInvoke('get-folder-tree', vaultPath)
+    if (res.success) {
+      document.getElementById('convert-folders').innerHTML = ''
+      renderConvertFolderTree(res.tree, document.getElementById('convert-folders'), vaultPath)
+    }
+  } catch(e) {}
+  renderConvertSelected()
+}
+
+// ── 刷新文件夹树 + 当前打开的文件夹的文件列表（比如新转换/翻译生成的文件，需要手动刷新才能看到）──
+async function convertRefreshBrowser() {
+  await convertLoadFolders()
+  if (convertCurrentFolderPath) {
+    await convertLoadFiles(convertCurrentFolderPath, null)
+  }
+}
+
+function renderConvertFolderTree(node, container, vaultPath) {
+  const rootEl = document.createElement('div')
+  rootEl.className = 'st-folder-item'
+  rootEl.textContent = '📁 ' + node.name
+  rootEl.onclick = () => convertLoadFiles(vaultPath, rootEl)
+  container.appendChild(rootEl)
+
+  const renderChildren = (children, parent) => {
+    for (const child of (children || [])) {
+      const el = document.createElement('div')
+      el.className = 'st-folder-item'
+      el.style.paddingLeft = (child.depth * 10 + 10) + 'px'
+      el.textContent = '📁 ' + child.name
+      el.dataset.folderPath = child.path
+      el.onclick = () => convertLoadFiles(child.path, el)
+      parent.appendChild(el)
+      renderChildren(child.children, parent)
+    }
+  }
+  renderChildren(node.children, container)
+}
+
+// ── 根据文件扩展名选一个图标（资料转换涉及的文件类型比复习备考更多） ──
+function convertFileIcon(type) {
+  const map = { md:'📝', pdf:'📄', doc:'📄', docx:'📄', xls:'📊', xlsx:'📊', txt:'📄', jpg:'🖼️', jpeg:'🖼️', png:'🖼️' }
+  return map[(type || '').toLowerCase()] || '📎'
+}
+
+async function convertLoadFiles(folderPath, clickedEl) {
+  convertCurrentFolderPath = folderPath
+  document.querySelectorAll('#convert-folders .st-folder-item').forEach(el => el.classList.remove('selected'))
+  if (clickedEl) clickedEl.classList.add('selected')
+
+  const fileList = document.getElementById('convert-files')
+  fileList.innerHTML = '<div class="loading" style="font-size:12px;padding:12px">加载中...</div>'
+
+  try {
+    const res = await window.api.studyInvoke('get-folder-all-files', folderPath)
+    if (!res.success || !res.files || res.files.length === 0) {
+      fileList.innerHTML = '<div class="empty-tip" style="font-size:12px">此文件夹无文件</div>'
+      return
+    }
+    fileList.innerHTML = ''
+    for (const file of res.files) {
+      const item = document.createElement('div')
+      item.className = 'st-file-check-item'
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      checkbox.id = 'convert-file-' + encodeURIComponent(file.path)
+      checkbox.value = file.path
+      checkbox.checked = convertSelectedFiles.includes(file.path)
+      checkbox.onchange = () => {
+        if (checkbox.checked) {
+          // 资料转换每次只支持处理 1 个文件：选中新的会自动取消之前选的
+          convertSelectedFiles = [file.path]
+          document.querySelectorAll('#convert-files input[type="checkbox"]').forEach(cb => {
+            if (cb !== checkbox) cb.checked = false
+          })
+        } else {
+          convertSelectedFiles = []
+        }
+        updateConvertCount()
+        renderConvertSelected()
+      }
+      const label = document.createElement('label')
+      label.htmlFor = checkbox.id
+      label.style.flex = '1'
+      label.style.minWidth = '0'
+      label.textContent = convertFileIcon(file.type) + ' ' + file.name
+      const actions = document.createElement('span')
+      actions.className = 'ff-actions'
+      actions.onclick = (e) => e.stopPropagation()
+      const openBtn = document.createElement('button')
+      openBtn.className = 'ff-btn'
+      openBtn.textContent = '打开'
+      openBtn.onclick = () => window.api.openFileDirectly(file.path)
+      const showBtn = document.createElement('button')
+      showBtn.className = 'ff-btn'
+      showBtn.textContent = '文件管理器'
+      showBtn.onclick = () => openFile(file.path)
+      actions.appendChild(openBtn)
+      actions.appendChild(showBtn)
+      item.appendChild(checkbox)
+      item.appendChild(label)
+      item.appendChild(actions)
+      fileList.appendChild(item)
+    }
+  } catch(e) {
+    fileList.innerHTML = '<div class="empty-tip" style="font-size:12px">加载失败</div>'
+  }
+}
+
+function updateConvertCount() {
+  const countEl = document.getElementById('convert-select-count')
+  if (!countEl) return
+  countEl.textContent = convertSelectedFiles.length === 0 ? '（未选择）' : '（已选 ' + convertSelectedFiles.length + ' 个文件）'
+}
+
+function convertFileName(p) {
+  return (p || '').split(/[\\/]/).pop()
+}
+
+function renderConvertSelected() {
+  const wrap = document.getElementById('convert-selected-list')
+  if (!wrap) return
+  if (convertSelectedFiles.length === 0) {
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>'
+    return
+  }
+  wrap.innerHTML = convertSelectedFiles.map(p => {
+    const name = convertFileName(p)
+    const esc = p.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+    return `<div class="study-selected-item">
+      <span class="study-selected-name" title="${name}">${name}</span>
+      <span class="study-selected-remove" onclick="convertRemoveSelected('${esc}')" title="移除">✕</span>
+    </div>`
+  }).join('')
+}
+
+function convertRemoveSelected(path) {
+  convertSelectedFiles = convertSelectedFiles.filter(p => p !== path)
+  const cb = document.getElementById('convert-file-' + encodeURIComponent(path))
+  if (cb) cb.checked = false
+  updateConvertCount()
+  renderConvertSelected()
+}
+
+// ── 资料翻译 ──
+let convertTranslateResultContent = ''
+
+async function convertStartTranslate() {
+  if (convertSelectedFiles.length === 0) { alert('请先从左侧文件夹中选择 1 个文件'); return }
+  const filePath = convertSelectedFiles[0]
+  const targetLang = document.getElementById('convert-translate-lang').value
+
+  const btn = document.getElementById('convert-translate-btn')
+  const progressEl = document.getElementById('convert-translate-progress')
+  const resultWrap = document.getElementById('convert-translate-result-wrap')
+  const msgEl = document.getElementById('convert-translate-msg')
+
+  btn.disabled = true
+  btn.textContent = '⏳ 翻译中...'
+  progressEl.style.display = 'block'
+  resultWrap.style.display = 'none'
+  msgEl.style.display = 'none'
+
+  try {
+    const result = await window.api.studyInvoke('convert-translate', { filePath, targetLang })
+    if (result.success) {
+      convertTranslateResultContent = result.result
+      studyRenderResult('convert-translate-result', result.result)
+      resultWrap.style.display = 'block'
+    } else {
+      alert('翻译失败：' + (result.error || '未知错误'))
+    }
+  } catch (e) {
+    alert('翻译出错：' + e.message)
+  }
+
+  btn.disabled = false
+  btn.textContent = '🌐 开始翻译'
+  progressEl.style.display = 'none'
+}
+
+async function convertTranslateSave() {
+  if (!convertTranslateResultContent) { alert('没有可保存的翻译结果'); return }
+  const filePath = convertSelectedFiles[0]
+  const targetLang = document.getElementById('convert-translate-lang').value
+  const btn = document.getElementById('convert-translate-save-btn')
+  const msgEl = document.getElementById('convert-translate-msg')
+
+  let format = document.getElementById('convert-translate-save-format').value
+
+  // 检测到公式、但用户选的是 Markdown 时，弹出提示建议改存 PDF（跟其他保存入口的逻辑一致）
+  if (format === 'md' && nwDetectFormula(convertTranslateResultContent)) {
+    const choice = await nwShowSaveChoiceDialog()
+    if (choice === 'cancel') return
+    format = choice
+    document.getElementById('convert-translate-save-format').value = format
+  }
+
+  btn.disabled = true
+  btn.textContent = '⏳ 保存中...'
+  msgEl.style.display = 'none'
+
+  try {
+    const payload = { format, sourceFilePath: filePath, targetLang }
+    if (format === 'pdf') {
+      payload.htmlBody = nwMdToKatexHtml(convertTranslateResultContent)
+    } else {
+      payload.content = convertTranslateResultContent
+    }
+    const res = await window.api.studyInvoke('convert-translate-save', payload)
+    if (res.success) {
+      msgEl.className = 'import-result success'
+      msgEl.innerHTML = `✅ 已保存为「${essayEsc(res.filename)}」，跟原文件在同一文件夹`
+      msgEl.style.display = 'block'
+      loadOverview()
+    } else {
+      msgEl.className = 'import-result error'
+      msgEl.innerHTML = '❌ 保存失败：' + essayEsc(res.error || '未知错误')
+      msgEl.style.display = 'block'
+    }
+  } catch (e) {
+    msgEl.className = 'import-result error'
+    msgEl.innerHTML = '❌ 出错：' + essayEsc(e.message)
+    msgEl.style.display = 'block'
+  }
+
+  btn.disabled = false
+  btn.textContent = '📂 保存到知识库'
+}
+
+// 图片转 PDF 时二选一：提取文字生成文档，还是保留原图直接放进 PDF。返回 Promise<'extract'|'image'|'cancel'>
+function nwShowImagePdfChoiceDialog() {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;justify-content:center'
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:24px 26px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.25);font-family:inherit">
+        <div style="font-size:15px;font-weight:600;color:#2c2c2a;margin-bottom:8px">这张图片要怎么处理？</div>
+        <div style="font-size:13px;color:#666;line-height:1.7;margin-bottom:18px">如果图片里主要是文字（比如拍的笔记、文档），可以提取文字生成排版规整的文档；如果图片里没有文字，或者你想保留原图效果（比如插图、示意图、照片），可以直接把原图放进 PDF，不做文字识别。</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button data-choice="extract" style="padding:10px;border:none;border-radius:8px;background:#534ab7;color:#fff;font-size:13px;cursor:pointer;font-weight:600">📝 提取文字，生成文档</button>
+          <button data-choice="image" style="padding:10px;border:1px solid #d8d6cc;border-radius:8px;background:#fff;color:#444;font-size:13px;cursor:pointer">🖼️ 保留原图，直接放入 PDF</button>
+          <button data-choice="cancel" style="padding:10px;border:none;border-radius:8px;background:none;color:#999;font-size:13px;cursor:pointer">取消</button>
+        </div>
+      </div>`
+    overlay.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        document.body.removeChild(overlay)
+        resolve(btn.getAttribute('data-choice'))
+      }
+    })
+    document.body.appendChild(overlay)
+  })
+}
+
+// ── 格式转换 ──
+async function convertStartFormat() {
+  if (convertSelectedFiles.length === 0) { alert('请先从左侧文件夹中选择 1 个文件'); return }
+  const filePath = convertSelectedFiles[0]
+  const targetFormat = document.getElementById('convert-format-target').value
+  const srcExt = filePath.split(/[\\/]/).pop().split('.').pop().toLowerCase()
+  const isImage = ['jpg', 'jpeg', 'png'].includes(srcExt)
+
+  let imageMode = 'extract'
+  if (isImage && targetFormat === 'pdf') {
+    const choice = await nwShowImagePdfChoiceDialog()
+    if (choice === 'cancel') return
+    imageMode = choice
+  }
+
+  const btn = document.getElementById('convert-format-btn')
+  const progressEl = document.getElementById('convert-format-progress')
+  const msgEl = document.getElementById('convert-format-msg')
+
+  btn.disabled = true
+  btn.textContent = '⏳ 转换中...'
+  progressEl.style.display = 'block'
+  msgEl.style.display = 'none'
+
+  try {
+    if (imageMode === 'image') {
+      const saveRes = await window.api.studyInvoke('convert-image-to-pdf', { filePath })
+      if (saveRes.success) {
+        msgEl.className = 'import-result success'
+        msgEl.innerHTML = `✅ 已生成「${essayEsc(saveRes.filename)}」，跟原文件在同一文件夹`
+        msgEl.style.display = 'block'
+        loadOverview()
+      } else {
+        msgEl.className = 'import-result error'
+        msgEl.innerHTML = '❌ 转换失败：' + essayEsc(saveRes.error || '未知错误')
+        msgEl.style.display = 'block'
+      }
+    } else {
+      const extractRes = await window.api.studyInvoke('convert-format-extract', { filePath })
+      if (!extractRes.success) {
+        alert('转换失败：' + (extractRes.error || '未知错误'))
+      } else {
+        const payload = { format: targetFormat, sourceFilePath: filePath, content: extractRes.content }
+        if (targetFormat === 'pdf') {
+          payload.htmlBody = nwMdToKatexHtml(extractRes.content)
+        }
+        const saveRes = await window.api.studyInvoke('convert-format-save', payload)
+        if (saveRes.success) {
+          msgEl.className = 'import-result success'
+          msgEl.innerHTML = `✅ 已生成「${essayEsc(saveRes.filename)}」，跟原文件在同一文件夹`
+          msgEl.style.display = 'block'
+          loadOverview()
+        } else {
+          msgEl.className = 'import-result error'
+          msgEl.innerHTML = '❌ 转换失败：' + essayEsc(saveRes.error || '未知错误')
+          msgEl.style.display = 'block'
+        }
+      }
+    }
+  } catch (e) {
+    alert('转换出错：' + e.message)
+  }
+
+  btn.disabled = false
+  btn.textContent = '🔄 开始转换'
+  progressEl.style.display = 'none'
 }
 
 /* ── 概览 ── */
@@ -4746,12 +5172,12 @@ let _tokenTab = 'today'
 const FEATURE_LABELS_ZH = {
   classify: 'AI 自动分类', youtube: 'YouTube 转笔记', webpage: '网页转笔记',
   audio: '音视频转笔记', analyze: '知识库分析', subscription: '订阅追踪',
-  tag: '批量补写标签', save: '智能保存笔记'
+  tag: '批量补写标签', save: '智能保存笔记', convert: '资料转换'
 }
 const FEATURE_LABELS_EN = {
   classify: 'AI auto-classify', youtube: 'YouTube to notes', webpage: 'Webpage to notes',
   audio: 'Audio/video to notes', analyze: 'Vault analysis', subscription: 'Subscription tracking',
-  tag: 'Batch tag writing', save: 'Smart note saving'
+  tag: 'Batch tag writing', save: 'Smart note saving', convert: 'Material conversion'
 }
 function getFeatureLabels() { return nwLang === 'zh' ? FEATURE_LABELS_ZH : FEATURE_LABELS_EN }
 
@@ -4870,6 +5296,7 @@ function switchStudyTab(tab, btn) {
   if (panel) { panel.classList.add('active'); panel.style.display = 'flex' }
   if (tab === 'essay') essayInitPage()
   if (tab === 'review') studyReviewLoadFolders()
+  if (tab === 'exam') examInitPage()
 }
 
 // ── 年龄段联动：国内/国际切换 + 高中课程选择 ──
@@ -5663,7 +6090,8 @@ window.addEventListener('resize', nwApplyWindowScale)
 /* ── nwRefreshAll: 复用原有 refreshAll 逻辑，适配首页暗色风格 ── */
 async function nwRefreshAll() {
   if (!currentVaultPath) return
-  // 加载统计数字
+  // 加载统计数字（顺便记下"最近修改"列表，供下面的文件夹树使用）
+  let recentFiles = []
   try {
     const res = await window.api.getVaultStats(currentVaultPath)
     if (res.success && res.stats) {
@@ -5674,6 +6102,7 @@ async function nwRefreshAll() {
       set('nw-stat-img', s.imgCount)
       set('nw-stat-video', s.videoCount)
       set('nw-stat-other', s.otherCount)
+      recentFiles = s.recent || []
     }
   } catch(e) {}
   // 加载目录树（复用原有 buildTreeHTML/toggleTree/selectTreeNode）
@@ -5682,9 +6111,9 @@ async function nwRefreshAll() {
     const treeEl = document.getElementById('folder-tree')
     if (!treeEl) return
     if (!res.success || !res.tree) { treeEl.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-placeholder);text-align:center">No folders</div>'; return }
-    treeEl.innerHTML = nwRenderDarkTree(res.tree, currentVaultPath, 0)
-    // 自动加载最近修改
-    loadRecentFiles && loadRecentFiles([])
+    treeEl.innerHTML = `<div class="virtual-folder" onclick="loadRecentFiles()">🕐 最近修改</div>` + nwRenderDarkTree(res.tree, currentVaultPath, 0)
+    // 自动加载最近修改（用上面已经取到的真实列表，而不是清空它）
+    loadRecentFiles && loadRecentFiles(recentFiles)
   } catch(e) {}
 }
 
@@ -6694,7 +7123,7 @@ function nwInitResizer() {
 const NW_STRINGS = {
   en: {
     navHome:'Home', navNew:'Essay Correction', navImport:'Import',
-    navSearch:'Search', navAI:'AI Notes', navExam:'Exam Review', navSettings:'Settings',
+    navSearch:'Search', navAI:'AI Notes', navConvert:'Convert', navSettings:'Settings',
     // home stats
     statMd:'Notes', statPdf:'PDF', statImg:'Images', statVideo:'Videos', statOther:'Others',
     // home folders area
@@ -6726,7 +7155,7 @@ const NW_STRINGS = {
     searchingTip:'Searching…', searchResultsPrefix:'Search ', searchResultsSuffix:'results',
     noMatchTip:'No matching files found', searchErrorTip:'Search error',
     // AI Notes: tab bar
-    tabNote:'Study Notes', tabExpand:'Knowledge Expansion', tabEssay:'Essay Correction', tabReview:'Exam Prep',
+    tabNote:'Study Notes', tabExpand:'Knowledge Expansion', tabEssay:'Essay Correction', tabReview:'Exam Prep', tabExam:'Exam Review',
     outputLangLabel:'Output language:',
     // AI Notes: tab 1 学习笔记
     noteInfoTip:'📌 Jot down anything you\'re learning — AI will identify the topic and file it into the right folder. Uncategorizable notes go to your temp folder.',
@@ -6785,6 +7214,20 @@ const NW_STRINGS = {
     examSaveBtnLabel:'Save review', examClearBtnLabel:'Clear',
     examCustomtypePh:'Enter exam type', examScorePh:'Score', examScoreTotalPh:'Total', examGradePh:'e.g. A / B+',
     examReviewPh:'Write your reflection on this exam…',
+    // Convert page (资料转换)
+    convertInfoTip:'🔄 Choose material from your vault to translate it into Chinese/English/Thai, or convert it to another file format (doc/pdf/md/txt/xls conversions; images are recognized by AI into text). The original file is never modified. To avoid processing timeouts, only 1 file can be selected at a time.',
+    convertSelectLabel:'Select material from vault',
+    convertFilesHint:'← Click a folder on the left',
+    convertSelectedLabel:'Selected file (single file only)',
+    convertNoselectTip:'No file selected yet',
+    convertTranslateTitle:'Translate material', convertTranslateLangLabel:'Target language:',
+    convertTranslateBtnLabel:'Start translating', convertTranslatePreviewLabel:'✅ Translation preview',
+    convertTranslateSavebtnLabel:'Save to vault',
+    convertFormatTitle:'Convert format', convertFormatTargetLabel:'Convert to:',
+    convertFormatImagehint:'Image files are recognized by AI into text first, then converted to the format you chose',
+    convertFormatBtnLabel:'Start converting',
+    convertRefreshBtn:'Refresh',
+    convertLangOptZh:'Chinese', convertLangOptEn:'English', convertLangOptTh:'Thai',
     // Settings: theme / path / AI features / model / tokens
     setThemeModeLabel:'Theme mode', themeLight:'Oat White', themeDark:'Midnight Blue', themePurple:'Neon Purple',
     setPathTitle:'Path settings', setHelpToggle:'Help',
@@ -6819,7 +7262,7 @@ const NW_STRINGS = {
   },
   zh: {
     navHome:'主页', navNew:'文章纠错', navImport:'导入资料',
-    navSearch:'搜索', navAI:'AI笔记', navExam:'考试复盘', navSettings:'设置',
+    navSearch:'搜索', navAI:'AI笔记', navConvert:'资料转换', navSettings:'设置',
     statMd:'笔记', statPdf:'PDF', statImg:'图片', statVideo:'视频', statOther:'其他',
     foldersLabel:'文件夹目录', refreshBtn:'↻ 刷新',
     filesTitle:'最近修改', selectFolder:'请选择文件夹',
@@ -6844,7 +7287,7 @@ const NW_STRINGS = {
     searchingTip:'搜索中…', searchResultsPrefix:'搜索 ', searchResultsSuffix:'个结果',
     noMatchTip:'没有找到匹配的文件', searchErrorTip:'搜索出错',
     // AI笔记：标签栏
-    tabNote:'学习笔记', tabExpand:'知识点扩充', tabEssay:'文章纠错', tabReview:'复习备考',
+    tabNote:'学习笔记', tabExpand:'知识点扩充', tabEssay:'文章纠错', tabReview:'复习备考', tabExam:'考试复盘',
     outputLangLabel:'输出语言：',
     // AI笔记：学习笔记
     noteInfoTip:'📌 随手记录学习内容，AI 会自动识别主题并归入知识库对应文件夹。无法分类时存入临时文件夹。',
@@ -6903,6 +7346,20 @@ const NW_STRINGS = {
     examSaveBtnLabel:'保存复盘', examClearBtnLabel:'清空',
     examCustomtypePh:'请输入考试类型', examScorePh:'得分', examScoreTotalPh:'总分', examGradePh:'如 A / B+',
     examReviewPh:'写下这次考试的复盘…',
+    // 资料转换页
+    convertInfoTip:'🔄 从知识库选择资料，翻译成中/英/泰文，或转换成其他文档格式（doc/pdf/md/txt/xls 互转，图片支持 AI 识别转文字）。原文件不会被修改。为避免处理超时，每次仅支持选择 1 个文件进行翻译或转换。',
+    convertSelectLabel:'选择知识库资料',
+    convertFilesHint:'← 点击左侧文件夹',
+    convertSelectedLabel:'已选文件（仅支持单选 1 个文件）',
+    convertNoselectTip:'暂无已选文件',
+    convertTranslateTitle:'资料翻译', convertTranslateLangLabel:'目标语言：',
+    convertTranslateBtnLabel:'开始翻译', convertTranslatePreviewLabel:'✅ 翻译结果预览',
+    convertTranslateSavebtnLabel:'保存到知识库',
+    convertFormatTitle:'格式转换', convertFormatTargetLabel:'转换为：',
+    convertFormatImagehint:'图片文件会先由 AI 识别文字，再转换为所选格式',
+    convertFormatBtnLabel:'开始转换',
+    convertRefreshBtn:'刷新',
+    convertLangOptZh:'中文', convertLangOptEn:'English', convertLangOptTh:'ภาษาไทย（泰文）',
     // 设置页：主题/路径/AI功能/模型/Token
     setThemeModeLabel:'主题模式', themeLight:'燕麦白', themeDark:'深蓝夜间', themePurple:'暗紫霓虹',
     setPathTitle:'路径设置', setHelpToggle:'说明',
@@ -6996,8 +7453,8 @@ function applyLanguage() {
   if (typeof examRenderTypeOptions === 'function') examRenderTypeOptions()
 
   // nav buttons（新导航栏，使用 nwnav-label-xxx ID）
-  const navLabelIds = ['nwnav-label-home','nwnav-label-import','nwnav-label-study','nwnav-label-exam','nwnav-label-settings']
-  const navKeys = ['navHome','navImport','navAI','navExam','navSettings']
+  const navLabelIds = ['nwnav-label-home','nwnav-label-import','nwnav-label-study','nwnav-label-convert','nwnav-label-settings']
+  const navKeys = ['navHome','navImport','navAI','navConvert','navSettings']
   navLabelIds.forEach((id, i) => {
     const el = document.getElementById(id)
     if (el) el.textContent = s[navKeys[i]]
@@ -7061,6 +7518,7 @@ function applyLanguage() {
   set('study-tabbtn-expand-label', s.tabExpand)
   set('study-tabbtn-essay-label', s.tabEssay)
   set('study-tabbtn-review-label', s.tabReview)
+  set('study-tabbtn-exam-label', s.tabExam)
   set('study-outputlang-label', s.outputLangLabel)
 
   // AI Notes: 学习笔记
@@ -7160,6 +7618,24 @@ function applyLanguage() {
     const allUnselected = [NW_STRINGS.en.examUnselected, NW_STRINGS.zh.examUnselected]
     if (allUnselected.includes(examSubjectEl.textContent.trim())) examSubjectEl.textContent = s.examUnselected
   }
+
+  // 资料转换页
+  set('convert-infotip', s.convertInfoTip)
+  set('convert-select-label', s.convertSelectLabel)
+  set('convert-files-hint', s.convertFilesHint)
+  set('convert-selected-label', s.convertSelectedLabel)
+  set('convert-noselect-tip', s.convertNoselectTip)
+  set('convert-translate-title', s.convertTranslateTitle)
+  set('convert-translate-lang-label', s.convertTranslateLangLabel)
+  set('convert-translate-btn-label', s.convertTranslateBtnLabel)
+  set('convert-translate-preview-label', s.convertTranslatePreviewLabel)
+  set('convert-translate-savebtn-label', s.convertTranslateSavebtnLabel)
+  set('convert-format-title', s.convertFormatTitle)
+  set('convert-format-target-label', s.convertFormatTargetLabel)
+  set('convert-format-imagehint', s.convertFormatImagehint)
+  set('convert-format-btn-label', s.convertFormatBtnLabel)
+  set('convert-refresh-btn-label', s.convertRefreshBtn)
+  set('convert-folders-loading', s.loadingTip)
 
   // Settings: 主题
   set('set-thememode-label', s.setThemeModeLabel)
