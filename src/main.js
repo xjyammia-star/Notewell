@@ -4160,3 +4160,216 @@ ipcMain.handle('study-smart-save', async (event, { content, vaultPath, vaultFold
   const settings = store.get('aiSettings', {})
   return await doSmartSave({ content, vaultPath, vaultFolders, inboxFolder, inboxPath, sourceType, sourceTitle, settings })
 })
+
+
+// ══════════════════════════════════════════════════════════════
+// ── 课程表功能（本次新增）──
+// 数据统一存在 store 的 'courseSchedule' 键下，结构说明：
+// meta: { anchorMonday: 'YYYY-MM-DD', anchorWeekType: 'week1' } —— 用户最近一次手动核对/切换
+//   "本周是第几周"时，记录下那一周的周一日期和周次类型，之后按此为基准每周单双数自动轮换。
+// templates.week1 / week2: 各含 mon/tue/wed/thu/fri 五个数组，每个元素是一节课：
+//   { id, start, end, subject, room, teacher, note }
+// reminder: { enabled, keywords:[{keyword,text}] } —— 提醒总开关 + 命中关键词后显示的提示语
+// ══════════════════════════════════════════════════════════════
+const SCHEDULE_WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri']
+
+function scheduleDefaultData() {
+  return {
+    meta: null,
+    templates: {
+      week1: { mon: [], tue: [], wed: [], thu: [], fri: [] },
+      week2: { mon: [], tue: [], wed: [], thu: [], fri: [] }
+    },
+    subjectColors: {},
+    reminder: {
+      enabled: true,
+      keywords: [
+        { keyword: '体育', text: '记得带运动装备' },
+        { keyword: 'PE', text: '记得带运动装备' },
+        { keyword: '游泳', text: '记得带游泳装备' },
+        { keyword: 'swim', text: '记得带游泳装备' }
+      ]
+    }
+  }
+}
+
+function scheduleGetData() {
+  const data = store.get('courseSchedule')
+  const def = scheduleDefaultData()
+  if (!data) return def
+  return {
+    meta: data.meta || def.meta,
+    templates: {
+      week1: Object.assign({}, def.templates.week1, data.templates && data.templates.week1),
+      week2: Object.assign({}, def.templates.week2, data.templates && data.templates.week2)
+    },
+    subjectColors: Object.assign({}, def.subjectColors, data.subjectColors),
+    reminder: Object.assign({}, def.reminder, data.reminder)
+  }
+}
+
+// 取某天所在自然周的周一（周一至周日为一周）
+function scheduleMondayOf(date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  const day = d.getDay()
+  const diff = (day === 0 ? -6 : 1 - day)
+  d.setDate(d.getDate() + diff)
+  return d
+}
+
+function scheduleDateKey(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+// 根据锚点计算指定日期所在周是 week1 还是 week2；未设置锚点时默认 week1
+function scheduleWeekTypeFor(date, meta) {
+  if (!meta || !meta.anchorMonday || !meta.anchorWeekType) return 'week1'
+  const anchorMonday = new Date(meta.anchorMonday + 'T00:00:00')
+  const thisMonday = scheduleMondayOf(date)
+  const diffWeeks = Math.round((thisMonday - anchorMonday) / (7 * 86400000))
+  const isEven = ((diffWeeks % 2) + 2) % 2 === 0
+  if (isEven) return meta.anchorWeekType
+  return meta.anchorWeekType === 'week1' ? 'week2' : 'week1'
+}
+
+// 只上传了一套课表时，不要轮换到空白的那一周——哪一周实际有内容就一直用哪一周；两周都有内容才正常轮换
+function scheduleTemplateIsEmpty(tpl) {
+  if (!tpl) return true
+  return SCHEDULE_WEEKDAYS.every(d => !(tpl[d] && tpl[d].length))
+}
+
+function scheduleResolveWeekType(date, data) {
+  const raw = scheduleWeekTypeFor(date, data.meta)
+  const other = raw === 'week1' ? 'week2' : 'week1'
+  if (scheduleTemplateIsEmpty(data.templates[raw]) && !scheduleTemplateIsEmpty(data.templates[other])) {
+    return other
+  }
+  return raw
+}
+
+// ── 课程表：选择课程表截图文件 ──
+ipcMain.handle('select-schedule-image', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    title: '选择课程表截图',
+    filters: [{ name: '图片文件', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }]
+  })
+  if (!result.canceled && result.filePaths.length > 0) {
+    return { success: true, path: result.filePaths[0], name: path.basename(result.filePaths[0]) }
+  }
+  return { success: false }
+})
+
+// ── 课程表：读取全部数据 + 计算今天属于哪个模板 ──
+ipcMain.handle('schedule-get', async () => {
+  const data = scheduleGetData()
+  const today = new Date()
+  const currentWeekType = scheduleResolveWeekType(today, data)
+  return { success: true, data, currentWeekType, todayKey: scheduleDateKey(today) }
+})
+
+// ── 课程表：保存某一周模板（周一到周五整份覆盖）──
+ipcMain.handle('schedule-save-template', async (event, { weekType, days }) => {
+  if (weekType !== 'week1' && weekType !== 'week2') return { success: false, error: '周次参数错误' }
+  const data = scheduleGetData()
+  data.templates[weekType] = Object.assign({}, data.templates[weekType], days)
+  store.set('courseSchedule', data)
+  return { success: true }
+})
+
+// ── 课程表：手动核对/切换"本周是第几周"，把本周一记为新的轮换基准点 ──
+ipcMain.handle('schedule-set-current-week', async (event, { weekType }) => {
+  if (weekType !== 'week1' && weekType !== 'week2') return { success: false, error: '周次参数错误' }
+  const data = scheduleGetData()
+  const monday = scheduleMondayOf(new Date())
+  data.meta = { anchorMonday: scheduleDateKey(monday), anchorWeekType: weekType }
+  store.set('courseSchedule', data)
+  return { success: true, meta: data.meta }
+})
+
+// ── 课程表：保存提醒设置（总开关 + 关键词列表）──
+ipcMain.handle('schedule-save-reminder-settings', async (event, { enabled, keywords }) => {
+  const data = scheduleGetData()
+  data.reminder = {
+    enabled: !!enabled,
+    keywords: Array.isArray(keywords) ? keywords.filter(k => k && k.keyword) : data.reminder.keywords
+  }
+  store.set('courseSchedule', data)
+  return { success: true }
+})
+
+// ── 课程表：计算"明天"需要提醒的课程（供右侧倒计时栏调用）──
+ipcMain.handle('schedule-get-reminder', async () => {
+  const data = scheduleGetData()
+  if (!data.reminder.enabled) return { success: true, items: [] }
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const weekday = tomorrow.getDay()
+  if (weekday === 0 || weekday === 6) return { success: true, items: [] }
+  const dayKey = SCHEDULE_WEEKDAYS[weekday - 1]
+  const weekType = scheduleResolveWeekType(tomorrow, data)
+  const courses = (data.templates[weekType] && data.templates[weekType][dayKey]) || []
+  const items = []
+  for (const c of courses) {
+    const subject = (c.subject || '')
+    for (const kw of data.reminder.keywords) {
+      if (kw.keyword && subject.toLowerCase().includes(kw.keyword.toLowerCase())) {
+        items.push({ subject: c.subject, start: c.start, text: kw.text || '记得提前准备' })
+        break
+      }
+    }
+  }
+  return { success: true, items, weekType, dayKey }
+})
+
+// ── 课程表：截图识别（按"星期几"归类，忽略截图里具体的日历日期）──
+ipcMain.handle('schedule-parse-image', async (event, { imagePath }) => {
+  const settings = store.get('aiSettings', {})
+  const visionApiKey = settings.audioApiKey || settings.apiKey
+  const visionModelId = settings.audioModelId || ''
+  const visionEndpoint = settings.audioEndpoint || settings.endpoint
+  if (!visionApiKey || !visionModelId) {
+    return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
+  }
+  const prompt = '这是一张学校课程表截图，表头可能是具体日期（如"Mon 31st August"）也可能直接是星期几。' +
+    '请忽略表头里具体的日历日期，只根据"星期几"把每节课归类到 mon/tue/wed/thu/fri 五天中。' +
+    '每节课请提取：开始时间 start（如"7:50"）、结束时间 end（如"8:45"）、科目名 subject、教室 room（没有留空字符串）、教师 teacher（没有留空字符串）。' +
+    '只输出严格的 JSON，不要任何解释文字，格式如下（某天没有课则为空数组）：' +
+    '{"mon":[{"start":"7:50","end":"8:45","subject":"Physical Education","room":"SHall","teacher":"Mr S Murgatroyd"}],"tue":[],"wed":[],"thu":[],"fri":[]}'
+  try {
+    const res = await callDoubaoVision(visionApiKey, visionModelId, visionEndpoint, imagePath, prompt, 4000)
+    recordTokenUsage('schedule', 'audio', res.usage.prompt_tokens || 0, res.usage.completion_tokens || 0)
+    let raw = (res.content || '').trim()
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+    let parsed
+    try { parsed = JSON.parse(raw) } catch (e) {
+      return { success: false, error: '识别结果解析失败，请重新截图或稍后手动录入' }
+    }
+    const result = {}
+    for (const day of SCHEDULE_WEEKDAYS) {
+      const arr = Array.isArray(parsed[day]) ? parsed[day] : []
+      result[day] = arr.map((c, i) => ({
+        id: 'p' + Date.now() + '_' + day + i,
+        start: c.start || '', end: c.end || '', subject: c.subject || '',
+        room: c.room || '', teacher: c.teacher || '', note: ''
+      }))
+    }
+    return { success: true, days: result }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
+// ── 课程表：设置某个科目的颜色（Week1/Week2 里所有同名科目一起变色）──
+ipcMain.handle('schedule-set-subject-color', async (event, { subject, color }) => {
+  const key = (subject || '').trim()
+  if (!key) return { success: false, error: '科目名称不能为空' }
+  const data = scheduleGetData()
+  data.subjectColors[key] = color
+  store.set('courseSchedule', data)
+  return { success: true }
+})
