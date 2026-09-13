@@ -1311,6 +1311,24 @@ async function checkAiAccessOrError() {
 
 ipcMain.handle('get-access-status', () => getAccessStatus())
 
+// ── 用户反馈（自动提交为 GitHub Issue） ──
+ipcMain.handle('submit-feedback', async (event, { content } = {}) => {
+  try {
+    const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/submit-feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
+      body: JSON.stringify({ content, appVersion: app.getVersion(), platform: process.platform })
+    })
+    const data = await resp.json()
+    if (!resp.ok || !data.success) {
+      return { success: false, error: data.error || `提交失败（状态码 ${resp.status}）` }
+    }
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+})
+
 // ── Token 使用统计 ──
 function recordTokenUsage(feature, modelType, inputTokens, outputTokens) {
   try {

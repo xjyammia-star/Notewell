@@ -1292,6 +1292,9 @@
       <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
     </div>
     <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
+    <div style="margin-top:10px">
+      <a href="javascript:void(0)" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？前往 Payhip 购买 →</a>
+    </div>
   </div>
 
   <!-- 语言设置 -->
@@ -1390,8 +1393,15 @@
     <div>
       <span style="font-size:13px;color:#5f5e5a" id="set-version-label">当前版本</span>
       <span id="app-version" style="font-size:13px;color:#2c2c2a;font-weight:500;margin-left:8px">v1.1.5</span>
+      <a href="javascript:void(0)" onclick="nwShowFullChangelog()" style="font-size:12px;color:var(--accent,#534ab7);margin-left:10px;text-decoration:none">查看更新日志</a>
     </div>
     <div id="update-status" style="font-size:12px;color:#888780"></div>
+  </div>
+
+  <!-- 问题反馈 -->
+  <div style="margin-top:14px;padding:14px 16px;background:#f5f4f0;border-radius:10px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:13px;color:#5f5e5a">遇到问题，或者有功能建议？</span>
+    <button class="btn-sm" onclick="nwOpenFeedbackModal()">💬 我要反馈</button>
   </div>
 
         </div><!-- /#nw-inner-settings -->
@@ -1749,6 +1759,31 @@
       <div class="nw-modal-btns" style="margin-top:16px;">
         <button class="nw-modal-cancel" onclick="nwCloseRadarSettings()">关闭</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 更新日志弹窗 -->
+<div id="nw-changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;max-height:70vh;overflow-y:auto;">
+    <h3 id="nw-changelog-modal-title" style="font-size:15px;color:var(--st-text);margin-bottom:14px;font-weight:600;"></h3>
+    <div id="nw-changelog-modal-body"></div>
+    <div class="nw-modal-btns" style="margin-top:16px;">
+      <button class="nw-modal-save" onclick="nwCloseChangelogModal()">知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 问题反馈弹窗 -->
+<div id="nw-feedback-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;">
+    <h3 style="font-size:15px;color:var(--st-text);margin-bottom:10px;font-weight:600;">💬 问题反馈 / 功能建议</h3>
+    <div style="font-size:12px;color:var(--st-text-muted);margin-bottom:10px;">遇到 Bug，或者有什么想要的新功能，都可以写在这里，会直接发给开发者。</div>
+    <textarea id="nw-feedback-input" placeholder="请描述你遇到的问题或建议…" style="width:100%;height:120px;box-sizing:border-box;padding:10px;border:1px solid var(--st-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;background:transparent;color:var(--st-text);"></textarea>
+    <div id="nw-feedback-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
+    <div class="nw-modal-btns" style="margin-top:14px;">
+      <button class="nw-modal-cancel" onclick="nwCloseFeedbackModal()">取消</button>
+      <button class="nw-modal-save" id="nw-feedback-submit-btn" onclick="nwSubmitFeedback()">提交</button>
     </div>
   </div>
 </div>
@@ -2331,6 +2366,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // 显示激活状态
   refreshLicenseStatus()
+
+  // 更新日志：对比上次记录的版本号，不一样就弹一次"这次更新了什么"（首次安装不弹，只记录）
+  if (ver) {
+    const lastSeenVer = localStorage.getItem('nw_last_seen_version')
+    if (lastSeenVer && lastSeenVer !== ver) {
+      nwShowChangelogModal(ver, lastSeenVer)
+    }
+    localStorage.setItem('nw_last_seen_version', ver)
+  }
 
   // 监听更新下载进度
   if (window.api.onUpdateDownloading) {
@@ -5724,6 +5768,97 @@ function getFeatureLabels() { return nwLang === 'zh' ? FEATURE_LABELS_ZH : FEATU
 async function loadTokenStats() {
   _tokenStats = await window.api.getTokenStats()
   renderTokenStats()
+}
+
+// ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
+const NW_CHANGELOG = [
+  { version: '1.0.3', items: ['【测试用】验证更新日志弹窗功能是否正常触发'] },
+  { version: '1.0.2', items: ['新增更新日志功能：更新后自动提示本次改动，设置页也可随时查看完整历史', '设置页新增"问题反馈"入口，遇到问题或有建议可以直接提交给开发者'] },
+  { version: '1.0.1', items: ['修复知识库首页文件夹列表：选中无子文件夹的文件夹后，误显示展开箭头的问题', '设置页新增"前往 Payhip 购买"入口'] },
+  { version: '1.0.0', items: ['首个正式版本发布'] }
+]
+
+function nwRenderChangelogList(entries) {
+  return entries.map(e => `
+    <div style="margin-bottom:14px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:var(--st-text)">v${e.version}</div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;color:var(--st-text-muted);line-height:1.7">
+        ${e.items.map(t => `<li>${t}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('')
+}
+
+function nwShowChangelogModal(currentVer, lastSeenVer) {
+  // 找到"从上次看到的版本之后"这一段（新版本排在数组前面）
+  const idx = NW_CHANGELOG.findIndex(e => e.version === lastSeenVer)
+  const entries = idx > 0 ? NW_CHANGELOG.slice(0, idx) : NW_CHANGELOG.slice(0, 1)
+  const modal = document.getElementById('nw-changelog-modal')
+  const body = document.getElementById('nw-changelog-modal-body')
+  const title = document.getElementById('nw-changelog-modal-title')
+  if (!modal || !body) return
+  title.textContent = `✨ Notewell 已更新到 v${currentVer}`
+  body.innerHTML = nwRenderChangelogList(entries)
+  modal.style.display = 'flex'
+}
+
+function nwShowFullChangelog() {
+  const modal = document.getElementById('nw-changelog-modal')
+  const body = document.getElementById('nw-changelog-modal-body')
+  const title = document.getElementById('nw-changelog-modal-title')
+  if (!modal || !body) return
+  title.textContent = '📋 更新日志'
+  body.innerHTML = nwRenderChangelogList(NW_CHANGELOG)
+  modal.style.display = 'flex'
+}
+
+function nwCloseChangelogModal() {
+  const modal = document.getElementById('nw-changelog-modal')
+  if (modal) modal.style.display = 'none'
+}
+
+// ── 问题反馈 ──
+function nwOpenFeedbackModal() {
+  const modal = document.getElementById('nw-feedback-modal')
+  const input = document.getElementById('nw-feedback-input')
+  const msg = document.getElementById('nw-feedback-msg')
+  if (input) input.value = ''
+  if (msg) msg.style.display = 'none'
+  if (modal) modal.style.display = 'flex'
+}
+
+function nwCloseFeedbackModal() {
+  const modal = document.getElementById('nw-feedback-modal')
+  if (modal) modal.style.display = 'none'
+}
+
+async function nwSubmitFeedback() {
+  const input = document.getElementById('nw-feedback-input')
+  const msg = document.getElementById('nw-feedback-msg')
+  const btn = document.getElementById('nw-feedback-submit-btn')
+  const content = input ? input.value.trim() : ''
+  if (!content) { return }
+  btn.disabled = true
+  btn.textContent = '提交中...'
+  msg.style.display = 'block'
+  msg.style.color = '#888780'
+  msg.textContent = ''
+  try {
+    const res = await window.api.submitFeedback(content)
+    if (res.success) {
+      msg.style.color = '#3b6d11'
+      msg.textContent = '✅ 提交成功，感谢反馈！'
+      setTimeout(nwCloseFeedbackModal, 1200)
+    } else {
+      msg.style.color = '#a32d2d'
+      msg.textContent = '❌ ' + (res.error || '提交失败')
+    }
+  } catch (e) {
+    msg.style.color = '#a32d2d'
+    msg.textContent = '❌ 提交失败：' + e.message
+  }
+  btn.disabled = false
+  btn.textContent = '提交'
 }
 
 // ── 账户与订阅（激活码） ──
