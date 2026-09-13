@@ -3641,7 +3641,7 @@ ipcMain.handle('convert-translate', async (event, { filePath, targetLang }) => {
 
   const ext = path.extname(filePath).toLowerCase()
   if (ext !== '.md' && ext !== '.pdf') {
-    return { success: false, error: '暂时只支持翻译 md 或 pdf 格式的文件，其他格式请等待"格式转换"功能上线后再试' }
+    return { success: false, error: '暂时只支持翻译 md 或 pdf 格式的文件，其他格式请先用「资料转换」里的"格式转换"功能转成 md 后再来翻译' }
   }
 
   let body = ''
