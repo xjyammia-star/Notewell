@@ -103,4 +103,8 @@ contextBridge.exposeInMainWorld('api', {
   // ── 学习助手 ──
   studyInvoke:         (channel, args) => ipcRenderer.invoke(channel, args),
   readFileContent:     (filePath)      => ipcRenderer.invoke('read-file-content', filePath),
+  // ── 激活码 ──
+  licenseActivate:     (code)          => ipcRenderer.invoke('license-activate', { code }),
+  licenseGetStatus:    ()              => ipcRenderer.invoke('license-get-status'),
+  licenseDeactivate:   ()              => ipcRenderer.invoke('license-deactivate'),
 })

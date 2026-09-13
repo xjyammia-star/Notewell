@@ -1200,6 +1200,45 @@ ipcMain.handle('test-relay-connection', async (event, { kind } = {}) => {
     return { success: false, error: e.message }
   }
 })
+
+// ── 激活码（目前仅支持好友白名单码，付费码逻辑之后再补）──
+ipcMain.handle('license-activate', async (event, { code } = {}) => {
+  try {
+    const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/verify-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
+      body: JSON.stringify({ code })
+    })
+    const data = await resp.json()
+    if (!resp.ok || !data.success) {
+      return { success: false, error: data.error || `验证服务返回错误（状态码 ${resp.status}）` }
+    }
+    if (!data.valid) {
+      return { success: false, error: data.error || '激活码无效' }
+    }
+    const license = {
+      activated: true,
+      type: data.type || 'friend',
+      code,
+      expiresAt: data.expiresAt || null,
+      activatedAt: new Date().toISOString()
+    }
+    store.set('license', license)
+    return { success: true, license }
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+})
+
+ipcMain.handle('license-get-status', () => {
+  return store.get('license', { activated: false })
+})
+
+ipcMain.handle('license-deactivate', () => {
+  store.delete('license')
+  return { success: true }
+})
+
 // ── Token 使用统计 ──
 function recordTokenUsage(feature, modelType, inputTokens, outputTokens) {
   try {

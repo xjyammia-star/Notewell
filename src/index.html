@@ -1371,6 +1371,16 @@
     </div>
   </div>
 
+  <div class="section-title" style="margin-top:16px" id="set-license-title">账户与订阅</div>
+  <div class="settings-section" id="license-section">
+    <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
+    <div id="license-activate-row" style="display:flex;gap:8px">
+      <input type="text" id="license-code-input" placeholder="请输入激活码" style="flex:1;padding:8px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box">
+      <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
+    </div>
+    <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
+  </div>
+
   <!-- 版本信息 -->
   <div style="margin-top:24px;padding:14px 16px;background:#f5f4f0;border-radius:10px;display:flex;align-items:center;justify-content:space-between">
     <div>
@@ -2311,6 +2321,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   const ver = await window.api.getAppVersion()
   const verEl = document.getElementById('app-version')
   if (verEl && ver) verEl.textContent = 'v' + ver
+
+  // 显示激活状态
+  refreshLicenseStatus()
 
   // 监听更新下载进度
   if (window.api.onUpdateDownloading) {
@@ -5695,6 +5708,57 @@ function getFeatureLabels() { return nwLang === 'zh' ? FEATURE_LABELS_ZH : FEATU
 async function loadTokenStats() {
   _tokenStats = await window.api.getTokenStats()
   renderTokenStats()
+}
+
+// ── 账户与订阅（激活码） ──
+async function refreshLicenseStatus() {
+  const el = document.getElementById('license-status-display')
+  const row = document.getElementById('license-activate-row')
+  if (!el) return
+  try {
+    const status = await window.api.licenseGetStatus()
+    if (status && status.activated) {
+      if (status.type === 'friend') {
+        el.textContent = '🎁 友情账户 · 永久免费'
+        el.style.color = '#3b6d11'
+      } else {
+        el.textContent = '✅ 已激活'
+        el.style.color = '#3b6d11'
+      }
+      if (row) row.style.display = 'none'
+    } else {
+      el.textContent = '未激活'
+      el.style.color = '#888780'
+      if (row) row.style.display = 'flex'
+    }
+  } catch (e) {
+    el.textContent = '未激活'
+  }
+}
+
+async function doLicenseActivate() {
+  const input = document.getElementById('license-code-input')
+  const msgEl = document.getElementById('license-msg')
+  const code = input ? input.value.trim() : ''
+  if (!code) { return }
+  msgEl.style.display = 'block'
+  msgEl.style.color = '#888780'
+  msgEl.textContent = '验证中...'
+  try {
+    const res = await window.api.licenseActivate(code)
+    if (res.success) {
+      msgEl.style.color = '#3b6d11'
+      msgEl.textContent = '✅ 激活成功'
+      input.value = ''
+      refreshLicenseStatus()
+    } else {
+      msgEl.style.color = '#a32d2d'
+      msgEl.textContent = '❌ ' + (res.error || '激活失败')
+    }
+  } catch (e) {
+    msgEl.style.color = '#a32d2d'
+    msgEl.textContent = '❌ 验证失败：' + e.message
+  }
 }
 
 function switchTokenTab(tab) {
