@@ -1281,7 +1281,18 @@
         <!-- ══ 设置页内嵌面板（内容暂保持原样，仅调整容器以适配左侧区域） ══ -->
         <div id="nw-inner-settings" style="display:none;flex-direction:column;gap:14px;flex:1;min-height:0;overflow-y:auto;" class="hidden nw-settings-scope">
 
-  <div class="page-header"><h2 id="set-page-title">Settings</h2></div>
+  <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+      <h2 id="set-page-title">Settings</h2>
+      <span style="font-size:12px;">
+        <span id="set-version-label" style="color:#888780">当前版本</span>
+        <span id="app-version" style="color:#5f5e5a;font-weight:500;margin-left:4px">v1.1.5</span>
+        <a href="javascript:void(0)" onclick="nwShowFullChangelog()" style="color:var(--accent,#534ab7);margin-left:8px;text-decoration:none">查看更新日志</a>
+        <span id="update-status" style="color:#888780;margin-left:8px"></span>
+      </span>
+    </div>
+    <button class="btn-sm" onclick="nwOpenFeedbackModal()">💬 我要反馈</button>
+  </div>
 
   <!-- 账户与订阅（放最上面，比较醒目） -->
   <div class="section-title" id="set-license-title">账户与订阅</div>
@@ -1296,6 +1307,7 @@
       <a href="javascript:void(0)" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？前往 Payhip 购买 →</a>
     </div>
   </div>
+
 
   <!-- 语言设置 -->
   <div class="section-title" id="set-lang-title">Language / 语言</div>
@@ -1388,21 +1400,7 @@
     </div>
   </div>
 
-  <!-- 版本信息 -->
-  <div style="margin-top:24px;padding:14px 16px;background:#f5f4f0;border-radius:10px;display:flex;align-items:center;justify-content:space-between">
-    <div>
-      <span style="font-size:13px;color:#5f5e5a" id="set-version-label">当前版本</span>
-      <span id="app-version" style="font-size:13px;color:#2c2c2a;font-weight:500;margin-left:8px">v1.1.5</span>
-      <a href="javascript:void(0)" onclick="nwShowFullChangelog()" style="font-size:12px;color:var(--accent,#534ab7);margin-left:10px;text-decoration:none">查看更新日志</a>
-    </div>
-    <div id="update-status" style="font-size:12px;color:#888780"></div>
-  </div>
-
-  <!-- 问题反馈 -->
-  <div style="margin-top:14px;padding:14px 16px;background:#f5f4f0;border-radius:10px;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:13px;color:#5f5e5a">遇到问题，或者有功能建议？</span>
-    <button class="btn-sm" onclick="nwOpenFeedbackModal()">💬 我要反馈</button>
-  </div>
+  <!-- 版本信息 / 问题反馈 已挪到设置页顶部"账户与订阅"下方，此处不再重复 -->
 
         </div><!-- /#nw-inner-settings -->
 
@@ -1778,7 +1776,7 @@
 <div id="nw-feedback-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;">
     <h3 style="font-size:15px;color:var(--st-text);margin-bottom:10px;font-weight:600;">💬 问题反馈 / 功能建议</h3>
-    <div style="font-size:12px;color:var(--st-text-muted);margin-bottom:10px;">遇到 Bug，或者有什么想要的新功能，都可以写在这里，会直接发给开发者。</div>
+    <div style="font-size:12px;color:var(--st-text-muted);margin-bottom:10px;">遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。</div>
     <textarea id="nw-feedback-input" placeholder="请描述你遇到的问题或建议…" style="width:100%;height:120px;box-sizing:border-box;padding:10px;border:1px solid var(--st-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;background:transparent;color:var(--st-text);"></textarea>
     <div id="nw-feedback-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
     <div class="nw-modal-btns" style="margin-top:14px;">
@@ -5772,6 +5770,8 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.0.5', items: ['设置页布局优化：版本号、更新日志、问题反馈入口收进标题栏同一行，节省页面空间'] },
+  { version: '1.0.4', items: ['修复更新日志弹窗在深色主题下文字看不清的问题', '设置页布局调整：版本信息、更新日志、问题反馈入口挪到页面最上方，更醒目', '安装包改为固定文件名，方便以后提供永久不变的下载链接'] },
   { version: '1.0.3', items: ['【测试用】验证更新日志弹窗功能是否正常触发'] },
   { version: '1.0.2', items: ['新增更新日志功能：更新后自动提示本次改动，设置页也可随时查看完整历史', '设置页新增"问题反馈"入口，遇到问题或有建议可以直接提交给开发者'] },
   { version: '1.0.1', items: ['修复知识库首页文件夹列表：选中无子文件夹的文件夹后，误显示展开箭头的问题', '设置页新增"前往 Payhip 购买"入口'] },

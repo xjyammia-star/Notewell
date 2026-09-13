@@ -1,6 +1,6 @@
 {
   "name": "notewell",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Notewell — Student Knowledge Base",
   "author": "xjyammia-star",
   "main": "src/main.js",
@@ -27,12 +27,12 @@
       ],
       "icon": "assets/icon.icns",
       "category": "public.app-category.productivity",
-      "artifactName": "notewell-${version}.${ext}"
+      "artifactName": "notewell.dmg"
     },
     "win": {
       "target": "nsis",
       "icon": "assets/icon.ico",
-      "artifactName": "notewell-setup-${version}.exe"
+      "artifactName": "notewell-setup.exe"
     },
     "publish": {
       "provider": "github",
