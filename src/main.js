@@ -88,6 +88,7 @@ autoUpdater.on('update-downloaded', () => {
 })
 
 app.whenReady().then(() => {
+  ensureTrialStarted()
   createWindow()
   if (process.platform === 'darwin') {
     try {
@@ -1239,6 +1240,46 @@ ipcMain.handle('license-deactivate', () => {
   return { success: true }
 })
 
+// ── 试用期（30天，纯本地判断，不联网）──
+const TRIAL_DAYS = 30
+
+function ensureTrialStarted() {
+  if (!store.get('trialStartDate')) {
+    store.set('trialStartDate', new Date().toISOString())
+  }
+}
+
+function getAccessStatus() {
+  const license = store.get('license', { activated: false })
+  if (license.activated) {
+    const expired = license.expiresAt && new Date(license.expiresAt).getTime() < Date.now()
+    if (!expired) {
+      return { activated: true, type: license.type, expiresAt: license.expiresAt || null, locked: false, trialDaysLeft: null }
+    }
+    // 年付版到期：不自动清除激活记录（保留购买历史），但按锁定状态处理，需重新购买/激活
+    return { activated: false, expired: true, locked: true, trialDaysLeft: 0 }
+  }
+  const startStr = store.get('trialStartDate')
+  const start = startStr ? new Date(startStr) : new Date()
+  const daysPassed = Math.floor((Date.now() - start.getTime()) / (1000 * 60 * 60 * 24))
+  const daysLeft = TRIAL_DAYS - daysPassed
+  if (daysLeft > 0) {
+    return { activated: false, locked: false, trialDaysLeft: daysLeft }
+  }
+  return { activated: false, locked: true, trialDaysLeft: 0 }
+}
+
+// AI 功能入口统一调用这个函数做拦截检查，非空即代表被锁，直接把返回值当结果返回给前端
+function checkAiAccessOrError() {
+  const status = getAccessStatus()
+  if (status.locked) {
+    return { success: false, locked: true, error: '试用已结束，激活后可继续使用' }
+  }
+  return null
+}
+
+ipcMain.handle('get-access-status', () => getAccessStatus())
+
 // ── Token 使用统计 ──
 function recordTokenUsage(feature, modelType, inputTokens, outputTokens) {
   try {
@@ -2180,6 +2221,8 @@ function buildAnnotatedText(original, corrections) {
 }
 
 ipcMain.handle('essay-correct', async (event, { text }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const content = (text || '').trim()
   if (!content) return { success: false, error: '内容为空' }
@@ -2270,6 +2313,8 @@ ${content}`
 
 // ── 文章纠错：保存干净版 + 批改记录版到知识库（AI 判断科目文件夹）──
 ipcMain.handle('essay-save', async (event, { filename, correctedText, annotatedText, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const rawName = (filename || '').trim()
   if (!rawName) return { success: false, error: '请填写文件名' }
@@ -3495,6 +3540,8 @@ ${content}
 
 // ── 知识点扩充 ──
 ipcMain.handle('study-expand-knowledge', async (event, { title, description, ageGroup, curriculum, systemType, outputLang, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
 
   // 根据年龄段/课程/体系生成教学深度说明
@@ -3574,6 +3621,8 @@ ${expandBoundaryInstruction}
 })
 
 ipcMain.handle('study-generate-review', async (event, { filePaths, userRequirements, generateType, outputLang, vaultPath }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
 
   const allFiles = (filePaths || []).filter(p => p.endsWith('.md') || p.endsWith('.pdf'))
@@ -3675,6 +3724,8 @@ ${combinedContent}`
 
 // ── 资料转换：资料翻译（目前只支持 md / pdf，其他格式需先做格式转换）──
 ipcMain.handle('convert-translate', async (event, { filePath, targetLang }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   if (!filePath) return { success: false, error: '未指定文件' }
 
@@ -3735,6 +3786,8 @@ ${body}`
 
 // ── 资料转换：保存翻译结果（存到原文件所在文件夹，生成新文件，原文件不受影响；支持存成 md 或 pdf）──
 ipcMain.handle('convert-translate-save', async (event, { content, htmlBody, format, sourceFilePath, targetLang }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   if (!sourceFilePath) return { success: false, error: '未指定原文件' }
   const fmt = format === 'pdf' ? 'pdf' : 'md'
   if (fmt === 'md' && !content) return { success: false, error: '没有可保存的内容' }
@@ -3827,6 +3880,8 @@ ipcMain.handle('convert-image-to-pdf', async (event, { filePath }) => {
 // 目前支持的源格式：md / txt / pdf（文字提取）/ docx（用 mammoth 转成 markdown）/ jpg・jpeg・png（AI 识别文字）
 // 暂不支持 xlsx 等表格类格式（表格转文字/文字转表格是完全不同的转换逻辑，需要单独设计）
 ipcMain.handle('convert-format-extract', async (event, { filePath }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   if (!filePath) return { success: false, error: '未指定文件' }
   const ext = path.extname(filePath).toLowerCase()
   const supportedExt = ['.md', '.txt', '.pdf', '.docx', '.jpg', '.jpeg', '.png']
@@ -4367,6 +4422,8 @@ ipcMain.handle('schedule-get-reminder', async () => {
 
 // ── 课程表：截图识别（按"星期几"归类，忽略截图里具体的日历日期）──
 ipcMain.handle('schedule-parse-image', async (event, { imagePath }) => {
+  const accessError = checkAiAccessOrError()
+  if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const visionApiKey = settings.audioApiKey || settings.apiKey
   const visionModelId = settings.audioModelId || ''

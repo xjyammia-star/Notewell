@@ -937,6 +937,9 @@
           </div>
         </div>
 
+        <!-- 试用/激活状态提示条（正常已激活时不显示） -->
+        <div id="nw-trial-banner" onclick="showPage('settings')" style="display:none;padding:6px 16px;font-size:12px;text-align:center;cursor:pointer;"></div>
+
         <!-- 搜索栏 + 其他内容（可滚动） -->
         <div id="nw-main-scroll">
 
@@ -1280,6 +1283,17 @@
 
   <div class="page-header"><h2 id="set-page-title">Settings</h2></div>
 
+  <!-- 账户与订阅（放最上面，比较醒目） -->
+  <div class="section-title" id="set-license-title">账户与订阅</div>
+  <div class="settings-section" id="license-section">
+    <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
+    <div id="license-activate-row" style="display:flex;gap:8px">
+      <input type="text" id="license-code-input" placeholder="请输入激活码" style="flex:1;padding:8px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box">
+      <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
+    </div>
+    <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
+  </div>
+
   <!-- 语言设置 -->
   <div class="section-title" id="set-lang-title">Language / 语言</div>
   <div class="settings-section">
@@ -1369,16 +1383,6 @@
     <div id="token-stats-content" style="font-size:13px;color:#5f5e5a">
       <div style="color:#b4b2a9" id="token-stats-loading">加载中...</div>
     </div>
-  </div>
-
-  <div class="section-title" style="margin-top:16px" id="set-license-title">账户与订阅</div>
-  <div class="settings-section" id="license-section">
-    <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
-    <div id="license-activate-row" style="display:flex;gap:8px">
-      <input type="text" id="license-code-input" placeholder="请输入激活码" style="flex:1;padding:8px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box">
-      <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
-    </div>
-    <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
   </div>
 
   <!-- 版本信息 -->
@@ -1690,7 +1694,10 @@
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <div class="nw-side-label" style="margin-bottom:0;">Subjects</div>
-            <span id="nw-radar-settings-btn" onclick="nwOpenRadarSettings()" title="设置" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">⚙ 设置</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="nw-radar-refresh-btn" onclick="nwRadarRecount()" title="按知识库当前文件重新统计" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">🔄 刷新</span>
+              <span id="nw-radar-settings-btn" onclick="nwOpenRadarSettings()" title="设置" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">⚙ 设置</span>
+            </div>
           </div>
           <div id="nw-radar-chart"></div>
         </div>
@@ -2793,6 +2800,7 @@ async function nwScheduleUploadImage() {
   if (tip) tip.style.display = 'block'
   try {
     const res = await window.api.studyInvoke('schedule-parse-image', { imagePath: picked.path })
+    if (res && res.locked) { nwShowLockedPrompt(); return }
     if (!res || !res.success) { alert((res && res.error) || t('scheduleParseFailTip')); return }
     nwScheduleDraft = res.days
     nwScheduleDirty = true
@@ -3058,7 +3066,9 @@ async function convertStartTranslate() {
 
   try {
     const result = await window.api.studyInvoke('convert-translate', { filePath, targetLang })
-    if (result.success) {
+    if (result.locked) {
+      nwShowLockedPrompt()
+    } else if (result.success) {
       convertTranslateResultContent = result.result
       studyRenderResult('convert-translate-result', result.result)
       resultWrap.style.display = 'block'
@@ -3103,7 +3113,9 @@ async function convertTranslateSave() {
       payload.content = convertTranslateResultContent
     }
     const res = await window.api.studyInvoke('convert-translate-save', payload)
-    if (res.success) {
+    if (res.locked) {
+      nwShowLockedPrompt()
+    } else if (res.success) {
       msgEl.className = 'import-result success'
       msgEl.innerHTML = `✅ 已保存为「${essayEsc(res.filename)}」，跟原文件在同一文件夹`
       msgEl.style.display = 'block'
@@ -3187,7 +3199,9 @@ async function convertStartFormat() {
       }
     } else {
       const extractRes = await window.api.studyInvoke('convert-format-extract', { filePath })
-      if (!extractRes.success) {
+      if (extractRes.locked) {
+        nwShowLockedPrompt()
+      } else if (!extractRes.success) {
         alert('转换失败：' + (extractRes.error || '未知错误'))
       } else {
         const payload = { format: targetFormat, sourceFilePath: filePath, content: extractRes.content }
@@ -4243,6 +4257,7 @@ async function essayStartCorrect() {
 
   try {
     const res = await window.api.studyInvoke('essay-correct', { text })
+    if (res.locked) { nwShowLockedPrompt() }
     if (!res.success) {
       progress.textContent = '❌ ' + (res.error || '纠错失败')
       btn.disabled = false; btn.textContent = '✅ 开始纠错'
@@ -4336,6 +4351,7 @@ async function essaySaveToVault() {
       inboxFolder: aiSettings.inboxFolder || '',
       inboxPath: await window.api.getInboxPath()
     })
+    if (res.locked) { nwShowLockedPrompt() }
 
     if (res.success) {
       const where = res.usedInbox ? '📁 临时文件夹' : ('📂 ' + (res.folder || ''))
@@ -5711,28 +5727,68 @@ async function loadTokenStats() {
 }
 
 // ── 账户与订阅（激活码） ──
+function nwShowLockedPrompt() {
+  if (confirm('试用已结束，激活后可继续使用该功能。\n\n是否现在前往设置页输入激活码？')) {
+    showPage('settings')
+  }
+}
+
 async function refreshLicenseStatus() {
   const el = document.getElementById('license-status-display')
   const row = document.getElementById('license-activate-row')
+  const banner = document.getElementById('nw-trial-banner')
   if (!el) return
   try {
-    const status = await window.api.licenseGetStatus()
-    if (status && status.activated) {
+    const status = await window.api.getAccessStatus()
+    if (status.activated) {
       if (status.type === 'friend') {
         el.textContent = '🎁 友情账户 · 永久免费'
-        el.style.color = '#3b6d11'
+      } else if (status.type === 'lifetime') {
+        el.textContent = '✅ 已激活 · 终身版'
+      } else if (status.type === 'annual' && status.expiresAt) {
+        const d = new Date(status.expiresAt)
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+        el.textContent = `✅ 已激活 · 年付版（到期日：${dateStr}）`
       } else {
         el.textContent = '✅ 已激活'
-        el.style.color = '#3b6d11'
       }
+      el.style.color = '#3b6d11'
       if (row) row.style.display = 'none'
+      if (banner) banner.style.display = 'none'
+    } else if (status.expired) {
+      el.textContent = '⚠️ 年付版已到期，请重新购买或输入新激活码'
+      el.style.color = '#a32d2d'
+      if (row) row.style.display = 'flex'
+      if (banner) {
+        banner.textContent = '⚠️ 激活已到期，AI 相关功能已锁定 · 点击前往设置续费'
+        banner.style.background = '#fcebeb'
+        banner.style.color = '#a32d2d'
+        banner.style.display = 'block'
+      }
+    } else if (status.locked) {
+      el.textContent = '🔒 试用已结束，AI 功能已锁定'
+      el.style.color = '#a32d2d'
+      if (row) row.style.display = 'flex'
+      if (banner) {
+        banner.textContent = '🔒 试用已结束，AI 相关功能已锁定 · 点击前往设置激活'
+        banner.style.background = '#fcebeb'
+        banner.style.color = '#a32d2d'
+        banner.style.display = 'block'
+      }
     } else {
-      el.textContent = '未激活'
+      el.textContent = `试用中 · 还剩 ${status.trialDaysLeft} 天`
       el.style.color = '#888780'
       if (row) row.style.display = 'flex'
+      if (banner) {
+        banner.textContent = `🕐 免费试用中，还剩 ${status.trialDaysLeft} 天 · 点击前往设置激活`
+        banner.style.background = '#f5f4f0'
+        banner.style.color = '#888780'
+        banner.style.display = 'block'
+      }
     }
   } catch (e) {
     el.textContent = '未激活'
+    if (banner) banner.style.display = 'none'
   }
 }
 
@@ -6035,7 +6091,9 @@ async function studyExpandKnowledge() {
       outputLang: document.querySelector('input[name="study-output-lang"]:checked')?.value || '中文'
     })
 
-    if (result.success) {
+    if (result.locked) {
+      nwShowLockedPrompt()
+    } else if (result.success) {
       studyExpandResultContent = result.result
       studyRenderResult('study-expand-result', result.result)
       resultWrap.style.display = 'block'
@@ -6302,7 +6360,9 @@ async function studyGenerateReview() {
       outputLang: document.querySelector('input[name="study-output-lang"]:checked')?.value || '中文'
     })
 
-    if (result.success) {
+    if (result.locked) {
+      nwShowLockedPrompt()
+    } else if (result.success) {
       studyReviewResultContent = result.result
       studyRenderResult('study-review-result', result.result)
       resultWrap.style.display = 'block'

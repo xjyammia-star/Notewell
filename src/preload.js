@@ -107,4 +107,5 @@ contextBridge.exposeInMainWorld('api', {
   licenseActivate:     (code)          => ipcRenderer.invoke('license-activate', { code }),
   licenseGetStatus:    ()              => ipcRenderer.invoke('license-get-status'),
   licenseDeactivate:   ()              => ipcRenderer.invoke('license-deactivate'),
+  getAccessStatus:     ()              => ipcRenderer.invoke('get-access-status'),
 })
