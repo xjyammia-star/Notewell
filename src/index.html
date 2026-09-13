@@ -673,7 +673,7 @@
     */
     #nw-home { display:flex; flex-direction:column; height:100%; background:var(--bg-page); font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif; }
     #nw-body { display:flex; flex-direction:row; flex:1; min-height:0; overflow:hidden; }
-    #nw-main { display:grid; grid-template-rows:105px 1fr; flex:1; min-width:0; overflow:hidden; }
+    #nw-main { display:grid; grid-template-rows:105px auto 1fr; flex:1; min-width:0; overflow:hidden; }
     #nw-topbar { display:flex; align-items:center; padding:0 20px; height:105px; flex-shrink:0;
       background:var(--bg-nav); border-bottom:1px solid var(--border-color); gap:12px; }
     #nw-logo-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0; }
@@ -2800,7 +2800,7 @@ async function nwScheduleUploadImage() {
   if (tip) tip.style.display = 'block'
   try {
     const res = await window.api.studyInvoke('schedule-parse-image', { imagePath: picked.path })
-    if (res && res.locked) { nwShowLockedPrompt(); return }
+    if (res && res.locked) { nwShowLockedPrompt(res); return }
     if (!res || !res.success) { alert((res && res.error) || t('scheduleParseFailTip')); return }
     nwScheduleDraft = res.days
     nwScheduleDirty = true
@@ -3067,7 +3067,7 @@ async function convertStartTranslate() {
   try {
     const result = await window.api.studyInvoke('convert-translate', { filePath, targetLang })
     if (result.locked) {
-      nwShowLockedPrompt()
+      nwShowLockedPrompt(result)
     } else if (result.success) {
       convertTranslateResultContent = result.result
       studyRenderResult('convert-translate-result', result.result)
@@ -3114,7 +3114,7 @@ async function convertTranslateSave() {
     }
     const res = await window.api.studyInvoke('convert-translate-save', payload)
     if (res.locked) {
-      nwShowLockedPrompt()
+      nwShowLockedPrompt(res)
     } else if (res.success) {
       msgEl.className = 'import-result success'
       msgEl.innerHTML = `✅ 已保存为「${essayEsc(res.filename)}」，跟原文件在同一文件夹`
@@ -3200,7 +3200,7 @@ async function convertStartFormat() {
     } else {
       const extractRes = await window.api.studyInvoke('convert-format-extract', { filePath })
       if (extractRes.locked) {
-        nwShowLockedPrompt()
+        nwShowLockedPrompt(extractRes)
       } else if (!extractRes.success) {
         alert('转换失败：' + (extractRes.error || '未知错误'))
       } else {
@@ -4257,7 +4257,7 @@ async function essayStartCorrect() {
 
   try {
     const res = await window.api.studyInvoke('essay-correct', { text })
-    if (res.locked) { nwShowLockedPrompt() }
+    if (res.locked) { nwShowLockedPrompt(res) }
     if (!res.success) {
       progress.textContent = '❌ ' + (res.error || '纠错失败')
       btn.disabled = false; btn.textContent = '✅ 开始纠错'
@@ -4351,7 +4351,7 @@ async function essaySaveToVault() {
       inboxFolder: aiSettings.inboxFolder || '',
       inboxPath: await window.api.getInboxPath()
     })
-    if (res.locked) { nwShowLockedPrompt() }
+    if (res.locked) { nwShowLockedPrompt(res) }
 
     if (res.success) {
       const where = res.usedInbox ? '📁 临时文件夹' : ('📂 ' + (res.folder || ''))
@@ -5727,10 +5727,12 @@ async function loadTokenStats() {
 }
 
 // ── 账户与订阅（激活码） ──
-function nwShowLockedPrompt() {
-  if (confirm('试用已结束，激活后可继续使用该功能。\n\n是否现在前往设置页输入激活码？')) {
+function nwShowLockedPrompt(res) {
+  const msg = (res && res.error) || '试用已结束，激活后可继续使用该功能。'
+  if (confirm(msg + '\n\n是否现在前往设置页输入激活码？')) {
     showPage('settings')
   }
+  refreshLicenseStatus()
 }
 
 async function refreshLicenseStatus() {
@@ -6092,7 +6094,7 @@ async function studyExpandKnowledge() {
     })
 
     if (result.locked) {
-      nwShowLockedPrompt()
+      nwShowLockedPrompt(result)
     } else if (result.success) {
       studyExpandResultContent = result.result
       studyRenderResult('study-expand-result', result.result)
@@ -6361,7 +6363,7 @@ async function studyGenerateReview() {
     })
 
     if (result.locked) {
-      nwShowLockedPrompt()
+      nwShowLockedPrompt(result)
     } else if (result.success) {
       studyReviewResultContent = result.result
       studyRenderResult('study-review-result', result.result)

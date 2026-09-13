@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, Notification, net, nativeImage } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const crypto = require('crypto')
 const https = require('https')
 const { pathToFileURL } = require('url')
 const Store = require('electron-store')
@@ -66,7 +67,7 @@ autoUpdater.on('error', (err) => {
       type: 'warning',
       title: '更新失败',
       message: '自动更新下载失败',
-      detail: `${errMsg}\n\n请前往 GitHub 手动下载：\nhttps://github.com/xjyammia-star/Obsidian-/releases/latest`,
+      detail: `${errMsg}\n\n请前往 GitHub 手动下载：\nhttps://github.com/xjyammia-star/Notewell/releases/latest`,
       buttons: ['确定']
     })
   } catch(_) {}
@@ -107,8 +108,8 @@ app.whenReady().then(() => {
       try {
         https.get({
           hostname: 'api.github.com',
-          path: '/repos/xjyammia-star/Obsidian-/releases/latest',
-          headers: { 'User-Agent': 'obsidian-manager', 'Accept': 'application/vnd.github.v3+json' }
+          path: '/repos/xjyammia-star/Notewell/releases/latest',
+          headers: { 'User-Agent': 'notewell-app', 'Accept': 'application/vnd.github.v3+json' }
         }, (res) => {
           let data = ''
           res.on('data', chunk => data += chunk)
@@ -1202,13 +1203,23 @@ ipcMain.handle('test-relay-connection', async (event, { kind } = {}) => {
   }
 })
 
+// ── 设备编号（生成一次，永久存本地，用于识别"是不是同一台设备"）──
+function getDeviceId() {
+  let id = store.get('deviceId')
+  if (!id) {
+    id = crypto.randomUUID()
+    store.set('deviceId', id)
+  }
+  return id
+}
+
 // ── 激活码（目前仅支持好友白名单码，付费码逻辑之后再补）──
 ipcMain.handle('license-activate', async (event, { code } = {}) => {
   try {
     const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/verify-license', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code, deviceId: getDeviceId(), action: 'activate' })
     })
     const data = await resp.json()
     if (!resp.ok || !data.success) {
@@ -1270,10 +1281,30 @@ function getAccessStatus() {
 }
 
 // AI 功能入口统一调用这个函数做拦截检查，非空即代表被锁，直接把返回值当结果返回给前端
-function checkAiAccessOrError() {
+async function checkAiAccessOrError() {
   const status = getAccessStatus()
   if (status.locked) {
     return { success: false, locked: true, error: '试用已结束，激活后可继续使用' }
+  }
+  // 已激活（好友码/付费码）：顺带核对一下这个码目前是不是还绑定在这台设备上
+  // （换到别的设备重新激活过同一个码的话，这台设备会被顶替）
+  const license = store.get('license', { activated: false })
+  if (license.activated && license.code) {
+    try {
+      const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/verify-license', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
+        body: JSON.stringify({ code: license.code, deviceId: getDeviceId(), action: 'check' })
+      })
+      const data = await resp.json()
+      if (resp.ok && data.success && data.deviceOk === false) {
+        store.delete('license')
+        return { success: false, locked: true, deviceKicked: true, error: '该激活码已在其他设备上激活，请重新输入激活码' }
+      }
+      // 网络异常、服务暂时不可用等情况：不因为偶发问题拦住正常用户，直接放行
+    } catch (e) {
+      // 同上，网络问题不阻断使用
+    }
   }
   return null
 }
@@ -2221,7 +2252,7 @@ function buildAnnotatedText(original, corrections) {
 }
 
 ipcMain.handle('essay-correct', async (event, { text }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const content = (text || '').trim()
@@ -2313,7 +2344,7 @@ ${content}`
 
 // ── 文章纠错：保存干净版 + 批改记录版到知识库（AI 判断科目文件夹）──
 ipcMain.handle('essay-save', async (event, { filename, correctedText, annotatedText, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const rawName = (filename || '').trim()
@@ -3540,7 +3571,7 @@ ${content}
 
 // ── 知识点扩充 ──
 ipcMain.handle('study-expand-knowledge', async (event, { title, description, ageGroup, curriculum, systemType, outputLang, vaultPath, vaultFolders, inboxFolder, inboxPath }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
 
@@ -3621,7 +3652,7 @@ ${expandBoundaryInstruction}
 })
 
 ipcMain.handle('study-generate-review', async (event, { filePaths, userRequirements, generateType, outputLang, vaultPath }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
 
@@ -3724,7 +3755,7 @@ ${combinedContent}`
 
 // ── 资料转换：资料翻译（目前只支持 md / pdf，其他格式需先做格式转换）──
 ipcMain.handle('convert-translate', async (event, { filePath, targetLang }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   if (!filePath) return { success: false, error: '未指定文件' }
@@ -3786,7 +3817,7 @@ ${body}`
 
 // ── 资料转换：保存翻译结果（存到原文件所在文件夹，生成新文件，原文件不受影响；支持存成 md 或 pdf）──
 ipcMain.handle('convert-translate-save', async (event, { content, htmlBody, format, sourceFilePath, targetLang }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   if (!sourceFilePath) return { success: false, error: '未指定原文件' }
   const fmt = format === 'pdf' ? 'pdf' : 'md'
@@ -3880,7 +3911,7 @@ ipcMain.handle('convert-image-to-pdf', async (event, { filePath }) => {
 // 目前支持的源格式：md / txt / pdf（文字提取）/ docx（用 mammoth 转成 markdown）/ jpg・jpeg・png（AI 识别文字）
 // 暂不支持 xlsx 等表格类格式（表格转文字/文字转表格是完全不同的转换逻辑，需要单独设计）
 ipcMain.handle('convert-format-extract', async (event, { filePath }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   if (!filePath) return { success: false, error: '未指定文件' }
   const ext = path.extname(filePath).toLowerCase()
@@ -4422,7 +4453,7 @@ ipcMain.handle('schedule-get-reminder', async () => {
 
 // ── 课程表：截图识别（按"星期几"归类，忽略截图里具体的日历日期）──
 ipcMain.handle('schedule-parse-image', async (event, { imagePath }) => {
-  const accessError = checkAiAccessOrError()
+  const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
   const visionApiKey = settings.audioApiKey || settings.apiKey
