@@ -6813,11 +6813,11 @@ function nwDtSelect(itemEl, folderPath, folderName) {
   document.querySelectorAll('#folder-tree .nw-tree-item, #folder-tree .tree-item').forEach(el => el.classList.remove('selected'))
   itemEl.classList.add('selected')
   nwSelectedFolderPath = folderPath  // 同步选中路径供新增/删除使用
-  // 展开子树
+  // 展开子树：只用这个文件夹项紧挨着的下一个兄弟节点（也就是它自己的子树容器），
+  // 不要在父容器里搜第一个 .nw-tree-children，否则会误抓到同级其他文件夹的子树
   const toggle = itemEl.querySelector('.nw-tree-toggle')
-  const parent = itemEl.parentElement
-  const childDiv = parent ? parent.querySelector('.nw-tree-children') : null
-  if (childDiv && childDiv.classList.contains('collapsed')) {
+  const childDiv = itemEl.nextElementSibling
+  if (childDiv && childDiv.classList.contains('nw-tree-children') && childDiv.classList.contains('collapsed')) {
     childDiv.classList.remove('collapsed')
     if (toggle) toggle.textContent = '▼'
   }
@@ -7655,11 +7655,10 @@ async function nwSelectFolder(folderPath, itemEl) {
   itemEl.classList.add('selected')
   nwSelectedFolder = folderPath
   nwCheckedFiles.clear()
-  // 展开该节点
+  // 展开该节点：只用这个文件夹项紧挨着的下一个兄弟节点（也就是它自己的子树容器）
   const toggle = itemEl.querySelector('.nw-tree-toggle')
-  const parent = itemEl.closest('div')
-  const childDiv = parent ? parent.querySelector('.nw-tree-children') : null
-  if (childDiv && childDiv.classList.contains('collapsed')) {
+  const childDiv = itemEl.nextElementSibling
+  if (childDiv && childDiv.classList.contains('nw-tree-children') && childDiv.classList.contains('collapsed')) {
     childDiv.classList.remove('collapsed')
     if (toggle) toggle.textContent = '▼'
   }
