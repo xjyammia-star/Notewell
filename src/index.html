@@ -1298,6 +1298,9 @@
   <div class="section-title" id="set-license-title">账户与订阅</div>
   <div class="settings-section" id="license-section">
     <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
+    <div id="license-change-link-row" style="display:none;margin-bottom:10px">
+      <a href="javascript:void(0)" onclick="nwShowLicenseChangeRow()" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🔁 更换激活码 →</a>
+    </div>
     <div id="license-activate-row" style="display:flex;gap:8px">
       <input type="text" id="license-code-input" placeholder="请输入激活码" style="flex:1;padding:8px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box">
       <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
@@ -5873,6 +5876,7 @@ function nwShowLockedPrompt(res) {
 async function refreshLicenseStatus() {
   const el = document.getElementById('license-status-display')
   const row = document.getElementById('license-activate-row')
+  const changeLinkRow = document.getElementById('license-change-link-row')
   const banner = document.getElementById('nw-trial-banner')
   if (!el) return
   try {
@@ -5891,11 +5895,13 @@ async function refreshLicenseStatus() {
       }
       el.style.color = '#3b6d11'
       if (row) row.style.display = 'none'
+      if (changeLinkRow) changeLinkRow.style.display = 'block'
       if (banner) banner.style.display = 'none'
     } else if (status.expired) {
       el.textContent = '⚠️ 年付版已到期，请重新购买或输入新激活码'
       el.style.color = '#a32d2d'
       if (row) row.style.display = 'flex'
+      if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
         banner.textContent = '⚠️ 激活已到期，AI 相关功能已锁定 · 点击前往设置续费'
         banner.style.background = '#fcebeb'
@@ -5906,6 +5912,7 @@ async function refreshLicenseStatus() {
       el.textContent = '🔒 试用已结束，AI 功能已锁定'
       el.style.color = '#a32d2d'
       if (row) row.style.display = 'flex'
+      if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
         banner.textContent = '🔒 试用已结束，AI 相关功能已锁定 · 点击前往设置激活'
         banner.style.background = '#fcebeb'
@@ -5916,6 +5923,7 @@ async function refreshLicenseStatus() {
       el.textContent = `试用中 · 还剩 ${status.trialDaysLeft} 天`
       el.style.color = '#888780'
       if (row) row.style.display = 'flex'
+      if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
         banner.textContent = `🕐 免费试用中，还剩 ${status.trialDaysLeft} 天 · 点击前往设置激活`
         banner.style.background = '#f5f4f0'
@@ -5927,6 +5935,17 @@ async function refreshLicenseStatus() {
     el.textContent = '未激活'
     if (banner) banner.style.display = 'none'
   }
+}
+
+function nwShowLicenseChangeRow() {
+  const row = document.getElementById('license-activate-row')
+  const changeLinkRow = document.getElementById('license-change-link-row')
+  const input = document.getElementById('license-code-input')
+  const msgEl = document.getElementById('license-msg')
+  if (row) row.style.display = 'flex'
+  if (changeLinkRow) changeLinkRow.style.display = 'none'
+  if (input) { input.value = ''; input.focus() }
+  if (msgEl) msgEl.style.display = 'none'
 }
 
 async function doLicenseActivate() {
