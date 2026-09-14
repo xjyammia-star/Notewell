@@ -1070,8 +1070,8 @@
                 <option value="高中" id="study-expand-age-opt3">高中</option>
               </select>
               <div id="study-expand-system-wrap" class="st-radio-group">
-                <label class="st-radio-label" id="study-sys-label-cn"><input type="radio" name="study-expand-system" value="国内" onchange="updateSystemLabel()"> 国内体系</label>
-                <label class="st-radio-label" id="study-sys-label-intl"><input type="radio" name="study-expand-system" value="国际" checked onchange="updateSystemLabel()"> 国际体系</label>
+                <label class="st-radio-label" id="study-sys-label-cn"><input type="radio" name="study-expand-system" value="国内" onchange="updateSystemLabel()"> <span id="study-sys-label-cn-text">国内体系</span></label>
+                <label class="st-radio-label" id="study-sys-label-intl"><input type="radio" name="study-expand-system" value="国际" checked onchange="updateSystemLabel()"> <span id="study-sys-label-intl-text">国际体系</span></label>
               </div>
               <select class="st-select" id="study-expand-curriculum" style="display:none">
                 <option value="IGCSE">IGCSE</option>
@@ -1292,11 +1292,11 @@
       <span style="font-size:12px;">
         <span id="set-version-label" style="color:#888780">当前版本</span>
         <span id="app-version" style="color:#5f5e5a;font-weight:500;margin-left:4px">v1.1.5</span>
-        <a href="javascript:void(0)" onclick="nwShowFullChangelog()" style="color:var(--accent,#534ab7);margin-left:8px;text-decoration:none">查看更新日志</a>
+        <a href="javascript:void(0)" onclick="nwShowFullChangelog()" id="nw-view-changelog-link" style="color:var(--accent,#534ab7);margin-left:8px;text-decoration:none">查看更新日志</a>
         <span id="update-status" style="color:#888780;margin-left:8px"></span>
       </span>
     </div>
-    <button class="btn-sm" onclick="nwOpenFeedbackModal()">💬 我要反馈</button>
+    <button class="btn-sm" id="nw-feedback-open-btn" onclick="nwOpenFeedbackModal()">💬 我要反馈</button>
   </div>
 
   <!-- 账户与订阅（放最上面，比较醒目） -->
@@ -1304,15 +1304,15 @@
   <div class="settings-section" id="license-section">
     <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
     <div id="license-change-link-row" style="display:none;margin-bottom:10px">
-      <a href="javascript:void(0)" onclick="nwShowLicenseChangeRow()" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🔁 更换激活码 →</a>
+      <a href="javascript:void(0)" onclick="nwShowLicenseChangeRow()" id="license-change-link" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🔁 更换激活码 →</a>
     </div>
     <div id="license-activate-row" style="display:flex;gap:8px">
       <input type="text" id="license-code-input" placeholder="请输入激活码" style="flex:1;padding:8px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box">
-      <button class="btn-sm" onclick="doLicenseActivate()">激活</button>
+      <button class="btn-sm" id="license-activate-btn" onclick="doLicenseActivate()">激活</button>
     </div>
     <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
     <div style="margin-top:10px">
-      <a href="javascript:void(0)" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？前往 Payhip 购买 →</a>
+      <a href="javascript:void(0)" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" id="license-payhip-link" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？前往 Payhip 购买 →</a>
     </div>
   </div>
 
@@ -1384,14 +1384,14 @@
       <div style="flex:1;font-size:13px;color:#5f5e5a" id="set-aimodel-desc">AI 模型由服务端统一配置，无需在此填写 Key</div>
     </div>
     <div class="settings-row">
-      <div class="settings-label">📝 文字模型</div>
+      <div class="settings-label" id="set-aimodel-text-label">📝 文字模型</div>
       <div id="relay-test-result-text" style="flex:1;font-size:12px;color:#888780"></div>
-      <button class="btn-sm" onclick="testRelayConnection('text')">测试连接</button>
+      <button class="btn-sm" id="set-aimodel-test-btn-text" onclick="testRelayConnection('text')">测试连接</button>
     </div>
     <div class="settings-row">
-      <div class="settings-label">🖼️ 图片模型</div>
+      <div class="settings-label" id="set-aimodel-vision-label">🖼️ 图片模型</div>
       <div id="relay-test-result-vision" style="flex:1;font-size:12px;color:#888780"></div>
-      <button class="btn-sm" onclick="testRelayConnection('vision')">测试连接</button>
+      <button class="btn-sm" id="set-aimodel-test-btn-vision" onclick="testRelayConnection('vision')">测试连接</button>
     </div>
   </div>
 
@@ -1711,8 +1711,8 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <div class="nw-side-label" style="margin-bottom:0;">Subjects</div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span id="nw-radar-refresh-btn" onclick="nwRadarRecount()" title="按知识库当前文件重新统计" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">🔄 刷新</span>
-              <span id="nw-radar-settings-btn" onclick="nwOpenRadarSettings()" title="设置" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">⚙ 设置</span>
+              <span id="nw-radar-refresh-btn" onclick="nwRadarRecount()" title="按知识库当前文件重新统计" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">🔄 <span id="nw-radar-refresh-btn-label">刷新</span></span>
+              <span id="nw-radar-settings-btn" onclick="nwOpenRadarSettings()" title="设置" style="cursor:pointer;font-size:12px;color:var(--text-muted);white-space:nowrap;">⚙ <span id="nw-radar-settings-btn-label">设置</span></span>
             </div>
           </div>
           <div id="nw-radar-chart"></div>
@@ -1750,20 +1750,20 @@
   <!-- 知识库雷达图设置弹窗 -->
   <div id="nw-radar-settings-modal">
     <div id="nw-radar-settings-box">
-      <h3>知识库雷达图设置</h3>
-      <label class="nw-modal-label">已显示的科目（点击 ✕ 移除，至少需要 3 个才会画图）</label>
+      <h3 id="nw-radar-modal-title">知识库雷达图设置</h3>
+      <label class="nw-modal-label" id="nw-radar-modal-current-label">已显示的科目（点击 ✕ 移除，至少需要 3 个才会画图）</label>
       <div id="nw-radar-settings-current"></div>
-      <label class="nw-modal-label" style="margin-top:14px;">添加科目（从知识库的一级文件夹中选择）</label>
+      <label class="nw-modal-label" id="nw-radar-modal-add-label" style="margin-top:14px;">添加科目（从知识库任意层级的文件夹中选择）</label>
       <div style="display:flex;gap:6px;">
         <select class="nw-modal-input" id="nw-radar-add-select" style="flex:1;"></select>
-        <button class="nw-modal-save" onclick="nwRadarAddSubject()">添加</button>
+        <button class="nw-modal-save" id="nw-radar-modal-add-btn" onclick="nwRadarAddSubject()">添加</button>
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--st-border);">
-        <span id="nw-radar-recount-btn" onclick="nwRadarRecount()" style="cursor:pointer;color:var(--st-text-muted);font-size:12px;text-decoration:underline;">🔄 按知识库里实际的文件数量，重新统计以上科目的分数（含子文件夹）</span>
-        <div style="font-size:11px;color:var(--st-text-muted);margin-top:6px;line-height:1.5;">用于科目文件夹里有旧文件、或文件是手动放进子文件夹的情况——这些不会被自动计分，需要点这里手动统计一次。会用当前文件数重新估算分数，覆盖这个科目原有的数值。</div>
+        <span id="nw-radar-recount-btn" onclick="nwRadarRecount()" style="cursor:pointer;color:var(--st-text-muted);font-size:12px;text-decoration:underline;">🔄 <span id="nw-radar-modal-recount-hint">按知识库里实际的文件数量，重新统计以上科目的分数（含子文件夹）</span></span>
+        <div id="nw-radar-modal-recount-desc" style="font-size:11px;color:var(--st-text-muted);margin-top:6px;line-height:1.5;">用于科目文件夹里有旧文件、或文件是手动放进子文件夹的情况——这些不会被自动计分，需要点这里手动统计一次。会用当前文件数重新估算分数，覆盖这个科目原有的数值。</div>
       </div>
       <div class="nw-modal-btns" style="margin-top:16px;">
-        <button class="nw-modal-cancel" onclick="nwCloseRadarSettings()">关闭</button>
+        <button class="nw-modal-cancel" id="nw-radar-modal-close-btn" onclick="nwCloseRadarSettings()">关闭</button>
       </div>
     </div>
   </div>
@@ -1775,7 +1775,7 @@
     <h3 id="nw-changelog-modal-title" style="font-size:15px;color:var(--st-text);margin-bottom:14px;font-weight:600;"></h3>
     <div id="nw-changelog-modal-body"></div>
     <div class="nw-modal-btns" style="margin-top:16px;">
-      <button class="nw-modal-save" onclick="nwCloseChangelogModal()">知道了</button>
+      <button class="nw-modal-save" id="nw-changelog-ok-btn" onclick="nwCloseChangelogModal()">知道了</button>
     </div>
   </div>
 </div>
@@ -1783,12 +1783,13 @@
 <!-- 问题反馈弹窗 -->
 <div id="nw-feedback-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;">
-    <h3 style="font-size:15px;color:var(--st-text);margin-bottom:10px;font-weight:600;">💬 问题反馈 / 功能建议</h3>
-    <div style="font-size:12px;color:var(--st-text-muted);margin-bottom:10px;">遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。</div>
+    <h3 id="nw-feedback-modal-title" style="font-size:15px;color:var(--st-text);margin-bottom:10px;font-weight:600;">💬 问题反馈 / 功能建议</h3>
+    <div id="nw-feedback-modal-desc" style="font-size:12px;color:var(--st-text-muted);margin-bottom:10px;">遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。</div>
     <textarea id="nw-feedback-input" placeholder="请描述你遇到的问题或建议…" style="width:100%;height:120px;box-sizing:border-box;padding:10px;border:1px solid var(--st-border);border-radius:8px;font-family:inherit;font-size:13px;resize:vertical;background:transparent;color:var(--st-text);"></textarea>
+    <input type="text" id="nw-feedback-contact" placeholder="微信号或邮箱（选填，方便我们联系你确认问题）" style="width:100%;margin-top:8px;box-sizing:border-box;padding:9px 10px;border:1px solid var(--st-border);border-radius:8px;font-family:inherit;font-size:13px;background:transparent;color:var(--st-text);">
     <div id="nw-feedback-msg" style="font-size:12px;margin-top:8px;display:none;"></div>
     <div class="nw-modal-btns" style="margin-top:14px;">
-      <button class="nw-modal-cancel" onclick="nwCloseFeedbackModal()">取消</button>
+      <button class="nw-modal-cancel" id="nw-feedback-cancel-btn" onclick="nwCloseFeedbackModal()">取消</button>
       <button class="nw-modal-save" id="nw-feedback-submit-btn" onclick="nwSubmitFeedback()">提交</button>
     </div>
   </div>
@@ -2942,10 +2943,12 @@ async function nwRenderScheduleReminder() {
     if (!res || !res.success || !res.items || !res.items.length) { box.innerHTML = ''; box.style.display = 'none'; return }
     box.style.display = 'block'
     const dayLabelKeys = { mon: 'scheduleWeekdayMon', tue: 'scheduleWeekdayTue', wed: 'scheduleWeekdayWed', thu: 'scheduleWeekdayThu', fri: 'scheduleWeekdayFri' }
-    const dayLabel = t(dayLabelKeys[res.dayKey]) || '明天'
+    const dayLabel = t(dayLabelKeys[res.dayKey]) || (nwLang === 'en' ? 'Tomorrow' : '明天')
+    const hasWord = nwLang === 'en' ? ' has ' : '有 '
+    const sep = nwLang === 'en' ? ', ' : '，'
     box.innerHTML = res.items.map(it => {
       const timeStr = it.start ? ('（' + it.start + '）') : ''
-      return '<div class="nw-schedule-reminder-item">🔔 ' + dayLabel + '有 ' + esc(it.subject || '') + timeStr + '，' + esc(it.text || '') + '</div>'
+      return '<div class="nw-schedule-reminder-item">🔔 ' + dayLabel + hasWord + esc(it.subject || '') + timeStr + sep + esc(it.text || '') + '</div>'
     }).join('')
   } catch (e) { box.innerHTML = ''; box.style.display = 'none' }
 }
@@ -2981,7 +2984,7 @@ async function convertRefreshBrowser() {
 function renderConvertFolderTree(node, container, vaultPath) {
   const rootEl = document.createElement('div')
   rootEl.className = 'st-folder-item'
-  rootEl.textContent = '📁 ' + node.name
+  rootEl.textContent = '📁 ' + nwLocalizeFolderName(node.name)
   rootEl.onclick = () => convertLoadFiles(vaultPath, rootEl)
   container.appendChild(rootEl)
 
@@ -3052,11 +3055,11 @@ async function convertLoadFiles(folderPath, clickedEl) {
       actions.onclick = (e) => e.stopPropagation()
       const openBtn = document.createElement('button')
       openBtn.className = 'ff-btn'
-      openBtn.textContent = '打开'
+      openBtn.textContent = typeof t === 'function' ? t('openBtn') : '打开'
       openBtn.onclick = () => window.api.openFileDirectly(file.path)
       const showBtn = document.createElement('button')
       showBtn.className = 'ff-btn'
-      showBtn.textContent = '文件管理器'
+      showBtn.textContent = typeof t === 'function' ? t('showInFolderBtn') : '文件管理器'
       showBtn.onclick = () => openFile(file.path)
       actions.appendChild(openBtn)
       actions.appendChild(showBtn)
@@ -3073,7 +3076,12 @@ async function convertLoadFiles(folderPath, clickedEl) {
 function updateConvertCount() {
   const countEl = document.getElementById('convert-select-count')
   if (!countEl) return
-  countEl.textContent = convertSelectedFiles.length === 0 ? '（未选择）' : '（已选 ' + convertSelectedFiles.length + ' 个文件）'
+  if (convertSelectedFiles.length === 0) {
+    countEl.textContent = typeof t === 'function' ? t('notSelected') : '（未选择）'
+  } else {
+    const n = convertSelectedFiles.length
+    countEl.textContent = nwLang === 'en' ? '(' + n + ' file' + (n > 1 ? 's' : '') + ' selected)' : '（已选 ' + n + ' 个文件）'
+  }
 }
 
 function convertFileName(p) {
@@ -3084,7 +3092,7 @@ function renderConvertSelected() {
   const wrap = document.getElementById('convert-selected-list')
   if (!wrap) return
   if (convertSelectedFiles.length === 0) {
-    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>'
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">' + nwEscHtml(typeof t === 'function' ? t('noFilesSelectedYet') : '暂无已选文件') + '</div>'
     return
   }
   wrap.innerHTML = convertSelectedFiles.map(p => {
@@ -3092,7 +3100,7 @@ function renderConvertSelected() {
     const esc = p.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
     return `<div class="study-selected-item">
       <span class="study-selected-name" title="${name}">${name}</span>
-      <span class="study-selected-remove" onclick="convertRemoveSelected('${esc}')" title="移除">✕</span>
+      <span class="study-selected-remove" onclick="convertRemoveSelected('${esc}')" title="${nwEscHtml(typeof t === 'function' ? t('radarModalRemoveTitle') : '移除')}">✕</span>
     </div>`
   }).join('')
 }
@@ -3475,8 +3483,8 @@ async function loadFilesByType(type, label, cardEl) {
         <span class="ff-name" title="${f.relativePath}">${f.name}</span>
         <span class="ff-meta">${f.mtime}</span>
         <span class="ff-actions">
-          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${typeof t === 'function' ? t('openBtn') : '打开'}</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${typeof t === 'function' ? t('showInFolderBtn') : '文件管理器'}</button>
         </span>
       </div>`
     }).join('')
@@ -4019,8 +4027,8 @@ async function loadInboxFiles() {
         <span class="inbox-file-name" title="${f.path}">${f.name}</span>
         <span class="inbox-file-meta">${f.mtime}</span>
         <span class="ff-actions">
-          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">打开</button>
-          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">文件管理器</button>
+          <button class="ff-btn" onclick="event.stopPropagation();window.api.openFileDirectly('${ep}')">${typeof t === 'function' ? t('openBtn') : '打开'}</button>
+          <button class="ff-btn" onclick="event.stopPropagation();openFile('${ep}')">${typeof t === 'function' ? t('showInFolderBtn') : '文件管理器'}</button>
         </span>
       </div>`}).join('')
     updateInboxCount()
@@ -4037,7 +4045,12 @@ function updateInboxCount() {
   const total    = document.querySelectorAll('.inbox-check').length
   const selected = document.querySelectorAll('.inbox-check:checked').length
   const el = document.getElementById('inbox-select-count')
-  if (el) el.textContent = selected > 0 ? `已选 ${selected} / ${total} 个` : `共 ${total} 个文件`
+  if (!el) return
+  if (nwLang === 'en') {
+    el.textContent = selected > 0 ? `Selected ${selected} / ${total}` : `Total files: ${total}`
+  } else {
+    el.textContent = selected > 0 ? `已选 ${selected} / ${total} 个` : `共 ${total} 个文件`
+  }
 }
 
 function selectAllInbox(checked) {
@@ -5793,6 +5806,7 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.1.1', items: ['知识库雷达图设置支持从任意层级的子文件夹添加科目，不再局限于一级目录', '修复英文界面下多处仍显示中文的问题（雷达图设置弹窗、课程表提醒、文件夹根目录名、文件选择计数、知识点扩充课程体系、AI 模型设置、账户与订阅、更新日志与反馈弹窗等）', '问题反馈新增选填的联系方式（微信号/邮箱），方便开发者跟进确认问题'] },
   { version: '1.1.0', items: ['文章纠错、知识点扩充、复习备考三个页面优化：生成结果后自动收起上方输入区，结果区新增"返回修改"按钮', '文章纠错的图片上传流程简化：点击即弹出文件选择框，上传成功提示与识别按钮改为同一行显示', '修复深色主题下 AI 生成结果框（标题、加粗、斜体文字）颜色不匹配、看不清的问题', '课程表明日提醒文案改为显示具体星期几，不再固定写"明天"'] },
   { version: '1.0.9', items: ['课程表高亮显示和提前提醒的切换时间调整：周一到周五 15 点之前继续显示当天课程，15 点后才提前显示次日课程；周六日不受影响，维持原逻辑'] },
   { version: '1.0.8', items: ['修复课程表截图识别、文章纠错图片识别、资料转换图片识别一直提示"请先配置图片和音视频模型"、导致无法使用的问题', '修复导入资料 AI 自动分类图片文件时，未能正确识别图片内容、只能靠文件名分类的问题'] },
@@ -5849,8 +5863,10 @@ function nwCloseChangelogModal() {
 function nwOpenFeedbackModal() {
   const modal = document.getElementById('nw-feedback-modal')
   const input = document.getElementById('nw-feedback-input')
+  const contactInput = document.getElementById('nw-feedback-contact')
   const msg = document.getElementById('nw-feedback-msg')
   if (input) input.value = ''
+  if (contactInput) contactInput.value = localStorage.getItem('nw_feedback_contact') || ''
   if (msg) msg.style.display = 'none'
   if (modal) modal.style.display = 'flex'
 }
@@ -5862,9 +5878,11 @@ function nwCloseFeedbackModal() {
 
 async function nwSubmitFeedback() {
   const input = document.getElementById('nw-feedback-input')
+  const contactInput = document.getElementById('nw-feedback-contact')
   const msg = document.getElementById('nw-feedback-msg')
   const btn = document.getElementById('nw-feedback-submit-btn')
   const content = input ? input.value.trim() : ''
+  const contact = contactInput ? contactInput.value.trim() : ''
   if (!content) { return }
   btn.disabled = true
   btn.textContent = '提交中...'
@@ -5872,10 +5890,11 @@ async function nwSubmitFeedback() {
   msg.style.color = '#888780'
   msg.textContent = ''
   try {
-    const res = await window.api.submitFeedback(content)
+    const res = await window.api.submitFeedback(content, contact)
     if (res.success) {
       msg.style.color = '#3b6d11'
       msg.textContent = '✅ 提交成功，感谢反馈！'
+      if (contact) localStorage.setItem('nw_feedback_contact', contact)
       setTimeout(nwCloseFeedbackModal, 1200)
     } else {
       msg.style.color = '#a32d2d'
@@ -5891,8 +5910,11 @@ async function nwSubmitFeedback() {
 
 // ── 账户与订阅（激活码） ──
 function nwShowLockedPrompt(res) {
-  const msg = (res && res.error) || '试用已结束，激活后可继续使用该功能。'
-  if (confirm(msg + '\n\n是否现在前往设置页输入激活码？')) {
+  const en = nwLang === 'en'
+  const defaultMsg = en ? 'Your trial has ended. Activate to keep using this feature.' : '试用已结束，激活后可继续使用该功能。'
+  const msg = (res && res.error) || defaultMsg
+  const ask = en ? '\n\nGo to Settings now to enter an activation code?' : '\n\n是否现在前往设置页输入激活码？'
+  if (confirm(msg + ask)) {
     showPage('settings')
   }
   refreshLicenseStatus()
@@ -5904,60 +5926,61 @@ async function refreshLicenseStatus() {
   const changeLinkRow = document.getElementById('license-change-link-row')
   const banner = document.getElementById('nw-trial-banner')
   if (!el) return
+  const en = nwLang === 'en'
   try {
     const status = await window.api.getAccessStatus()
     if (status.activated) {
       if (status.type === 'friend') {
-        el.textContent = '🎁 友情账户 · 永久免费'
+        el.textContent = en ? '🎁 Friend account · Free forever' : '🎁 友情账户 · 永久免费'
       } else if (status.type === 'lifetime') {
-        el.textContent = '✅ 已激活 · 终身版'
+        el.textContent = en ? '✅ Activated · Lifetime' : '✅ 已激活 · 终身版'
       } else if (status.type === 'annual' && status.expiresAt) {
         const d = new Date(status.expiresAt)
         const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-        el.textContent = `✅ 已激活 · 年付版（到期日：${dateStr}）`
+        el.textContent = en ? `✅ Activated · Annual (expires: ${dateStr})` : `✅ 已激活 · 年付版（到期日：${dateStr}）`
       } else {
-        el.textContent = '✅ 已激活'
+        el.textContent = en ? '✅ Activated' : '✅ 已激活'
       }
       el.style.color = '#3b6d11'
       if (row) row.style.display = 'none'
       if (changeLinkRow) changeLinkRow.style.display = 'block'
       if (banner) banner.style.display = 'none'
     } else if (status.expired) {
-      el.textContent = '⚠️ 年付版已到期，请重新购买或输入新激活码'
+      el.textContent = en ? '⚠️ Your annual plan has expired — please renew or enter a new activation code' : '⚠️ 年付版已到期，请重新购买或输入新激活码'
       el.style.color = '#a32d2d'
       if (row) row.style.display = 'flex'
       if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
-        banner.textContent = '⚠️ 激活已到期，AI 相关功能已锁定 · 点击前往设置续费'
+        banner.textContent = en ? '⚠️ Activation expired, AI features are locked · Click to renew in Settings' : '⚠️ 激活已到期，AI 相关功能已锁定 · 点击前往设置续费'
         banner.style.background = '#fcebeb'
         banner.style.color = '#a32d2d'
         banner.style.display = 'block'
       }
     } else if (status.locked) {
-      el.textContent = '🔒 试用已结束，AI 功能已锁定'
+      el.textContent = en ? '🔒 Trial ended, AI features are locked' : '🔒 试用已结束，AI 功能已锁定'
       el.style.color = '#a32d2d'
       if (row) row.style.display = 'flex'
       if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
-        banner.textContent = '🔒 试用已结束，AI 相关功能已锁定 · 点击前往设置激活'
+        banner.textContent = en ? '🔒 Trial ended, AI features are locked · Click to activate in Settings' : '🔒 试用已结束，AI 相关功能已锁定 · 点击前往设置激活'
         banner.style.background = '#fcebeb'
         banner.style.color = '#a32d2d'
         banner.style.display = 'block'
       }
     } else {
-      el.textContent = `试用中 · 还剩 ${status.trialDaysLeft} 天`
+      el.textContent = en ? `Trial · ${status.trialDaysLeft} days left` : `试用中 · 还剩 ${status.trialDaysLeft} 天`
       el.style.color = '#888780'
       if (row) row.style.display = 'flex'
       if (changeLinkRow) changeLinkRow.style.display = 'none'
       if (banner) {
-        banner.textContent = `🕐 免费试用中，还剩 ${status.trialDaysLeft} 天 · 点击前往设置激活`
+        banner.textContent = en ? `🕐 Free trial, ${status.trialDaysLeft} days left · Click to activate in Settings` : `🕐 免费试用中，还剩 ${status.trialDaysLeft} 天 · 点击前往设置激活`
         banner.style.background = '#f5f4f0'
         banner.style.color = '#888780'
         banner.style.display = 'block'
       }
     }
   } catch (e) {
-    el.textContent = '未激活'
+    el.textContent = en ? 'Not activated' : '未激活'
     if (banner) banner.style.display = 'none'
   }
   // 横幅显示/隐藏会影响首页文件夹树可用高度，这里状态确定后再补算一次，
@@ -6138,11 +6161,15 @@ function updateSystemLabel() {
   const hint = document.getElementById('study-expand-system-hint')
   if (!hint) return
   if (system === '国内') {
-    hint.textContent = '📚 国内体系：参照人教版课程标准，结合中考/小学考试重点'
+    hint.textContent = nwLang === 'en'
+      ? '📚 Domestic system: follows the PEP curriculum standards, with a focus on middle/primary school exam points'
+      : '📚 国内体系：参照人教版课程标准，结合中考/小学考试重点'
   } else {
     const age = document.getElementById('study-expand-age').value
     const framework = age === '小学' ? 'Cambridge Primary / IB PYP' : 'Cambridge Lower Secondary / IB MYP'
-    hint.textContent = '🌏 国际体系：参照 ' + framework + ' 课程框架，注重概念理解和批判性思维'
+    hint.textContent = nwLang === 'en'
+      ? '🌏 International system: follows the ' + framework + ' framework, focusing on conceptual understanding and critical thinking'
+      : '🌏 国际体系：参照 ' + framework + ' 课程框架，注重概念理解和批判性思维'
   }
 }
 
@@ -6401,7 +6428,7 @@ function renderStudyReviewFolderTree(node, container, vaultPath) {
   // 根目录
   const rootEl = document.createElement('div')
   rootEl.className = 'st-folder-item'
-  rootEl.textContent = '📁 ' + node.name
+  rootEl.textContent = '📁 ' + nwLocalizeFolderName(node.name)
   rootEl.onclick = () => studyReviewLoadFiles(vaultPath, rootEl)
   container.appendChild(rootEl)
 
@@ -6463,11 +6490,11 @@ async function studyReviewLoadFiles(folderPath, clickedEl) {
       actions.onclick = (e) => e.stopPropagation()
       const openBtn = document.createElement('button')
       openBtn.className = 'ff-btn'
-      openBtn.textContent = '打开'
+      openBtn.textContent = typeof t === 'function' ? t('openBtn') : '打开'
       openBtn.onclick = () => window.api.openFileDirectly(file.path)
       const showBtn = document.createElement('button')
       showBtn.className = 'ff-btn'
-      showBtn.textContent = '文件管理器'
+      showBtn.textContent = typeof t === 'function' ? t('showInFolderBtn') : '文件管理器'
       showBtn.onclick = () => openFile(file.path)
       actions.appendChild(openBtn)
       actions.appendChild(showBtn)
@@ -6484,9 +6511,10 @@ async function studyReviewLoadFiles(folderPath, clickedEl) {
 function updateStudyReviewCount() {
   const countEl = document.getElementById('study-review-count')
   if (studyReviewSelectedFiles.length === 0) {
-    countEl.textContent = '（未选择）'
+    countEl.textContent = typeof t === 'function' ? t('notSelected') : '（未选择）'
   } else {
-    countEl.textContent = '（已选 ' + studyReviewSelectedFiles.length + ' 个文件）'
+    const n = studyReviewSelectedFiles.length
+    countEl.textContent = nwLang === 'en' ? '(' + n + ' file' + (n > 1 ? 's' : '') + ' selected)' : '（已选 ' + n + ' 个文件）'
   }
 }
 
@@ -6500,7 +6528,7 @@ function renderStudyReviewSelected() {
   const wrap = document.getElementById('study-review-selected-list')
   if (!wrap) return
   if (studyReviewSelectedFiles.length === 0) {
-    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">暂无已选文件</div>'
+    wrap.innerHTML = '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding-top:10px">' + nwEscHtml(typeof t === 'function' ? t('noFilesSelectedYet') : '暂无已选文件') + '</div>'
     return
   }
   wrap.innerHTML = studyReviewSelectedFiles.map(p => {
@@ -6508,7 +6536,7 @@ function renderStudyReviewSelected() {
     const esc = p.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
     return `<div class="study-selected-item">
       <span class="study-selected-name" title="${name}">${name}</span>
-      <span class="study-selected-remove" onclick="studyReviewRemoveSelected('${esc}')" title="移除">✕</span>
+      <span class="study-selected-remove" onclick="studyReviewRemoveSelected('${esc}')" title="${nwEscHtml(typeof t === 'function' ? t('radarModalRemoveTitle') : '移除')}">✕</span>
     </div>`
   }).join('')
 }
@@ -6980,7 +7008,7 @@ function nwRenderDarkTree(node, vaultPath, depth) {
   const hasChildren = node.children && node.children.length
   const uid = 'dt' + Math.random().toString(36).slice(2,7)
   const ep = esc(node.path || '')
-  const label = depth === 0 ? (node.name || 'Root') : node.name
+  const label = depth === 0 ? nwLocalizeFolderName(node.name || 'Root') : node.name
   const folderName = esc(label)
 
   // depth 0 = 根节点（默认展开）
@@ -7539,21 +7567,45 @@ function nwEscHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
 
+// 知识库根目录名字是后端拼好"xxx（根目录）"整串传过来的（很多地方靠这个原始字符串做判断，
+// 不能直接改后端），这里在界面展示的时候按当前语言把这个后缀换掉
+function nwLocalizeFolderName(name) {
+  if (typeof name !== 'string') return name
+  const suffix = '（根目录）'
+  if (name.indexOf(suffix) !== -1) {
+    const base = name.split(suffix)[0]
+    return base + (typeof t === 'function' ? t('rootFolderSuffix') : suffix)
+  }
+  return name
+}
+
 function nwGetSubjectPoints() {
   try { return JSON.parse(localStorage.getItem('nw_subject_points') || '{}') } catch(e) { return {} }
 }
 
-// folderPathOrName 可传完整路径或纯文件夹名。如果文件存在知识库根目录下的二级、三级子文件夹里
-// （比如 "数学/代数"），科目应该算在顶层的"数学"上，而不是最深一层的"代数"，
-// 所以这里会先尝试用知识库根路径把它换算成"相对于知识库根目录的第一级文件夹名"；
-// 如果传入的本来就只是一个文件夹名（不含完整路径），则直接把它当作科目名使用。
+// folderPathOrName 可传完整路径或纯文件夹名。优先匹配"当前已选的雷达图科目"里
+// 路径前缀最长、最具体的一个（比如同时选了"网球"和"网球/比赛"两个科目，
+// "网球/比赛/xxx.md" 会算进"网球/比赛"而不是笼统的"网球"）；
+// 如果一个已选科目都匹配不上（比如还没手动选过科目、或者是老数据），
+// 就退回旧逻辑：取知识库根目录下的第一级文件夹名。
 function nwGetTopLevelFolderKey(folderPathOrName) {
   const raw = String(folderPathOrName)
+  let rel = raw
   if (currentVaultPath && raw.toLowerCase().indexOf(currentVaultPath.toLowerCase()) === 0) {
-    let rel = raw.slice(currentVaultPath.length).replace(/^[\\/]+/, '')
-    const first = rel.split(/[\\/]/).filter(Boolean)[0]
-    if (first) return first
+    rel = raw.slice(currentVaultPath.length).replace(/^[\\/]+/, '')
   }
+  const relNorm = rel.replace(/\\/g, '/').replace(/\/+$/, '')
+  const subjects = nwGetRadarSubjects()
+  let bestMatch = null
+  for (const s of subjects) {
+    const sNorm = String(s).replace(/\\/g, '/').replace(/\/+$/, '')
+    if (relNorm === sNorm || relNorm.indexOf(sNorm + '/') === 0) {
+      if (!bestMatch || sNorm.length > bestMatch.length) bestMatch = sNorm
+    }
+  }
+  if (bestMatch) return bestMatch
+  const first = relNorm.split('/').filter(Boolean)[0]
+  if (first) return first
   return raw.split(/[\\/]/).filter(Boolean).pop()
 }
 
@@ -7649,7 +7701,7 @@ function nwRenderRadarSettingsCurrent() {
   if (!wrap) return
   const subjects = nwGetRadarSubjects()
   if (!subjects.length) {
-    wrap.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">暂未选择任何科目</div>'
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px 0;">' + nwEscHtml(typeof t === 'function' ? t('radarModalEmptyList') : '暂未选择任何科目') + '</div>'
     return
   }
   wrap.innerHTML = subjects.map(k => {
@@ -7657,7 +7709,7 @@ function nwRenderRadarSettingsCurrent() {
     const esc = k.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
     return '<div class="study-selected-item">' +
       '<span class="study-selected-name" title="' + nwEscHtml(name) + '">' + nwEscHtml(name) + '</span>' +
-      '<span class="study-selected-remove" onclick="nwRadarRemoveSubject(\'' + esc + '\')" title="移除">✕</span>' +
+      '<span class="study-selected-remove" onclick="nwRadarRemoveSubject(\'' + esc + '\')" title="' + nwEscHtml(typeof t === 'function' ? t('radarModalRemoveTitle') : '移除') + '">✕</span>' +
       '</div>'
   }).join('')
 }
@@ -7665,22 +7717,34 @@ function nwRenderRadarSettingsCurrent() {
 async function nwPopulateRadarAddSelect() {
   const sel = document.getElementById('nw-radar-add-select')
   if (!sel) return
-  if (!currentVaultPath) { sel.innerHTML = '<option value="">请先选择知识库</option>'; return }
-  sel.innerHTML = '<option value="">加载中…</option>'
+  const tt = (k, fallback) => typeof t === 'function' ? t(k) : fallback
+  if (!currentVaultPath) { sel.innerHTML = '<option value="">' + nwEscHtml(tt('radarModalSelectVaultFirst','请先选择知识库')) + '</option>'; return }
+  sel.innerHTML = '<option value="">' + nwEscHtml(tt('radarModalLoading','加载中…')) + '</option>'
   try {
     const res = await window.api.getFolderTree(currentVaultPath)
-    const top = (res.success && res.tree) ? (res.tree.children || []) : []
     const subjects = nwGetRadarSubjects()
-    const options = top.map(f => f.name).filter(name => name && !subjects.includes(name))
+    const options = []
+    const walk = (node, prefix, depth) => {
+      for (const child of (node.children || [])) {
+        if (!child.name) continue
+        const relPath = prefix ? prefix + '/' + child.name : child.name
+        if (!subjects.includes(relPath)) {
+          options.push({ value: relPath, depth, name: child.name })
+        }
+        walk(child, relPath, depth + 1)
+      }
+    }
+    if (res.success && res.tree) walk(res.tree, '', 0)
     if (!options.length) {
-      sel.innerHTML = '<option value="">没有可添加的文件夹</option>'
+      sel.innerHTML = '<option value="">' + nwEscHtml(tt('radarModalNoFolder','没有可添加的文件夹')) + '</option>'
       return
     }
-    sel.innerHTML = options.map(name =>
-      '<option value="' + nwEscHtml(name) + '">' + nwEscHtml(nwSubjectDisplayName(name)) + '</option>'
-    ).join('')
+    sel.innerHTML = options.map(o => {
+      const label = o.depth === 0 ? nwSubjectDisplayName(o.name) : ('\u3000'.repeat(o.depth) + '└ ' + o.name)
+      return '<option value="' + nwEscHtml(o.value) + '">' + nwEscHtml(label) + '</option>'
+    }).join('')
   } catch(e) {
-    sel.innerHTML = '<option value="">加载失败</option>'
+    sel.innerHTML = '<option value="">' + nwEscHtml(tt('radarModalLoadFailed','加载失败')) + '</option>'
   }
 }
 
@@ -7706,7 +7770,8 @@ function nwRadarRemoveSubject(key) {
 // 拼接路径：跟随 currentVaultPath 本身用的分隔符（Win 是 \，Mac 是 /）
 function nwJoinPath(base, sub) {
   const sep = base.indexOf('\\') !== -1 ? '\\' : '/'
-  return base.replace(/[\\/]+$/, '') + sep + sub
+  const subNorm = String(sub).replace(/[\\/]+/g, sep)
+  return base.replace(/[\\/]+$/, '') + sep + subNorm
 }
 
 // 按知识库里实际的文件数量（含子文件夹），重新统计当前所有已选科目的分数。
@@ -7993,6 +8058,29 @@ const NW_STRINGS = {
     calLabel:'Calendar', cdLabel:'Countdowns', wrongLabel:'Wrong answers',
     subjectsLabel:'Vault Radar', radarEmpty:'Use the ⚙ Settings button above to choose at least 3 subjects to display',
     radarBackfillBtn:'Scan existing files', radarScanning:'Scanning your vault…',
+    radarRefreshBtn:'Refresh', radarSettingsBtnLabel:'Settings',
+    radarModalTitle:'Vault Radar Settings',
+    radarModalCurrentLabel:'Subjects shown (click × to remove, at least 3 needed to draw the chart)',
+    radarModalAddLabel:'Add a subject (choose any folder from your vault, including subfolders)',
+    radarModalAddBtn:'Add', radarModalClose:'Close',
+    radarModalRecountHint:'Recalculate the scores above using the actual file counts in your vault (including subfolders)',
+    radarModalRecountDesc:'Use this when a subject folder has older files, or files were manually moved into a subfolder — those are not scored automatically. This re-estimates the score from the current file count and overwrites the subject\'s existing score.',
+    radarModalEmptyList:'No subjects selected yet', radarModalNoFolder:'No folders available to add',
+    radarModalLoadFailed:'Failed to load', radarModalSelectVaultFirst:'Please select a vault first',
+    radarModalLoading:'Loading…', radarModalRemoveTitle:'Remove',
+    rootFolderSuffix:' (Root)', notSelected:'(Not selected)', noFilesSelectedYet:'No files selected yet',
+    openBtn:'Open', showInFolderBtn:'Show in folder', totalFilesCount:'Total files: ',
+    domesticSystemLabel:'Domestic system', internationalSystemLabel:'International system',
+    aimodelTitle:'AI model settings', aimodelDesc:'AI models are configured centrally on the server side, no need to fill in a Key here',
+    aimodelTextLabel:'📝 Text model', aimodelVisionLabel:'🖼️ Image model', testConnectionBtn:'Test connection',
+    setVersionLabel:'Current version', viewChangelogLink:'View changelog', feedbackBtn:'💬 Feedback',
+    setLicenseTitle:'Account & Subscription', licenseLoading:'Loading...',
+    licenseChangeLink:'🔁 Change activation code →', licenseCodePlaceholder:'Enter activation code',
+    licenseActivateBtn:'Activate', licensePayhipLink:'🛒 No activation code yet? Buy on Payhip →',
+    changelogOkBtn:'Got it', feedbackModalTitle:'💬 Feedback / Suggestions',
+    feedbackModalDesc:'Found a bug, or have an idea for a new feature? Write it here. The developer reads every piece of feedback and will schedule improvements when needed.',
+    feedbackPlaceholder:'Describe the issue or suggestion…', feedbackCancelBtn:'Cancel', feedbackSubmitBtn:'Submit',
+    feedbackContactPlaceholder:'WeChat ID or email (optional, so we can follow up with you)',
     unsolved:'Unsolved', solved:'Resolved',
     addEvent:'+ Add event',
     // modal
@@ -8149,6 +8237,29 @@ const NW_STRINGS = {
     calLabel:'日历', cdLabel:'倒计时', wrongLabel:'错题本',
     subjectsLabel:'知识库雷达图', radarEmpty:'点击右上角"设置"，选择至少 3 个科目来展示',
     radarBackfillBtn:'扫描已有文件', radarScanning:'正在扫描知识库…',
+    radarRefreshBtn:'刷新', radarSettingsBtnLabel:'设置',
+    radarModalTitle:'知识库雷达图设置',
+    radarModalCurrentLabel:'已显示的科目（点击 × 移除，至少需要 3 个才会画图）',
+    radarModalAddLabel:'添加科目（从知识库任意层级的文件夹中选择）',
+    radarModalAddBtn:'添加', radarModalClose:'关闭',
+    radarModalRecountHint:'🔄 按知识库里实际的文件数量，重新统计以上科目的分数（含子文件夹）',
+    radarModalRecountDesc:'用于科目文件夹里有旧文件、或文件是手动放进子文件夹的情况——这些不会被自动计分，需要点这里手动统计一次。会用当前文件数重新估算分数，覆盖这个科目原有的数值。',
+    radarModalEmptyList:'暂未选择任何科目', radarModalNoFolder:'没有可添加的文件夹',
+    radarModalLoadFailed:'加载失败', radarModalSelectVaultFirst:'请先选择知识库',
+    radarModalLoading:'加载中…', radarModalRemoveTitle:'移除',
+    rootFolderSuffix:'（根目录）', notSelected:'（未选择）', noFilesSelectedYet:'暂无已选文件',
+    openBtn:'打开', showInFolderBtn:'文件管理器', totalFilesCount:'共',
+    domesticSystemLabel:'国内体系', internationalSystemLabel:'国际体系',
+    aimodelTitle:'AI 模型设置', aimodelDesc:'AI 模型由服务端统一配置，无需在此填写 Key',
+    aimodelTextLabel:'📝 文字模型', aimodelVisionLabel:'🖼️ 图片模型', testConnectionBtn:'测试连接',
+    setVersionLabel:'当前版本', viewChangelogLink:'查看更新日志', feedbackBtn:'💬 我要反馈',
+    setLicenseTitle:'账户与订阅', licenseLoading:'加载中...',
+    licenseChangeLink:'🔁 更换激活码 →', licenseCodePlaceholder:'请输入激活码',
+    licenseActivateBtn:'激活', licensePayhipLink:'🛒 还没有激活码？前往 Payhip 购买 →',
+    changelogOkBtn:'知道了', feedbackModalTitle:'💬 问题反馈 / 功能建议',
+    feedbackModalDesc:'遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。',
+    feedbackPlaceholder:'请描述你遇到的问题或建议…', feedbackCancelBtn:'取消', feedbackSubmitBtn:'提交',
+    feedbackContactPlaceholder:'微信号或邮箱（选填，方便我们联系你确认问题）',
     unsolved:'待解决', solved:'已解决',
     addEvent:'+ 添加事件',
     modalTitle:'添加倒计时', modalName:'事件名称', modalDate:'日期',
@@ -8361,6 +8472,47 @@ function applyLanguage() {
 
   // search bar placeholder
   setPlh('nw-search-input', s.searchPlh)
+
+  // vault radar refresh/settings buttons + settings modal
+  set('nw-radar-refresh-btn-label', s.radarRefreshBtn)
+  set('nw-radar-settings-btn-label', s.radarSettingsBtnLabel)
+  set('nw-radar-modal-title', s.radarModalTitle)
+  set('nw-radar-modal-current-label', s.radarModalCurrentLabel)
+  set('nw-radar-modal-add-label', s.radarModalAddLabel)
+  set('nw-radar-modal-add-btn', s.radarModalAddBtn)
+  set('nw-radar-modal-close-btn', s.radarModalClose)
+  set('nw-radar-modal-recount-hint', s.radarModalRecountHint)
+  set('nw-radar-modal-recount-desc', s.radarModalRecountDesc)
+  set('study-review-count', s.notSelected)
+  set('convert-select-count', s.notSelected)
+  set('study-sys-label-cn-text', s.domesticSystemLabel)
+  set('study-sys-label-intl-text', s.internationalSystemLabel)
+  if (typeof updateSystemLabel === 'function') updateSystemLabel()
+  set('set-aimodel-title', s.aimodelTitle)
+  set('set-aimodel-desc', s.aimodelDesc)
+  set('set-aimodel-text-label', s.aimodelTextLabel)
+  set('set-aimodel-vision-label', s.aimodelVisionLabel)
+  set('set-aimodel-test-btn-text', s.testConnectionBtn)
+  set('set-aimodel-test-btn-vision', s.testConnectionBtn)
+  set('set-version-label', s.setVersionLabel)
+  set('nw-view-changelog-link', s.viewChangelogLink)
+  set('nw-feedback-open-btn', s.feedbackBtn)
+  set('set-license-title', s.setLicenseTitle)
+  set('license-change-link', s.licenseChangeLink)
+  setPlh('license-code-input', s.licenseCodePlaceholder)
+  set('license-activate-btn', s.licenseActivateBtn)
+  set('license-payhip-link', s.licensePayhipLink)
+  // license-status-display 有真实状态时由 refreshLicenseStatus() 自己按语言渲染，
+  // 这里只兜底刚启动、还没请求到状态时的"加载中..."默认文字
+  const licenseDisplayEl = document.getElementById('license-status-display')
+  if (licenseDisplayEl && licenseDisplayEl.textContent === '加载中...') licenseDisplayEl.textContent = s.licenseLoading
+  set('nw-changelog-ok-btn', s.changelogOkBtn)
+  set('nw-feedback-modal-title', s.feedbackModalTitle)
+  set('nw-feedback-modal-desc', s.feedbackModalDesc)
+  setPlh('nw-feedback-input', s.feedbackPlaceholder)
+  setPlh('nw-feedback-contact', s.feedbackContactPlaceholder)
+  set('nw-feedback-cancel-btn', s.feedbackCancelBtn)
+  set('nw-feedback-submit-btn', s.feedbackSubmitBtn)
 
   // stat card labels
   set('nw-stat-md-lbl', s.statMd)

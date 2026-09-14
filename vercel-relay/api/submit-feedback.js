@@ -18,11 +18,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: false, error: '反馈服务暂未配置，请稍后再试' })
   }
 
-  const { content, appVersion, platform } = req.body || {}
+  const { content, contact, appVersion, platform } = req.body || {}
   const trimmed = (content || '').trim()
   if (!trimmed) {
     return res.status(200).json({ success: false, error: '请填写反馈内容' })
   }
+  const trimmedContact = (contact || '').trim()
 
   // 标题取内容前 40 个字符，方便在 Issue 列表里一眼看出大概是什么问题
   const title = '[用户反馈] ' + (trimmed.length > 40 ? trimmed.slice(0, 40) + '…' : trimmed)
@@ -33,6 +34,7 @@ export default async function handler(req, res) {
     '---',
     `版本：${appVersion || '未知'}`,
     `系统：${platform || '未知'}`,
+    `联系方式：${trimmedContact || '（未填写）'}`,
     `提交时间：${new Date().toISOString()}`
   ].join('\n')
 

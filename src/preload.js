@@ -108,5 +108,5 @@ contextBridge.exposeInMainWorld('api', {
   licenseGetStatus:    ()              => ipcRenderer.invoke('license-get-status'),
   licenseDeactivate:   ()              => ipcRenderer.invoke('license-deactivate'),
   getAccessStatus:     ()              => ipcRenderer.invoke('get-access-status'),
-  submitFeedback:      (content)       => ipcRenderer.invoke('submit-feedback', { content }),
+  submitFeedback:      (content, contact) => ipcRenderer.invoke('submit-feedback', { content, contact }),
 })

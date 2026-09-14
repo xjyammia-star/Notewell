@@ -1312,12 +1312,12 @@ async function checkAiAccessOrError() {
 ipcMain.handle('get-access-status', () => getAccessStatus())
 
 // ── 用户反馈（自动提交为 GitHub Issue） ──
-ipcMain.handle('submit-feedback', async (event, { content } = {}) => {
+ipcMain.handle('submit-feedback', async (event, { content, contact } = {}) => {
   try {
     const resp = await fetch(RELAY_URL.replace(/\/+$/, '') + '/api/submit-feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-relay-secret': RELAY_SECRET },
-      body: JSON.stringify({ content, appVersion: app.getVersion(), platform: process.platform })
+      body: JSON.stringify({ content, contact, appVersion: app.getVersion(), platform: process.platform })
     })
     const data = await resp.json()
     if (!resp.ok || !data.success) {
