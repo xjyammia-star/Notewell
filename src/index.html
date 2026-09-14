@@ -1774,10 +1774,14 @@
 
 <!-- 更新日志弹窗 -->
 <div id="nw-changelog-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;max-height:70vh;overflow-y:auto;">
-    <h3 id="nw-changelog-modal-title" style="font-size:15px;color:var(--st-text);margin-bottom:14px;font-weight:600;"></h3>
-    <div id="nw-changelog-modal-body"></div>
-    <div class="nw-modal-btns" style="margin-top:16px;">
+  <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;max-height:70vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-bottom:10px;">
+      <h3 id="nw-changelog-modal-title" style="font-size:15px;color:var(--st-text);font-weight:600;margin:0;"></h3>
+      <button onclick="nwCloseChangelogModal()" id="nw-changelog-close-x" aria-label="关闭" style="background:none;border:none;cursor:pointer;color:var(--st-text-muted);font-size:18px;line-height:1;padding:2px 4px;">✕</button>
+    </div>
+    <div id="nw-changelog-update-note" style="flex-shrink:0;font-size:12px;line-height:1.6;background:var(--accent-light,#eeedfe);color:var(--accent-text,#3c3489);padding:8px 10px;border-radius:8px;margin-bottom:12px;">💡 Windows 端支持自动检测并更新；Mac 端仅能检测到新版本，需要手动重新下载安装包完成更新。</div>
+    <div id="nw-changelog-modal-body" style="overflow-y:auto;flex:1;min-height:0;"></div>
+    <div class="nw-modal-btns" style="margin-top:16px;flex-shrink:0;">
       <button class="nw-modal-save" id="nw-changelog-ok-btn" onclick="nwCloseChangelogModal()">知道了</button>
     </div>
   </div>
@@ -5839,7 +5843,7 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
-  { version: '1.1.2', items: ['设置页"账户与订阅"新增"查看收费说明"入口：弹窗展示年付版/终身版价格、收费原因说明、性价比总结', '收费说明弹窗新增"前往订阅"按钮，可直接跳转 Payhip 购买页，按钮下方注明"订阅后获取激活码"'] },
+  { version: '1.1.2', items: ['设置页"账户与订阅"新增"查看收费说明"入口：弹窗展示年付版/终身版价格、收费原因说明、性价比总结', '收费说明弹窗新增"前往订阅"按钮，可直接跳转 Payhip 购买页，按钮下方注明"订阅后获取激活码"', '更新日志弹窗优化：关闭按钮移到顶部，无需翻到底部即可关闭；顶部新增高亮提示——Windows 支持自动检测并更新，Mac 端需手动重新下载安装包完成更新'] },
   { version: '1.1.1', items: ['知识库雷达图设置支持从任意层级的子文件夹添加科目，不再局限于一级目录', '修复英文界面下多处仍显示中文的问题（雷达图设置弹窗、课程表提醒、文件夹根目录名、文件选择计数、知识点扩充课程体系、AI 模型设置、账户与订阅、更新日志与反馈弹窗等）', '问题反馈新增选填的联系方式（微信号/邮箱），方便开发者跟进确认问题'] },
   { version: '1.1.0', items: ['文章纠错、知识点扩充、复习备考三个页面优化：生成结果后自动收起上方输入区，结果区新增"返回修改"按钮', '文章纠错的图片上传流程简化：点击即弹出文件选择框，上传成功提示与识别按钮改为同一行显示', '修复深色主题下 AI 生成结果框（标题、加粗、斜体文字）颜色不匹配、看不清的问题', '课程表明日提醒文案改为显示具体星期几，不再固定写"明天"'] },
   { version: '1.0.9', items: ['课程表高亮显示和提前提醒的切换时间调整：周一到周五 15 点之前继续显示当天课程，15 点后才提前显示次日课程；周六日不受影响，维持原逻辑'] },
@@ -8129,7 +8133,8 @@ const NW_STRINGS = {
     pricingClosing:'That\'s roughly the cost of 1-2 tutoring sessions, in exchange for 10 minutes a day of steady progress — building a real study habit at a very good value.',
     pricingOkBtn:'Got it',
     pricingSubscribeBtn:'🛒 Subscribe now', pricingSubscribeNote:'Get your activation code after subscribing',
-    changelogOkBtn:'Got it', feedbackModalTitle:'💬 Feedback / Suggestions',
+    changelogOkBtn:'Got it',
+    changelogUpdateNote:'💡 Windows can detect and install updates automatically; on Mac, the app can only detect a new version is available — you\'ll need to download and install it manually.', feedbackModalTitle:'💬 Feedback / Suggestions',
     feedbackModalDesc:'Found a bug, or have an idea for a new feature? Write it here. The developer reads every piece of feedback and will schedule improvements when needed.',
     feedbackPlaceholder:'Describe the issue or suggestion…', feedbackCancelBtn:'Cancel', feedbackSubmitBtn:'Submit',
     feedbackContactPlaceholder:'WeChat ID or email (optional, so we can follow up with you)',
@@ -8315,7 +8320,8 @@ const NW_STRINGS = {
     pricingClosing:'相当于1-2次补课的费用，换来每天10分钟的持续积累——主动养成学习习惯，长期看性价比很高。',
     pricingOkBtn:'知道了',
     pricingSubscribeBtn:'🛒 前往订阅', pricingSubscribeNote:'订阅后获取激活码',
-    changelogOkBtn:'知道了', feedbackModalTitle:'💬 问题反馈 / 功能建议',
+    changelogOkBtn:'知道了',
+    changelogUpdateNote:'💡 Windows 端支持自动检测并更新；Mac 端仅能检测到新版本，需要手动重新下载安装包完成更新。', feedbackModalTitle:'💬 问题反馈 / 功能建议',
     feedbackModalDesc:'遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。',
     feedbackPlaceholder:'请描述你遇到的问题或建议…', feedbackCancelBtn:'取消', feedbackSubmitBtn:'提交',
     feedbackContactPlaceholder:'微信号或邮箱（选填，方便我们联系你确认问题）',
@@ -8580,6 +8586,7 @@ function applyLanguage() {
   const licenseDisplayEl = document.getElementById('license-status-display')
   if (licenseDisplayEl && licenseDisplayEl.textContent === '加载中...') licenseDisplayEl.textContent = s.licenseLoading
   set('nw-changelog-ok-btn', s.changelogOkBtn)
+  set('nw-changelog-update-note', s.changelogUpdateNote)
   set('nw-feedback-modal-title', s.feedbackModalTitle)
   set('nw-feedback-modal-desc', s.feedbackModalDesc)
   setPlh('nw-feedback-input', s.feedbackPlaceholder)
