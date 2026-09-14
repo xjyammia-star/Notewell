@@ -93,11 +93,11 @@ export default async function handler(req, res) {
     }
 
     let result = null
-    if (info.variant_name === '年付版') {
+    if (info.variant_name === 'Notewell（年付版）') {
       const purchaseDate = new Date(info.date)
       const expiresAt = new Date(purchaseDate.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString()
       result = { type: 'annual', expiresAt }
-    } else if (info.variant_name === '终身版') {
+    } else if (info.variant_name === 'Notewell（终身版）') {
       result = { type: 'lifetime', expiresAt: null }
     }
 
