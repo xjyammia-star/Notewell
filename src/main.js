@@ -1522,16 +1522,14 @@ ipcMain.handle('ai-classify-file', async (event, { filePath, vaultPath, vaultFol
     const audioApiKey = settings.audioApiKey || settings.apiKey
     const audioModelId = settings.audioModelId || ''
     const audioEndpoint = settings.audioEndpoint || settings.endpoint
-    if (audioApiKey && audioModelId) {
-      try {
-        const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
-        const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, filePath, visionPrompt)
-        if (visionRes.content) {
-          contentForAI += `\n图片内容描述：\n${visionRes.content}`
-          recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
-        }
-      } catch (_) {}
-    }
+    try {
+      const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
+      const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, filePath, visionPrompt)
+      if (visionRes.content) {
+        contentForAI += `\n图片内容描述：\n${visionRes.content}`
+        recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
+      }
+    } catch (_) {}
   }
 
   // 构建知识库文件夹列表
@@ -1630,17 +1628,15 @@ ipcMain.handle('ai-import-files', async (event, { files, vaultPath, vaultFolders
               const audioApiKey = settings.audioApiKey || settings.apiKey
               const audioModelId = settings.audioModelId || ''
               const audioEndpoint = settings.audioEndpoint || settings.endpoint
-              if (audioApiKey && audioModelId) {
-                try {
-                  const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
-                  const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, srcPath, visionPrompt)
-                  if (visionRes.content) {
-                    contentForAI += `\n图片内容描述：\n${visionRes.content}`
-                    recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
-                  }
-                } catch (_) {
-                  // 视觉识别失败则仅靠文件名分类，不中断流程
+              try {
+                const visionPrompt = '请简要描述这张图片的主要内容，重点说明涉及的学科、主题或知识领域（如数学、化学、英语等），50字以内。'
+                const visionRes = await callDoubaoVision(audioApiKey, audioModelId, audioEndpoint, srcPath, visionPrompt)
+                if (visionRes.content) {
+                  contentForAI += `\n图片内容描述：\n${visionRes.content}`
+                  recordTokenUsage('classify', 'vision', visionRes.usage.prompt_tokens||0, visionRes.usage.completion_tokens||0)
                 }
+              } catch (_) {
+                // 视觉识别失败则仅靠文件名分类，不中断流程
               }
             }
 
@@ -2238,9 +2234,6 @@ ipcMain.handle('essay-ocr-image', async (event, { imagePath }) => {
   const visionApiKey = settings.audioApiKey || settings.apiKey
   const visionModelId = settings.audioModelId || ''
   const visionEndpoint = settings.audioEndpoint || settings.endpoint
-  if (!visionApiKey || !visionModelId) {
-    return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
-  }
   try {
     const prompt = '请提取这张图片中的所有文字内容，按原文的顺序和分段完整输出，不要遗漏任何文字，不要添加任何解释、总结、标题或者标点符号以外的内容。如果图片中的某部分不是文字（如插图、图表），可以忽略，不用描述。'
     const res = await callDoubaoVision(visionApiKey, visionModelId, visionEndpoint, imagePath, prompt, 4000)
@@ -3956,7 +3949,6 @@ ipcMain.handle('convert-format-extract', async (event, { filePath }) => {
       const visionApiKey = settings.audioApiKey || settings.apiKey
       const visionModelId = settings.audioModelId || ''
       const visionEndpoint = settings.audioEndpoint || settings.endpoint
-      if (!visionApiKey || !visionModelId) return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
       const prompt = '请提取这张图片中的所有文字内容，按原文的顺序和分段完整输出，不要遗漏任何文字，不要添加任何解释、总结、标题或者标点符号以外的内容。如果图片中的某部分不是文字（如插图、图表），可以忽略，不用描述。'
       const res = await callDoubaoVision(visionApiKey, visionModelId, visionEndpoint, filePath, prompt, 4000)
       recordTokenUsage('convert', 'vision', res.usage.prompt_tokens||0, res.usage.completion_tokens||0)
@@ -4446,11 +4438,18 @@ ipcMain.handle('schedule-save-reminder-settings', async (event, { enabled, keywo
 })
 
 // ── 课程表：计算"明天"需要提醒的课程（供右侧倒计时栏调用）──
+// 周一到周五：15点之前还算"今天"，不提前显示明天的提醒；15点及以后才推进到明天
+// 周六日：不受15点限制，维持原来直接看下一天的逻辑
 ipcMain.handle('schedule-get-reminder', async () => {
   const data = scheduleGetData()
   if (!data.reminder.enabled) return { success: true, items: [] }
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  const now = new Date()
+  const nowWeekday = now.getDay()
+  const isWeekday = nowWeekday >= 1 && nowWeekday <= 5
+  const tomorrow = new Date(now)
+  if (!(isWeekday && now.getHours() < 15)) {
+    tomorrow.setDate(tomorrow.getDate() + 1)
+  }
   const weekday = tomorrow.getDay()
   if (weekday === 0 || weekday === 6) return { success: true, items: [] }
   const dayKey = SCHEDULE_WEEKDAYS[weekday - 1]
@@ -4477,9 +4476,6 @@ ipcMain.handle('schedule-parse-image', async (event, { imagePath }) => {
   const visionApiKey = settings.audioApiKey || settings.apiKey
   const visionModelId = settings.audioModelId || ''
   const visionEndpoint = settings.audioEndpoint || settings.endpoint
-  if (!visionApiKey || !visionModelId) {
-    return { success: false, error: '请先在系统设置中配置图片和音视频模型' }
-  }
   const prompt = '这是一张学校课程表截图，表头可能是具体日期（如"Mon 31st August"）也可能直接是星期几。' +
     '请忽略表头里具体的日历日期，只根据"星期几"把每节课归类到 mon/tue/wed/thu/fri 五天中。' +
     '每节课请提取：开始时间 start（如"7:50"）、结束时间 end（如"8:45"）、科目名 subject、教室 room（没有留空字符串）、教师 teacher（没有留空字符串）。' +

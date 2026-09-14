@@ -586,19 +586,25 @@
     .nw-newnote-scope p[style*="color:#888780"] { color:var(--text-muted) !important; }
 
     /* ── 学习助手结果框内容样式 ── */
-    .study-result-box h1 { font-size: 18px; color: #2c2c2a; border-bottom: 2px solid #534ab7; padding-bottom: 6px; margin: 14px 0 10px; }
-    .study-result-box h2 { font-size: 15px; color: #3c3489; margin: 12px 0 7px; }
-    .study-result-box h3 { font-size: 14px; color: #444; margin: 10px 0 5px; }
-    .study-result-box h4 { font-size: 13px; color: #666; margin: 8px 0 4px; }
+    .study-result-box h1 { font-size: 18px; border-bottom: 2px solid #534ab7; padding-bottom: 6px; margin: 14px 0 10px; }
+    .study-result-box h2 { font-size: 15px; margin: 12px 0 7px; }
+    .study-result-box h3 { font-size: 14px; margin: 10px 0 5px; }
+    .study-result-box h4 { font-size: 13px; margin: 8px 0 4px; }
     .study-result-box p  { margin: 5px 0; line-height: 1.8; }
     .study-result-box ul { margin: 5px 0 5px 18px; }
     .study-result-box li { margin: 3px 0; line-height: 1.7; }
     .study-result-box hr { border: none; border-top: 1px solid var(--border-color); margin: 12px 0; }
-    .study-result-box strong { font-weight: 600; color: #1a1a1a; }
-    .study-result-box em { font-style: italic; color: #444; }
+    .study-result-box strong { font-weight: 600; }
+    .study-result-box em { font-style: italic; }
     .study-result-box .katex-display { margin: 10px 0; overflow-x: auto; }
     .study-result-box .katex { font-size: 1.05em; }
     .study-result-box .katex-display-wrap { text-align: center; margin: 12px 0; overflow-x: auto; }
+    [data-theme="light"] .study-result-box h1 { color: #2c2c2a; }
+    [data-theme="light"] .study-result-box h2 { color: #3c3489; }
+    [data-theme="light"] .study-result-box h3 { color: #444; }
+    [data-theme="light"] .study-result-box h4 { color: #666; }
+    [data-theme="light"] .study-result-box strong { color: #1a1a1a; }
+    [data-theme="light"] .study-result-box em { color: #444; }
     .study-tabs { display:flex; gap:4px; margin-bottom:18px; border-bottom:2px solid var(--border-color); padding-bottom:0; }
     .study-tab-btn { font-size:14px; padding:9px 20px; border:none; background:none; cursor:pointer; color:#888780; border-bottom:2px solid transparent; margin-bottom:-2px; border-radius:6px 6px 0 0; transition:all 0.12s; }
     .study-tab-btn:hover { background:#f1efe8; color:#444441; }
@@ -615,7 +621,8 @@
     .study-label { font-size:13px; color:#5f5e5a; }
     .study-select { border:1px solid var(--border-input); border-radius:6px; padding:5px 10px; font-size:13px; outline:none; background:#fff; color:#444441; }
     .study-select:focus { border-color:#534ab7; }
-    .study-result-box { background:#fff; border:1px solid var(--border-color); border-radius:10px; padding:16px 18px; margin-top:14px; font-size:14px; line-height:1.8; word-break:break-word; max-height:440px; overflow-y:auto; }
+    .study-result-box { border:1px solid var(--border-color); border-radius:10px; padding:16px 18px; margin-top:14px; font-size:14px; line-height:1.8; word-break:break-word; max-height:440px; overflow-y:auto; }
+    [data-theme="light"] .study-result-box { background:#fff; }
     .study-action-row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center; }
     .btn-study-primary { background:#534ab7; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:14px; cursor:pointer; font-weight:500; }
     .btn-study-primary:hover { background:#3c3489; }
@@ -1053,6 +1060,7 @@
 
           <!-- ── 标签二：知识点扩充 ── -->
           <div id="study-tab-expand" class="st-tab-panel" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
+            <div id="study-expand-input-area" style="display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;">
             <div class="st-info-tip" id="study-expand-infotip">🔬 输入一个知识点标题和你的理解，AI 会帮你完善内容、纠正错误，并根据年龄段/课程给出适当深度的扩展。</div>
             <div class="st-row">
               <input type="text" class="st-input" id="study-expand-title" placeholder="知识点标题（如：动物细胞、光合作用、牛顿第二定律…）" style="flex:1">
@@ -1081,6 +1089,7 @@
             <div class="st-action-row">
               <button class="st-btn-primary" id="study-expand-btn" onclick="studyExpandKnowledge()">✨ <span id="study-expand-btn-label">AI 扩充知识点</span></button>
             </div>
+            </div>
             <div id="study-expand-progress" style="display:none" class="st-progress">⏳ AI 正在扩充知识点，请稍候...</div>
             <div id="study-expand-result-wrap" style="display:none;flex:1;min-height:0;flex-direction:column;overflow-y:auto;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
@@ -1091,6 +1100,7 @@
               <div class="st-action-row" style="margin-top:10px">
                 <button class="st-btn-green" id="study-expand-save-btn" onclick="studyExpandSave()">📂 <span id="study-expand-savebtn-label">保存到知识库</span></button>
                 <button class="st-btn-sec" id="study-expand-copybtn" onclick="studyCopyResult('study-expand-result')">📋 <span id="study-expand-copybtn-label">复制内容</span></button>
+                <button class="btn-sm" onclick="studyExpandBackToInput()">← <span id="study-expand-backbtn-label">返回修改</span></button>
               </div>
               <div id="study-expand-msg" style="display:none"></div>
             </div>
@@ -1101,32 +1111,24 @@
 
   <div class="st-info-tip" id="essay-infotip">📌 文章纠错：只检查错别字、语法、标点、固定搭配等客观错误，不评价内容和思路，也不打分。纠错尺度偏宽松，日常口语化的表达、非正式书写中的省略（如缺少句末标点、时间写法不标准等）只要意思清楚就不会被判定为错误，只处理明显、确定无疑的错误。支持直接输入文字，或上传文章照片自动识别文字。</div>
 
-  <div class="st-tabs" style="margin-top:2px">
+  <div class="st-tabs" id="essay-input-tabs" style="margin-top:2px;align-items:center;">
     <button class="st-tab-btn active" id="essay-tab-text" onclick="essaySwitchInputMode('text')">✏️ <span id="essay-tab-text-label">文字输入</span></button>
     <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ <span id="essay-tab-image-label">上传图片</span></button>
+    <div id="essay-image-preview" style="display:none;align-items:center;gap:10px;margin-left:10px;">
+      <span id="essay-image-name" style="font-size:13px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button class="btn-sm" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 <span id="essay-ocr-btn-label">识别图片文字</span></button>
+    </div>
   </div>
 
   <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;">
     <textarea class="st-textarea" id="essay-input-text" style="flex:1;min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
   </div>
 
-  <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px">
-    <div class="drop-zone" id="essay-drop-zone" onclick="essayPickImage()"
-      style="padding:12px 20px;display:flex;align-items:center;gap:12px;text-align:left;justify-content:flex-start;border-radius:8px;cursor:pointer">
-      <span style="font-size:22px">🖼️</span>
-      <span style="font-size:13px;color:#888780" id="essay-dropzone-label">点击选择一张文章图片（支持 jpg / png / gif / webp）</span>
-    </div>
-    <div id="essay-image-preview" style="display:none;align-items:center;gap:12px">
-      <img id="essay-image-preview-img" style="max-width:100px;max-height:100px;border-radius:8px;border:1px solid var(--border-color);flex-shrink:0">
-      <div style="flex:1;min-width:0">
-        <div id="essay-image-name" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
-        <button class="btn-sm" style="margin-top:6px" onclick="essayOcrImage()" id="essay-ocr-btn">🔍 <span id="essay-ocr-btn-label">识别图片文字</span></button>
-      </div>
-    </div>
-    <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780"></div>
-    <div>
-      <div style="font-size:12px;color:#888780;margin-bottom:6px" id="essay-ocr-result-label">识别出的文字（可手动修正后再纠错）：</div>
-      <textarea class="st-textarea" id="essay-ocr-result-text" style="min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
+  <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px;flex:1;min-height:0;">
+    <div id="essay-ocr-progress" style="display:none;font-size:13px;color:#888780;flex-shrink:0;"></div>
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;">
+      <div style="font-size:12px;color:#888780;margin-bottom:6px;flex-shrink:0;" id="essay-ocr-result-label">识别出的文字（可手动修正后再纠错）：</div>
+      <textarea class="st-textarea" id="essay-ocr-result-text" style="flex:1;min-height:160px" placeholder="识别结果会显示在这里，你可以先核对修改，再点击下方「开始纠错」"></textarea>
     </div>
   </div>
 
@@ -1175,6 +1177,7 @@
 
           <!-- ── 标签四：复习备考 ── -->
           <div id="study-tab-review" class="st-tab-panel" style="flex:1;min-height:0;overflow-y:auto;display:none;flex-direction:column;gap:12px;">
+            <div id="study-review-input-area" style="display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;">
             <div class="st-info-tip" id="review-infotip">📖 从知识库选择资料，AI 根据内容生成复习材料或练习题。支持保存到知识库（md格式）和下载（PDF格式）。</div>
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -1209,6 +1212,7 @@
             <div class="st-action-row">
               <button class="st-btn-primary" id="study-review-btn" onclick="studyGenerateReview()">🤖 <span id="review-genbtn-label">AI 生成复习内容</span></button>
             </div>
+            </div>
             <div id="study-review-progress" style="display:none" class="st-progress">⏳ AI 正在生成复习内容，请稍候（内容较多时可能需要1~2分钟）...</div>
             <div id="study-review-result-wrap" style="display:none;flex:1;min-height:0;flex-direction:column;overflow-y:auto;">
               <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;flex-shrink:0;" id="review-preview-label">✅ 生成结果预览</div>
@@ -1217,6 +1221,7 @@
                 <button class="st-btn-green" id="study-review-save-btn" onclick="studyReviewSave()">📂 <span id="review-savebtn-label">保存到知识库（md）</span></button>
                 <button class="st-btn-sec" id="study-review-pdf-btn" onclick="studyReviewDownloadPDF()">📄 <span id="review-pdfbtn-label">下载 PDF</span></button>
                 <button class="st-btn-sec" id="review-copybtn" onclick="studyCopyResult('study-review-result')">📋 <span id="review-copybtn-label">复制内容</span></button>
+                <button class="btn-sm" onclick="studyReviewBackToInput()">← <span id="review-backbtn-label">返回修改</span></button>
               </div>
               <div id="study-review-msg" style="display:none"></div>
             </div>
@@ -2693,10 +2698,18 @@ function nwScheduleResolveWeekTypeFE(date) {
   return raw
 }
 
-// 算出"要突出显示的那一天"：平时是明天，如果明天落在周末（或今天已经是周末），就顺延到下一个周一
+// 算出"要突出显示的那一天"：
+// 周一到周五：15点之前当天的课还没上完，继续高亮"今天"；15点及以后才提前高亮"明天"
+// （如果明天落在周末，就顺延到下一个周一）
+// 周六日：不受15点限制，维持原来"直接看下一个上课日"的逻辑（反正周末本来就没课）
 function nwScheduleGetNextSchoolDay() {
-  const d = new Date()
-  d.setDate(d.getDate() + 1)
+  const now = new Date()
+  const nowWeekday = now.getDay()
+  const isWeekday = nowWeekday >= 1 && nowWeekday <= 5
+  const d = new Date(now)
+  if (!(isWeekday && now.getHours() < 15)) {
+    d.setDate(d.getDate() + 1)
+  }
   let guard = 0
   while ([0, 6].includes(d.getDay()) && guard < 7) { d.setDate(d.getDate() + 1); guard++ }
   const weekdayIdx = d.getDay()
@@ -2928,9 +2941,11 @@ async function nwRenderScheduleReminder() {
     const res = await window.api.studyInvoke('schedule-get-reminder', {})
     if (!res || !res.success || !res.items || !res.items.length) { box.innerHTML = ''; box.style.display = 'none'; return }
     box.style.display = 'block'
+    const dayLabelKeys = { mon: 'scheduleWeekdayMon', tue: 'scheduleWeekdayTue', wed: 'scheduleWeekdayWed', thu: 'scheduleWeekdayThu', fri: 'scheduleWeekdayFri' }
+    const dayLabel = t(dayLabelKeys[res.dayKey]) || '明天'
     box.innerHTML = res.items.map(it => {
       const timeStr = it.start ? ('（' + it.start + '）') : ''
-      return '<div class="nw-schedule-reminder-item">🔔 ' + '明天有 ' + esc(it.subject || '') + timeStr + '，' + esc(it.text || '') + '</div>'
+      return '<div class="nw-schedule-reminder-item">🔔 ' + dayLabel + '有 ' + esc(it.subject || '') + timeStr + '，' + esc(it.text || '') + '</div>'
     }).join('')
   } catch (e) { box.innerHTML = ''; box.style.display = 'none' }
 }
@@ -4234,6 +4249,7 @@ function essaySwitchInputMode(mode) {
   } else {
     tabImage.classList.add('active'); tabText.classList.remove('active')
     panelImage.style.display = 'flex'; panelText.style.display = 'none'
+    essayPickImage()
   }
 }
 
@@ -4245,10 +4261,8 @@ async function essayPickImage() {
 function essaySetImage(imgPath) {
   essayImagePath = imgPath
   const preview = document.getElementById('essay-image-preview')
-  const img = document.getElementById('essay-image-preview-img')
   const nameEl = document.getElementById('essay-image-name')
-  img.src = 'file://' + imgPath.replace(/\\/g,'/')
-  nameEl.textContent = imgPath.split(/[\\/]/).pop()
+  nameEl.textContent = '上传成功：' + imgPath.split(/[\\/]/).pop()
   preview.style.display = 'flex'
   document.getElementById('essay-ocr-result-text').value = ''
 }
@@ -4363,12 +4377,18 @@ function essayRenderResult(res) {
     fnEl.value = '文章纠错-' + dateStr
   }
 
+  document.getElementById('essay-input-tabs').style.display = 'none'
+  document.getElementById('essay-panel-text').style.display = 'none'
+  document.getElementById('essay-panel-image').style.display = 'none'
   document.getElementById('essay-result-section').style.display = 'flex'
   document.getElementById('essay-save-msg').style.display = 'none'
 }
 
 function essayBackToInput() {
   document.getElementById('essay-result-section').style.display = 'none'
+  document.getElementById('essay-input-tabs').style.display = 'flex'
+  const isImageMode = document.getElementById('essay-tab-image').classList.contains('active')
+  document.getElementById(isImageMode ? 'essay-panel-image' : 'essay-panel-text').style.display = 'flex'
 }
 
 async function essaySaveToVault() {
@@ -5773,6 +5793,9 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.1.0', items: ['文章纠错、知识点扩充、复习备考三个页面优化：生成结果后自动收起上方输入区，结果区新增"返回修改"按钮', '文章纠错的图片上传流程简化：点击即弹出文件选择框，上传成功提示与识别按钮改为同一行显示', '修复深色主题下 AI 生成结果框（标题、加粗、斜体文字）颜色不匹配、看不清的问题', '课程表明日提醒文案改为显示具体星期几，不再固定写"明天"'] },
+  { version: '1.0.9', items: ['课程表高亮显示和提前提醒的切换时间调整：周一到周五 15 点之前继续显示当天课程，15 点后才提前显示次日课程；周六日不受影响，维持原逻辑'] },
+  { version: '1.0.8', items: ['修复课程表截图识别、文章纠错图片识别、资料转换图片识别一直提示"请先配置图片和音视频模型"、导致无法使用的问题', '修复导入资料 AI 自动分类图片文件时，未能正确识别图片内容、只能靠文件名分类的问题'] },
   { version: '1.0.7', items: ['修复首页文件夹/文件列表区域在已激活状态下高度无法撑满到底部的问题', '修复 AI笔记「知识点扩充」「文章纠错」「复习备考」三个页面输入框和结果预览框高度未能撑满到底部的问题'] },
   { version: '1.0.6', items: ['修复付费激活码（年付版/终身版）购买后无法正确识别版本类型、导致激活失败的问题', '设置页新增"更换激活码"入口：已激活状态下也可以重新输入新的激活码'] },
   { version: '1.0.5', items: ['设置页布局优化：版本号、更新日志、问题反馈入口收进标题栏同一行，节省页面空间'] },
@@ -6257,6 +6280,7 @@ async function studyExpandKnowledge() {
     } else if (result.success) {
       studyExpandResultContent = result.result
       studyRenderResult('study-expand-result', result.result)
+      document.getElementById('study-expand-input-area').style.display = 'none'
       resultWrap.style.display = 'flex'
     } else {
       alert('生成失败：' + (result.error || '未知错误'))
@@ -6268,6 +6292,11 @@ async function studyExpandKnowledge() {
   btn.disabled = false
   btn.textContent = '✨ AI 扩充知识点'
   progressEl.style.display = 'none'
+}
+
+function studyExpandBackToInput() {
+  document.getElementById('study-expand-result-wrap').style.display = 'none'
+  document.getElementById('study-expand-input-area').style.display = 'flex'
 }
 
 async function studyExpandSave() {
@@ -6526,6 +6555,7 @@ async function studyGenerateReview() {
     } else if (result.success) {
       studyReviewResultContent = result.result
       studyRenderResult('study-review-result', result.result)
+      document.getElementById('study-review-input-area').style.display = 'none'
       resultWrap.style.display = 'flex'
     } else {
       alert('生成失败：' + (result.error || '未知错误'))
@@ -6537,6 +6567,11 @@ async function studyGenerateReview() {
   btn.disabled = false
   btn.textContent = '🤖 AI 生成复习内容'
   progressEl.style.display = 'none'
+}
+
+function studyReviewBackToInput() {
+  document.getElementById('study-review-result-wrap').style.display = 'none'
+  document.getElementById('study-review-input-area').style.display = 'flex'
 }
 
 async function studyReviewSave() {
