@@ -1300,7 +1300,10 @@
   </div>
 
   <!-- 账户与订阅（放最上面，比较醒目） -->
-  <div class="section-title" id="set-license-title">账户与订阅</div>
+  <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <span id="set-license-title">账户与订阅</span>
+    <a href="javascript:void(0)" onclick="nwShowPricingModal()" id="nw-pricing-info-link" style="font-size:12px;font-weight:normal;color:var(--accent,#534ab7);text-decoration:none">💰 查看收费说明</a>
+  </div>
   <div class="settings-section" id="license-section">
     <div id="license-status-display" style="font-size:13px;color:#5f5e5a;margin-bottom:10px">加载中...</div>
     <div id="license-change-link-row" style="display:none;margin-bottom:10px">
@@ -1776,6 +1779,36 @@
     <div id="nw-changelog-modal-body"></div>
     <div class="nw-modal-btns" style="margin-top:16px;">
       <button class="nw-modal-save" id="nw-changelog-ok-btn" onclick="nwCloseChangelogModal()">知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 收费说明弹窗 -->
+<div id="nw-pricing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--sidebar-panel-bg);border:1px solid var(--st-border);border-radius:14px;padding:22px 24px;width:380px;max-height:80vh;overflow-y:auto;">
+    <h3 id="nw-pricing-modal-title" style="font-size:15px;color:var(--st-text);margin-bottom:14px;font-weight:600;">💰 收费说明</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:var(--st-input-bg);border-radius:10px;padding:12px;text-align:center;display:flex;flex-direction:column;">
+        <div style="display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;margin-bottom:6px;visibility:hidden;">占位</div>
+        <div id="nw-pricing-annual-label" style="font-size:12px;color:var(--st-text-muted);margin-bottom:4px;">年付版</div>
+        <div id="nw-pricing-annual-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥499</div>
+        <div id="nw-pricing-annual-sub" style="font-size:12px;color:var(--st-text-muted);">฿2,499 / 年</div>
+      </div>
+      <div style="background:var(--st-input-bg);border-radius:10px;padding:12px;text-align:center;border:2px solid var(--accent,#534ab7);display:flex;flex-direction:column;">
+        <div id="nw-pricing-lifetime-badge" style="display:inline-block;font-size:11px;font-weight:600;color:var(--accent-text,#3c3489);background:var(--accent-light,#eeedfe);padding:2px 8px;border-radius:8px;margin-bottom:6px;">更划算</div>
+        <div id="nw-pricing-lifetime-label" style="font-size:12px;color:var(--st-text-muted);margin-bottom:4px;">终身版</div>
+        <div id="nw-pricing-lifetime-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥1,199</div>
+        <div id="nw-pricing-lifetime-sub" style="font-size:12px;color:var(--st-text-muted);">฿5,999 · 一次性</div>
+      </div>
+    </div>
+    <p id="nw-pricing-reason" style="font-size:13px;color:var(--st-text-muted);line-height:1.7;margin:0 0 12px;">AI笔记的每一次生成，都需要调用真实的AI模型进行处理，会产生实际的Token成本——尤其是图片识别和文件处理，消耗的Token远高于纯文字。这部分成本会持续产生，因此需要收取合理的使用费用来维持服务运转。</p>
+    <div style="border-top:1px solid var(--st-border);padding-top:12px;">
+      <p id="nw-pricing-closing" style="font-size:13px;color:var(--st-text);line-height:1.7;margin:0;font-weight:600;">相当于1-2次补课的费用，换来每天10分钟的持续积累——主动养成学习习惯，长期看性价比很高。</p>
+    </div>
+    <button class="nw-modal-save" id="nw-pricing-subscribe-btn" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="width:100%;margin-top:16px;">🛒 前往订阅</button>
+    <div id="nw-pricing-subscribe-note" style="font-size:12px;color:var(--st-text-muted);text-align:center;margin-top:6px;">订阅后获取激活码</div>
+    <div class="nw-modal-btns" style="margin-top:12px;">
+      <button class="nw-modal-cancel" id="nw-pricing-ok-btn" onclick="nwClosePricingModal()">知道了</button>
     </div>
   </div>
 </div>
@@ -5806,6 +5839,7 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.1.2', items: ['设置页"账户与订阅"新增"查看收费说明"入口：弹窗展示年付版/终身版价格、收费原因说明、性价比总结', '收费说明弹窗新增"前往订阅"按钮，可直接跳转 Payhip 购买页，按钮下方注明"订阅后获取激活码"'] },
   { version: '1.1.1', items: ['知识库雷达图设置支持从任意层级的子文件夹添加科目，不再局限于一级目录', '修复英文界面下多处仍显示中文的问题（雷达图设置弹窗、课程表提醒、文件夹根目录名、文件选择计数、知识点扩充课程体系、AI 模型设置、账户与订阅、更新日志与反馈弹窗等）', '问题反馈新增选填的联系方式（微信号/邮箱），方便开发者跟进确认问题'] },
   { version: '1.1.0', items: ['文章纠错、知识点扩充、复习备考三个页面优化：生成结果后自动收起上方输入区，结果区新增"返回修改"按钮', '文章纠错的图片上传流程简化：点击即弹出文件选择框，上传成功提示与识别按钮改为同一行显示', '修复深色主题下 AI 生成结果框（标题、加粗、斜体文字）颜色不匹配、看不清的问题', '课程表明日提醒文案改为显示具体星期几，不再固定写"明天"'] },
   { version: '1.0.9', items: ['课程表高亮显示和提前提醒的切换时间调整：周一到周五 15 点之前继续显示当天课程，15 点后才提前显示次日课程；周六日不受影响，维持原逻辑'] },
@@ -5856,6 +5890,17 @@ function nwShowFullChangelog() {
 
 function nwCloseChangelogModal() {
   const modal = document.getElementById('nw-changelog-modal')
+  if (modal) modal.style.display = 'none'
+}
+
+// ── 收费说明弹窗 ──
+function nwShowPricingModal() {
+  const modal = document.getElementById('nw-pricing-modal')
+  if (modal) modal.style.display = 'flex'
+}
+
+function nwClosePricingModal() {
+  const modal = document.getElementById('nw-pricing-modal')
   if (modal) modal.style.display = 'none'
 }
 
@@ -8077,6 +8122,13 @@ const NW_STRINGS = {
     setLicenseTitle:'Account & Subscription', licenseLoading:'Loading...',
     licenseChangeLink:'🔁 Change activation code →', licenseCodePlaceholder:'Enter activation code',
     licenseActivateBtn:'Activate', licensePayhipLink:'🛒 No activation code yet? Buy on Payhip →',
+    pricingInfoLink:'💰 Pricing details', pricingModalTitle:'💰 Pricing details',
+    pricingAnnualLabel:'Annual', pricingAnnualPrice:'¥499', pricingAnnualSub:'฿2,499 / year',
+    pricingLifetimeBadge:'Best value', pricingLifetimeLabel:'Lifetime', pricingLifetimePrice:'¥1,199', pricingLifetimeSub:'฿5,999 · one-time',
+    pricingReason:'Every AI note generation calls a real AI model, which has an actual token cost — image recognition and file processing use far more tokens than plain text. This cost is ongoing, so a reasonable usage fee helps keep the service running.',
+    pricingClosing:'That\'s roughly the cost of 1-2 tutoring sessions, in exchange for 10 minutes a day of steady progress — building a real study habit at a very good value.',
+    pricingOkBtn:'Got it',
+    pricingSubscribeBtn:'🛒 Subscribe now', pricingSubscribeNote:'Get your activation code after subscribing',
     changelogOkBtn:'Got it', feedbackModalTitle:'💬 Feedback / Suggestions',
     feedbackModalDesc:'Found a bug, or have an idea for a new feature? Write it here. The developer reads every piece of feedback and will schedule improvements when needed.',
     feedbackPlaceholder:'Describe the issue or suggestion…', feedbackCancelBtn:'Cancel', feedbackSubmitBtn:'Submit',
@@ -8256,6 +8308,13 @@ const NW_STRINGS = {
     setLicenseTitle:'账户与订阅', licenseLoading:'加载中...',
     licenseChangeLink:'🔁 更换激活码 →', licenseCodePlaceholder:'请输入激活码',
     licenseActivateBtn:'激活', licensePayhipLink:'🛒 还没有激活码？前往 Payhip 购买 →',
+    pricingInfoLink:'💰 查看收费说明', pricingModalTitle:'💰 收费说明',
+    pricingAnnualLabel:'年付版', pricingAnnualPrice:'¥499', pricingAnnualSub:'฿2,499 / 年',
+    pricingLifetimeBadge:'更划算', pricingLifetimeLabel:'终身版', pricingLifetimePrice:'¥1,199', pricingLifetimeSub:'฿5,999 · 一次性',
+    pricingReason:'AI笔记的每一次生成，都需要调用真实的AI模型进行处理，会产生实际的Token成本——尤其是图片识别和文件处理，消耗的Token远高于纯文字。这部分成本会持续产生，因此需要收取合理的使用费用来维持服务运转。',
+    pricingClosing:'相当于1-2次补课的费用，换来每天10分钟的持续积累——主动养成学习习惯，长期看性价比很高。',
+    pricingOkBtn:'知道了',
+    pricingSubscribeBtn:'🛒 前往订阅', pricingSubscribeNote:'订阅后获取激活码',
     changelogOkBtn:'知道了', feedbackModalTitle:'💬 问题反馈 / 功能建议',
     feedbackModalDesc:'遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。',
     feedbackPlaceholder:'请描述你遇到的问题或建议…', feedbackCancelBtn:'取消', feedbackSubmitBtn:'提交',
@@ -8502,6 +8561,20 @@ function applyLanguage() {
   setPlh('license-code-input', s.licenseCodePlaceholder)
   set('license-activate-btn', s.licenseActivateBtn)
   set('license-payhip-link', s.licensePayhipLink)
+  set('nw-pricing-info-link', s.pricingInfoLink)
+  set('nw-pricing-modal-title', s.pricingModalTitle)
+  set('nw-pricing-annual-label', s.pricingAnnualLabel)
+  set('nw-pricing-annual-price', s.pricingAnnualPrice)
+  set('nw-pricing-annual-sub', s.pricingAnnualSub)
+  set('nw-pricing-lifetime-badge', s.pricingLifetimeBadge)
+  set('nw-pricing-lifetime-label', s.pricingLifetimeLabel)
+  set('nw-pricing-lifetime-price', s.pricingLifetimePrice)
+  set('nw-pricing-lifetime-sub', s.pricingLifetimeSub)
+  set('nw-pricing-reason', s.pricingReason)
+  set('nw-pricing-closing', s.pricingClosing)
+  set('nw-pricing-ok-btn', s.pricingOkBtn)
+  set('nw-pricing-subscribe-btn', s.pricingSubscribeBtn)
+  set('nw-pricing-subscribe-note', s.pricingSubscribeNote)
   // license-status-display 有真实状态时由 refreshLicenseStatus() 自己按语言渲染，
   // 这里只兜底刚启动、还没请求到状态时的"加载中..."默认文字
   const licenseDisplayEl = document.getElementById('license-status-display')
