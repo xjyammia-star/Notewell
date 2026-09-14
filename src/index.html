@@ -216,7 +216,7 @@
     .refresh-btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
     .refresh-btn.spinning .refresh-icon { display: inline-block; animation: spin 0.7s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .main { flex: 1; overflow-y: auto; padding: 20px 28px; isolation: isolate; position: relative; }
+    .main { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 28px; isolation: isolate; position: relative; }
     .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 16px; text-align: center; }
     .welcome h2 { font-size: 22px; font-weight: 500; }
     .welcome p { font-size: 14px; color: var(--text-muted); max-width: 320px; line-height: 1.7; }
@@ -673,8 +673,8 @@
     */
     #nw-home { display:flex; flex-direction:column; height:100%; background:var(--bg-page); font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif; }
     #nw-body { display:flex; flex-direction:row; flex:1; min-height:0; overflow:hidden; }
-    #nw-main { display:grid; grid-template-rows:105px auto 1fr; flex:1; min-width:0; overflow:hidden; }
-    #nw-topbar { display:flex; align-items:center; padding:0 20px; height:105px; flex-shrink:0;
+    #nw-main { display:grid; grid-template-rows:105px auto 1fr; flex:1; min-width:0; min-height:0; overflow:hidden; }
+    #nw-topbar { grid-row: 1; display:flex; align-items:center; padding:0 20px; height:105px; flex-shrink:0;
       background:var(--bg-nav); border-bottom:1px solid var(--border-color); gap:12px; }
     #nw-logo-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0; }
     #nw-logo-svg { width:54px; height:54px; }
@@ -938,10 +938,10 @@
         </div>
 
         <!-- 试用/激活状态提示条（正常已激活时不显示） -->
-        <div id="nw-trial-banner" onclick="showPage('settings')" style="display:none;padding:6px 16px;font-size:12px;text-align:center;cursor:pointer;"></div>
+        <div id="nw-trial-banner" onclick="showPage('settings')" style="grid-row:2;display:none;padding:6px 16px;font-size:12px;text-align:center;cursor:pointer;"></div>
 
         <!-- 搜索栏 + 其他内容（可滚动） -->
-        <div id="nw-main-scroll">
+        <div id="nw-main-scroll" style="grid-row:3;">
 
           <div id="nw-home-content" style="display:flex;flex-direction:column;flex:1;min-height:0;">
         <!-- 搜索栏 -->
@@ -1076,18 +1076,18 @@
             <div id="study-expand-system-hint" style="font-size:12px;color:var(--text-muted);background:var(--bg-hover);border-radius:6px;padding:7px 11px;line-height:1.6;">
               🌏 国际体系：参照 Cambridge Lower Secondary / IB MYP 课程框架，注重概念理解和批判性思维
             </div>
-            <textarea class="st-textarea" id="study-expand-desc" style="min-height:180px"
+            <textarea class="st-textarea" id="study-expand-desc" style="flex:1;min-height:180px"
               placeholder="写下你对这个知识点的理解和描述（可以不完整、有错误，AI 会帮你纠正和补充）&#10;&#10;示例：动物细胞有细胞膜、细胞质和细胞核，没有细胞壁，我记得还有线粒体？"></textarea>
             <div class="st-action-row">
               <button class="st-btn-primary" id="study-expand-btn" onclick="studyExpandKnowledge()">✨ <span id="study-expand-btn-label">AI 扩充知识点</span></button>
             </div>
             <div id="study-expand-progress" style="display:none" class="st-progress">⏳ AI 正在扩充知识点，请稍候...</div>
-            <div id="study-expand-result-wrap" style="display:none">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div id="study-expand-result-wrap" style="display:none;flex:1;min-height:0;flex-direction:column;overflow-y:auto;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-shrink:0;">
                 <span style="font-size:13px;font-weight:500;color:var(--text-secondary)" id="study-expand-preview-label">✅ 扩充结果预览</span>
                 <span style="font-size:12px;color:var(--text-muted)" id="study-expand-scroll-hint">可向下滚动查看完整内容</span>
               </div>
-              <div class="st-result-box study-result-box" id="study-expand-result"></div>
+              <div class="st-result-box study-result-box" id="study-expand-result" style="flex:1;max-height:none;"></div>
               <div class="st-action-row" style="margin-top:10px">
                 <button class="st-btn-green" id="study-expand-save-btn" onclick="studyExpandSave()">📂 <span id="study-expand-savebtn-label">保存到知识库</span></button>
                 <button class="st-btn-sec" id="study-expand-copybtn" onclick="studyCopyResult('study-expand-result')">📋 <span id="study-expand-copybtn-label">复制内容</span></button>
@@ -1106,8 +1106,8 @@
     <button class="st-tab-btn" id="essay-tab-image" onclick="essaySwitchInputMode('image')">🖼️ <span id="essay-tab-image-label">上传图片</span></button>
   </div>
 
-  <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px">
-    <textarea class="st-textarea" id="essay-input-text" style="min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
+  <div id="essay-panel-text" style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;">
+    <textarea class="st-textarea" id="essay-input-text" style="flex:1;min-height:220px" placeholder="在这里粘贴或输入需要纠错的文章内容…"></textarea>
   </div>
 
   <div id="essay-panel-image" style="display:none;flex-direction:column;gap:10px">
@@ -1136,7 +1136,7 @@
     <div id="essay-correct-progress" style="font-size:13px;color:#888780"></div>
   </div>
 
-  <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px">
+  <div id="essay-result-section" style="display:none;flex-direction:column;gap:14px;margin-top:6px;flex:1;min-height:0;overflow-y:auto;">
 
     <div id="essay-result-lang" style="font-size:12px;color:#888780"></div>
     <div id="essay-punctuation-note" style="display:none;font-size:12px;color:var(--warn-text);background:var(--warn-bg);border:1px solid var(--warn-text);border-radius:6px;padding:6px 10px;"></div>
@@ -1204,15 +1204,15 @@
                 <label><input type="radio" name="study-gen-type" value="both"> 📚 <span id="review-gentype-opt3">复习资料 + 练习题</span></label>
               </div>
             </div>
-            <textarea class="st-textarea" id="study-review-requirement" style="min-height:80px"
+            <textarea class="st-textarea" id="study-review-requirement" style="flex:1;min-height:80px"
               placeholder="（可选）补充说明：重点关注哪些知识点？有什么特别要求？&#10;示例：重点考察光合作用的暗反应部分；练习题多出一些计算题；请用英文生成..."></textarea>
             <div class="st-action-row">
               <button class="st-btn-primary" id="study-review-btn" onclick="studyGenerateReview()">🤖 <span id="review-genbtn-label">AI 生成复习内容</span></button>
             </div>
             <div id="study-review-progress" style="display:none" class="st-progress">⏳ AI 正在生成复习内容，请稍候（内容较多时可能需要1~2分钟）...</div>
-            <div id="study-review-result-wrap" style="display:none">
-              <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px" id="review-preview-label">✅ 生成结果预览</div>
-              <div class="st-result-box study-result-box" id="study-review-result" style="max-height:420px"></div>
+            <div id="study-review-result-wrap" style="display:none;flex:1;min-height:0;flex-direction:column;overflow-y:auto;">
+              <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;flex-shrink:0;" id="review-preview-label">✅ 生成结果预览</div>
+              <div class="st-result-box study-result-box" id="study-review-result" style="flex:1;max-height:none;"></div>
               <div class="st-action-row" style="margin-top:10px">
                 <button class="st-btn-green" id="study-review-save-btn" onclick="studyReviewSave()">📂 <span id="review-savebtn-label">保存到知识库（md）</span></button>
                 <button class="st-btn-sec" id="study-review-pdf-btn" onclick="studyReviewDownloadPDF()">📄 <span id="review-pdfbtn-label">下载 PDF</span></button>
@@ -5773,6 +5773,8 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.0.7', items: ['修复首页文件夹/文件列表区域在已激活状态下高度无法撑满到底部的问题', '修复 AI笔记「知识点扩充」「文章纠错」「复习备考」三个页面输入框和结果预览框高度未能撑满到底部的问题'] },
+  { version: '1.0.6', items: ['修复付费激活码（年付版/终身版）购买后无法正确识别版本类型、导致激活失败的问题', '设置页新增"更换激活码"入口：已激活状态下也可以重新输入新的激活码'] },
   { version: '1.0.5', items: ['设置页布局优化：版本号、更新日志、问题反馈入口收进标题栏同一行，节省页面空间'] },
   { version: '1.0.4', items: ['修复更新日志弹窗在深色主题下文字看不清的问题', '设置页布局调整：版本信息、更新日志、问题反馈入口挪到页面最上方，更醒目', '安装包改为固定文件名，方便以后提供永久不变的下载链接'] },
   { version: '1.0.3', items: ['【测试用】验证更新日志弹窗功能是否正常触发'] },
@@ -5935,6 +5937,9 @@ async function refreshLicenseStatus() {
     el.textContent = '未激活'
     if (banner) banner.style.display = 'none'
   }
+  // 横幅显示/隐藏会影响首页文件夹树可用高度，这里状态确定后再补算一次，
+  // 避免启动时机不巧、横幅还没显示/隐藏完就已经算过高度，导致框没有撑满到底部
+  if (typeof nwFitVaultHeight === 'function' && currentVaultPath) nwFitVaultHeight()
 }
 
 function nwShowLicenseChangeRow() {
@@ -6252,7 +6257,7 @@ async function studyExpandKnowledge() {
     } else if (result.success) {
       studyExpandResultContent = result.result
       studyRenderResult('study-expand-result', result.result)
-      resultWrap.style.display = 'block'
+      resultWrap.style.display = 'flex'
     } else {
       alert('生成失败：' + (result.error || '未知错误'))
     }
@@ -6521,7 +6526,7 @@ async function studyGenerateReview() {
     } else if (result.success) {
       studyReviewResultContent = result.result
       studyRenderResult('study-review-result', result.result)
-      resultWrap.style.display = 'block'
+      resultWrap.style.display = 'flex'
     } else {
       alert('生成失败：' + (result.error || '未知错误'))
     }
@@ -6829,7 +6834,11 @@ function nwInitHome() {
 }
 
 /* ── 用 JS 精确计算文件夹树/文件列表区域应占的高度，
-     不依赖 CSS flex/grid 链条，保证一定撑满到底部 ── */
+     不依赖 CSS flex/grid 链条，保证一定撑满到底部 ──
+     用 ResizeObserver 持续盯着 #nw-main-scroll 的真实渲染尺寸，
+     只要它一变化（窗口 resize、最大化、内容变化等任何原因）就自动重算，
+     不再靠猜"该在哪个时间点调用一次"来触发 ── */
+let _nwVaultResizeObserver = null
 function nwFitVaultHeight() {
   const scroll = document.getElementById('nw-main-scroll')
   const vaultOverview = document.getElementById('nw-vault-overview')
@@ -6838,23 +6847,45 @@ function nwFitVaultHeight() {
   const statsRow = document.getElementById('nw-stats-row')
   if (!searchBar || !statsRow) return
 
+  if (!_nwVaultResizeObserver && typeof ResizeObserver !== 'undefined') {
+    _nwVaultResizeObserver = new ResizeObserver(() => nwFitVaultHeightCalc())
+    _nwVaultResizeObserver.observe(scroll)
+  }
+  nwFitVaultHeightCalc()
+}
+
+function nwFitVaultHeightCalc() {
+  const scroll = document.getElementById('nw-main-scroll')
+  const homeContent = document.getElementById('nw-home-content')
+  const vaultOverview = document.getElementById('nw-vault-overview')
+  if (!scroll || !homeContent || !vaultOverview) return
+
+  // 浏览器自身的 flex 自动分配在这个嵌套层级下算不准（已通过实测确认，
+  // 具体原因不明，但现象稳定复现），改成直接用 JS 精确计算：
+  // 用 #nw-main-scroll 真实高度（网格排位修好后这个数字是可信的），
+  // 减去它自己的内边距，再减去 nw-home-content 里除 vault-overview 以外
+  // 每一个兄弟元素的真实占用高度（含 margin），剩下的就是这个框该有的高度
   const scrollRect = scroll.getBoundingClientRect()
   const scrollStyle = getComputedStyle(scroll)
-  const paddingTop = parseFloat(scrollStyle.paddingTop) || 0
-  const paddingBottom = parseFloat(scrollStyle.paddingBottom) || 0
+  const scrollPadding = (parseFloat(scrollStyle.paddingTop) || 0) + (parseFloat(scrollStyle.paddingBottom) || 0)
 
-  // offsetHeight 已包含 margin 之外的自身高度，margin 需单独加
-  const searchStyle = getComputedStyle(searchBar)
-  const statsStyle = getComputedStyle(statsRow)
-  const searchH = searchBar.getBoundingClientRect().height
-    + (parseFloat(searchStyle.marginTop)||0) + (parseFloat(searchStyle.marginBottom)||0)
-  const statsH = statsRow.getBoundingClientRect().height
-    + (parseFloat(statsStyle.marginTop)||0) + (parseFloat(statsStyle.marginBottom)||0)
+  let siblingsH = 0
+  for (const child of homeContent.children) {
+    if (child.id === 'nw-vault-overview') continue
+    const cs = getComputedStyle(child)
+    if (cs.display === 'none') continue
+    siblingsH += child.getBoundingClientRect().height
+      + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0)
+  }
 
-  const available = scrollRect.height - paddingTop - paddingBottom - searchH - statsH
-  if (available > 100) {
+  const available = scrollRect.height - scrollPadding - siblingsH
+  if (available > 300) {
     vaultOverview.style.height = available + 'px'
     vaultOverview.style.flex = 'none'
+  } else {
+    // 算出来的数明显不合理，退回默认 flex:1，避免比不算还差
+    vaultOverview.style.height = ''
+    vaultOverview.style.flex = '1'
   }
 }
 window.addEventListener('resize', () => { if (currentVaultPath) nwFitVaultHeight() })
