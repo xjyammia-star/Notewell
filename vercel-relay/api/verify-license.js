@@ -31,6 +31,17 @@ async function checkDeviceBinding(licenseCode, deviceId) {
   return rows[0].device_id === deviceId
 }
 
+// 友情码有效期规则：码结尾正好是两位数字、且落在 01-12 之间，就当作"有效期N个月"
+// （从这次激活成功的时刻往后推N个月）；其它情况（结尾不是两位数字、是三位数字的
+// 后两位、或者数字超出01-12范围）一律按永久有效处理，不影响老码。
+function parseFriendCodeMonths(code) {
+  const m = code.match(/(?<!\d)(\d{2})$/)
+  if (!m) return null
+  const months = parseInt(m[1], 10)
+  if (months < 1 || months > 12) return null
+  return months
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed' })
@@ -68,7 +79,14 @@ export default async function handler(req, res) {
 
   if (friendCodes.includes(trimmedCode)) {
     try { await bindDevice(trimmedCode, deviceId) } catch (e) { /* 绑定失败不影响本次激活成功 */ }
-    return res.status(200).json({ success: true, valid: true, type: 'friend', expiresAt: null })
+    let expiresAt = null
+    const months = parseFriendCodeMonths(trimmedCode)
+    if (months) {
+      const d = new Date()
+      d.setMonth(d.getMonth() + months)
+      expiresAt = d.toISOString()
+    }
+    return res.status(200).json({ success: true, valid: true, type: 'friend', expiresAt })
   }
 
   // 第二步：不是好友码，尝试当作 Payhip 激活码验证

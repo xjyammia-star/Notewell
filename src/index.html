@@ -5981,7 +5981,13 @@ async function refreshLicenseStatus() {
     const status = await window.api.getAccessStatus()
     if (status.activated) {
       if (status.type === 'friend') {
-        el.textContent = en ? '🎁 Friend account · Free forever' : '🎁 友情账户 · 永久免费'
+        if (status.expiresAt) {
+          const d = new Date(status.expiresAt)
+          const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+          el.textContent = en ? `🎁 Friend account (expires: ${dateStr})` : `🎁 友情账户（到期日：${dateStr}）`
+        } else {
+          el.textContent = en ? '🎁 Friend account · Free forever' : '🎁 友情账户 · 永久免费'
+        }
       } else if (status.type === 'lifetime') {
         el.textContent = en ? '✅ Activated · Lifetime' : '✅ 已激活 · 终身版'
       } else if (status.type === 'annual' && status.expiresAt) {
