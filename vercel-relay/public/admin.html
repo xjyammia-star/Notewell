@@ -53,6 +53,20 @@
 
   <div class="cards" id="cards"></div>
 
+  <div class="section-title">最近30天，按天统计</div>
+  <table id="daily-table">
+    <thead>
+      <tr>
+        <th>日期</th>
+        <th>调用次数</th>
+        <th>当天用户/设备数</th>
+        <th>输入 token</th>
+        <th>输出 token</th>
+      </tr>
+    </thead>
+    <tbody id="daily-tbody"></tbody>
+  </table>
+
   <div class="section-title">按用户 / 设备</div>
   <table id="user-table">
     <thead>
@@ -92,6 +106,14 @@
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') +
       ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0')
   }
+  function fmtDay(s) {
+    if (!s) return '—'
+    const d = new Date(s)
+    const today = new Date()
+    const isToday = d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate()
+    const label = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
+    return isToday ? label + '（今天）' : label
+  }
 
   async function loadData() {
     const secret = sessionStorage.getItem(SECRET_KEY)
@@ -129,6 +151,21 @@
       <div class="card"><div class="num">${fmtNum(t.total_input)}</div><div class="label">总输入 token</div></div>
       <div class="card"><div class="num">${fmtNum(t.total_output)}</div><div class="label">总输出 token</div></div>
     `
+
+    const dailyTbody = document.getElementById('daily-tbody')
+    if (!data.daily || !data.daily.length) {
+      dailyTbody.innerHTML = '<tr><td colspan="5" class="empty">暂无数据</td></tr>'
+    } else {
+      dailyTbody.innerHTML = data.daily.map(d => `
+        <tr>
+          <td>${fmtDay(d.day)}</td>
+          <td>${fmtNum(d.calls)}</td>
+          <td>${fmtNum(d.users)}</td>
+          <td>${fmtNum(d.input_tokens)}</td>
+          <td>${fmtNum(d.output_tokens)}</td>
+        </tr>
+      `).join('')
+    }
 
     const tbody = document.getElementById('user-tbody')
     if (!data.users.length) {

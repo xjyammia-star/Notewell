@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
   try {
     await ensureUsageTable()
-    const [totalsRows, userRows, feedback] = await Promise.all([
+    const [totalsRows, userRows, dailyRows, feedback] = await Promise.all([
       sql`
         SELECT
           COUNT(DISTINCT COALESCE(license_code, device_id)) AS total_users,
@@ -62,6 +62,18 @@ export default async function handler(req, res) {
         GROUP BY identity
         ORDER BY (SUM(input_tokens) + SUM(output_tokens)) DESC
       `,
+      sql`
+        SELECT
+          date_trunc('day', created_at) AS day,
+          COUNT(*) AS calls,
+          COUNT(DISTINCT COALESCE(license_code, device_id)) AS users,
+          COALESCE(SUM(input_tokens), 0) AS input_tokens,
+          COALESCE(SUM(output_tokens), 0) AS output_tokens
+        FROM usage_logs
+        WHERE created_at > now() - interval '30 days'
+        GROUP BY day
+        ORDER BY day DESC
+      `,
       fetchFeedback()
     ])
 
@@ -69,6 +81,7 @@ export default async function handler(req, res) {
       success: true,
       totals: totalsRows[0] || { total_users: 0, total_calls: 0, total_input: 0, total_output: 0 },
       users: userRows,
+      daily: dailyRows,
       feedback
     })
   } catch (e) {
