@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           COUNT(*) FILTER (WHERE created_at > now() - interval '30 days') AS calls_30d
         FROM usage_logs
         GROUP BY identity
-        ORDER BY (input_tokens + output_tokens) DESC
+        ORDER BY (SUM(input_tokens) + SUM(output_tokens)) DESC
       `,
       fetchFeedback()
     ])
