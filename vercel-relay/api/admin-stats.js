@@ -37,6 +37,34 @@ export default async function handler(req, res) {
 
   try {
     await ensureUsageTable()
+    const dateParam = /^\d{4}-\d{2}-\d{2}$/.test(req.query.date) ? req.query.date : null
+    const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 365)
+
+    const dailyPromise = dateParam
+      ? sql`
+          SELECT
+            date_trunc('day', created_at) AS day,
+            COUNT(*) AS calls,
+            COUNT(DISTINCT COALESCE(license_code, device_id)) AS users,
+            COALESCE(SUM(input_tokens), 0) AS input_tokens,
+            COALESCE(SUM(output_tokens), 0) AS output_tokens
+          FROM usage_logs
+          WHERE created_at::date = ${dateParam}::date
+          GROUP BY day
+        `
+      : sql`
+          SELECT
+            date_trunc('day', created_at) AS day,
+            COUNT(*) AS calls,
+            COUNT(DISTINCT COALESCE(license_code, device_id)) AS users,
+            COALESCE(SUM(input_tokens), 0) AS input_tokens,
+            COALESCE(SUM(output_tokens), 0) AS output_tokens
+          FROM usage_logs
+          WHERE created_at > now() - make_interval(days => ${days})
+          GROUP BY day
+          ORDER BY day DESC
+        `
+
     const [totalsRows, userRows, dailyRows, feedback] = await Promise.all([
       sql`
         SELECT
@@ -62,18 +90,7 @@ export default async function handler(req, res) {
         GROUP BY identity
         ORDER BY (SUM(input_tokens) + SUM(output_tokens)) DESC
       `,
-      sql`
-        SELECT
-          date_trunc('day', created_at) AS day,
-          COUNT(*) AS calls,
-          COUNT(DISTINCT COALESCE(license_code, device_id)) AS users,
-          COALESCE(SUM(input_tokens), 0) AS input_tokens,
-          COALESCE(SUM(output_tokens), 0) AS output_tokens
-        FROM usage_logs
-        WHERE created_at > now() - interval '30 days'
-        GROUP BY day
-        ORDER BY day DESC
-      `,
+      dailyPromise,
       fetchFeedback()
     ])
 

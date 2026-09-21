@@ -30,6 +30,10 @@
   .fb-meta { font-size:11px; color:#b4b2a9; margin-top:6px; }
   .empty { color:#b4b2a9; font-size:13px; padding:16px; text-align:center; }
   .refresh-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .range-bar { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+  .range-btn { background:#fff; border:1px solid #ddd; color:#5f5e5a; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
+  .range-btn.active { background:#3b6d11; color:#fff; border-color:#3b6d11; }
+  .range-bar input[type=date] { padding:6px 10px; border:1px solid #ddd; border-radius:8px; font-size:13px; }
 </style>
 </head>
 <body>
@@ -53,7 +57,13 @@
 
   <div class="cards" id="cards"></div>
 
-  <div class="section-title">最近30天，按天统计</div>
+  <div class="section-title" id="daily-title">按天统计（最近30天）</div>
+  <div class="range-bar">
+    <button class="range-btn" id="range-today" onclick="setDailyRange('today')">今天</button>
+    <button class="range-btn" id="range-7" onclick="setDailyRange('7')">最近7天</button>
+    <button class="range-btn active" id="range-30" onclick="setDailyRange('30')">最近30天</button>
+    <input type="date" id="date-input" onchange="onDatePick()">
+  </div>
   <table id="daily-table">
     <thead>
       <tr>
@@ -91,11 +101,37 @@
 
 <script>
   const SECRET_KEY = 'nw_admin_secret'
+  let dailyQuery = '?days=30'
 
   function doLogin() {
     const val = document.getElementById('secret-input').value.trim()
     if (!val) return
     sessionStorage.setItem(SECRET_KEY, val)
+    loadData()
+  }
+
+  function setDailyRange(kind) {
+    document.getElementById('date-input').value = ''
+    if (kind === 'today') {
+      const todayStr = new Date().toISOString().slice(0, 10)
+      dailyQuery = '?date=' + todayStr
+      document.getElementById('daily-title').textContent = '按天统计（今天）'
+    } else {
+      dailyQuery = '?days=' + kind
+      document.getElementById('daily-title').textContent = '按天统计（最近' + kind + '天）'
+    }
+    ;['today', '7', '30'].forEach(k => {
+      document.getElementById('range-' + k).classList.toggle('active', k === kind)
+    })
+    loadData()
+  }
+
+  function onDatePick() {
+    const val = document.getElementById('date-input').value
+    if (!val) return
+    dailyQuery = '?date=' + val
+    document.getElementById('daily-title').textContent = '按天统计（' + val + '）'
+    ;['today', '7', '30'].forEach(k => document.getElementById('range-' + k).classList.remove('active'))
     loadData()
   }
 
@@ -120,7 +156,7 @@
     if (!secret) return
     document.getElementById('login-error').textContent = ''
     try {
-      const resp = await fetch('/api/admin-stats', { headers: { 'x-admin-secret': secret } })
+      const resp = await fetch('/api/admin-stats' + dailyQuery, { headers: { 'x-admin-secret': secret } })
       const data = await resp.json()
       if (!resp.ok || !data.success) {
         if (resp.status === 401) {
