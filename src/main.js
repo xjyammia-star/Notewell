@@ -1418,7 +1418,14 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
   const t0 = Date.now()
   logAICall(`[${callId}] 发起请求（中转服务）maxTokens=${maxTokens||500} promptLen=${promptLen} retry=${!!_isRetry}`)
   const apiCall = new Promise((resolve, reject) => {
-    const body = JSON.stringify({ type: 'text', messages, maxTokens: maxTokens || 500 })
+    const licenseInfo = store.get('license') || {}
+    const body = JSON.stringify({
+      type: 'text',
+      messages,
+      maxTokens: maxTokens || 500,
+      deviceId: getDeviceId(),
+      licenseCode: licenseInfo.activated ? licenseInfo.code : null
+    })
     const fullUrl = RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy'
     // 用 Electron 自带的 net 模块（走 Chromium 的网络栈），不用 Node 的 https 模块。
     const req = net.request({ method: 'POST', url: fullUrl })
@@ -2183,7 +2190,16 @@ function callDoubaoVision(apiKey, modelId, endpoint, imagePath, prompt, maxToken
       }
       const base64 = jpegBuffer.toString('base64')
       const mimeType = 'image/jpeg'
-      const body = JSON.stringify({ type: 'vision', imageBase64: base64, mimeType, prompt, maxTokens: maxTokens || 500 })
+      const licenseInfo = store.get('license') || {}
+      const body = JSON.stringify({
+        type: 'vision',
+        imageBase64: base64,
+        mimeType,
+        prompt,
+        maxTokens: maxTokens || 500,
+        deviceId: getDeviceId(),
+        licenseCode: licenseInfo.activated ? licenseInfo.code : null
+      })
       const url = new URL(RELAY_URL.replace(/\/+$/, '') + '/api/ai-proxy')
       const options = {
         hostname: url.hostname,

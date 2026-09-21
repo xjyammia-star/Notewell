@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Notewell 用量统计</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background:#f5f4f0; color:#2b2a27; margin:0; padding:24px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:#888780; font-size:13px; margin-bottom:20px; }
+  #login-box { max-width:360px; margin:80px auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  #login-box input { width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:14px; }
+  #login-box button, .btn { background:#3b6d11; color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-size:14px; }
+  #login-error { color:#c0392b; font-size:13px; min-height:18px; }
+  #app { display:none; max-width:1100px; margin:0 auto; }
+  .cards { display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .card { background:#fff; border-radius:12px; padding:16px 20px; min-width:150px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+  .card .num { font-size:24px; font-weight:600; }
+  .card .label { font-size:12px; color:#888780; margin-top:4px; }
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.05); margin-bottom:28px; }
+  th, td { padding:10px 12px; text-align:left; font-size:13px; border-bottom:1px solid #f0efe9; }
+  th { background:#faf9f5; color:#888780; font-weight:500; }
+  tr:last-child td { border-bottom:none; }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size:12px; color:#5f5e5a; }
+  .section-title { font-size:15px; font-weight:600; margin:0 0 10px; }
+  .fb-item { background:#fff; border-radius:10px; padding:14px 16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+  .fb-title { font-weight:600; font-size:14px; margin-bottom:4px; }
+  .fb-body { font-size:13px; color:#5f5e5a; white-space:pre-wrap; }
+  .fb-meta { font-size:11px; color:#b4b2a9; margin-top:6px; }
+  .empty { color:#b4b2a9; font-size:13px; padding:16px; text-align:center; }
+  .refresh-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+</style>
+</head>
+<body>
+
+<div id="login-box">
+  <h1>🔒 Notewell 后台</h1>
+  <div class="sub">输入访问密码</div>
+  <input type="password" id="secret-input" placeholder="密码" onkeydown="if(event.key==='Enter')doLogin()">
+  <button onclick="doLogin()">进入</button>
+  <div id="login-error"></div>
+</div>
+
+<div id="app">
+  <div class="refresh-row">
+    <div>
+      <h1>Notewell 用量统计</h1>
+      <div class="sub" id="last-updated"></div>
+    </div>
+    <button class="btn" onclick="loadData()">刷新</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="section-title">按用户 / 设备</div>
+  <table id="user-table">
+    <thead>
+      <tr>
+        <th>身份</th>
+        <th>类型</th>
+        <th>调用次数</th>
+        <th>近7天</th>
+        <th>近30天</th>
+        <th>输入 token</th>
+        <th>输出 token</th>
+        <th>首次使用</th>
+        <th>最近使用</th>
+      </tr>
+    </thead>
+    <tbody id="user-tbody"></tbody>
+  </table>
+
+  <div class="section-title">用户反馈</div>
+  <div id="feedback-list"></div>
+</div>
+
+<script>
+  const SECRET_KEY = 'nw_admin_secret'
+
+  function doLogin() {
+    const val = document.getElementById('secret-input').value.trim()
+    if (!val) return
+    sessionStorage.setItem(SECRET_KEY, val)
+    loadData()
+  }
+
+  function fmtNum(n) { return Number(n || 0).toLocaleString('zh-CN') }
+  function fmtDate(s) {
+    if (!s) return '—'
+    const d = new Date(s)
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') +
+      ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0')
+  }
+
+  async function loadData() {
+    const secret = sessionStorage.getItem(SECRET_KEY)
+    if (!secret) return
+    document.getElementById('login-error').textContent = ''
+    try {
+      const resp = await fetch('/api/admin-stats', { headers: { 'x-admin-secret': secret } })
+      const data = await resp.json()
+      if (!resp.ok || !data.success) {
+        if (resp.status === 401) {
+          sessionStorage.removeItem(SECRET_KEY)
+          document.getElementById('login-box').style.display = 'block'
+          document.getElementById('app').style.display = 'none'
+          document.getElementById('login-error').textContent = '密码错误'
+          return
+        }
+        document.getElementById('login-error').textContent = data.error || '加载失败'
+        return
+      }
+      document.getElementById('login-box').style.display = 'none'
+      document.getElementById('app').style.display = 'block'
+      render(data)
+    } catch (e) {
+      document.getElementById('login-error').textContent = '网络错误：' + e.message
+    }
+  }
+
+  function render(data) {
+    document.getElementById('last-updated').textContent = '更新时间：' + fmtDate(new Date().toISOString())
+
+    const t = data.totals
+    document.getElementById('cards').innerHTML = `
+      <div class="card"><div class="num">${fmtNum(t.total_users)}</div><div class="label">累计用户/设备数</div></div>
+      <div class="card"><div class="num">${fmtNum(t.total_calls)}</div><div class="label">总调用次数</div></div>
+      <div class="card"><div class="num">${fmtNum(t.total_input)}</div><div class="label">总输入 token</div></div>
+      <div class="card"><div class="num">${fmtNum(t.total_output)}</div><div class="label">总输出 token</div></div>
+    `
+
+    const tbody = document.getElementById('user-tbody')
+    if (!data.users.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">暂无数据</td></tr>'
+    } else {
+      tbody.innerHTML = data.users.map(u => `
+        <tr>
+          <td class="mono">${u.license_code || (u.device_id ? u.device_id.slice(0,8) : '—')}</td>
+          <td>${u.license_code ? '已激活' : '试用中'}</td>
+          <td>${fmtNum(u.total_calls)}</td>
+          <td>${fmtNum(u.calls_7d)}</td>
+          <td>${fmtNum(u.calls_30d)}</td>
+          <td>${fmtNum(u.input_tokens)}</td>
+          <td>${fmtNum(u.output_tokens)}</td>
+          <td>${fmtDate(u.first_seen)}</td>
+          <td>${fmtDate(u.last_seen)}</td>
+        </tr>
+      `).join('')
+    }
+
+    const fbBox = document.getElementById('feedback-list')
+    if (!data.feedback.available) {
+      fbBox.innerHTML = '<div class="empty">反馈服务未配置</div>'
+    } else if (!data.feedback.items.length) {
+      fbBox.innerHTML = '<div class="empty">暂无反馈</div>'
+    } else {
+      fbBox.innerHTML = data.feedback.items.map(f => `
+        <div class="fb-item">
+          <div class="fb-title"><a href="${f.url}" target="_blank" style="color:inherit">${escapeHtml(f.title)}</a></div>
+          <div class="fb-body">${escapeHtml((f.body || '').slice(0, 500))}</div>
+          <div class="fb-meta">${f.state === 'open' ? '🟢 未处理' : '⚪ 已关闭'} · ${fmtDate(f.createdAt)}</div>
+        </div>
+      `).join('')
+    }
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement('div')
+    div.textContent = s || ''
+    return div.innerHTML
+  }
+
+  // 如果之前登录过（同一浏览器会话内），直接尝试加载
+  if (sessionStorage.getItem(SECRET_KEY)) {
+    loadData()
+  }
+</script>
+
+</body>
+</html>

@@ -1398,19 +1398,6 @@
     </div>
   </div>
 
-  <!-- Token 使用统计 -->
-  <div class="section-title" style="margin-top:16px" id="set-tokenstats-title">Token 使用统计</div>
-  <div class="settings-section" id="token-stats-section">
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button id="token-tab-today" onclick="switchTokenTab('today')" class="btn-sm" style="background:#3b6d11;color:#fff">今天</button>
-      <button id="token-tab-week" onclick="switchTokenTab('week')" class="btn-sm">最近7天</button>
-      <button id="token-tab-month" onclick="switchTokenTab('month')" class="btn-sm">最近30天</button>
-    </div>
-    <div id="token-stats-content" style="font-size:13px;color:#5f5e5a">
-      <div style="color:#b4b2a9" id="token-stats-loading">加载中...</div>
-    </div>
-  </div>
-
   <!-- 版本信息 / 问题反馈 已挪到设置页顶部"账户与订阅"下方，此处不再重复 -->
 
         </div><!-- /#nw-inner-settings -->
@@ -2554,7 +2541,7 @@ function showPage(name) {
     studyReviewLoadFolders()
   }
   if (name === 'import') { loadFolders(); loadInboxFiles(); const ir=document.getElementById('import-result');if(ir)ir.classList.add('hidden');const ia=document.getElementById('import-ai-results');if(ia)ia.classList.add('hidden');const il=document.getElementById('import-results-list');if(il)il.innerHTML='' }
-  if (name === 'settings') { loadAiSettings(); loadTokenStats() }
+  if (name === 'settings') { loadAiSettings() }
   if (name === 'convert') nwConvertInitPage()
   if (name === 'schedule') nwScheduleInitPage()
   if (name === 'ai') { showAiHome() }

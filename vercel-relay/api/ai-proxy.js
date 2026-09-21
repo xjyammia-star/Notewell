@@ -2,6 +2,43 @@
 // 作用：客户端把请求发到这里，这里再用 Vercel 环境变量里的 Key
 // 去调用火山引擎方舟平台。API Key 只存在这里，不会出现在客户端代码里。
 
+import { neon } from '@neondatabase/serverless'
+
+const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null
+
+let tableReady = false
+async function ensureUsageTable() {
+  if (tableReady || !sql) return
+  await sql`
+    CREATE TABLE IF NOT EXISTS usage_logs (
+      id BIGSERIAL PRIMARY KEY,
+      license_code TEXT,
+      device_id TEXT NOT NULL,
+      call_type TEXT NOT NULL,
+      input_tokens INTEGER DEFAULT 0,
+      output_tokens INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `
+  tableReady = true
+}
+
+// 记录一次用量。任何失败都只打日志、不抛出——统计功能绝不能影响 AI 请求本身能不能用。
+async function logUsage({ licenseCode, deviceId, callType, usage }) {
+  if (!sql || !deviceId) return
+  try {
+    await ensureUsageTable()
+    const inputTokens = (usage && (usage.prompt_tokens ?? usage.input_tokens)) || 0
+    const outputTokens = (usage && (usage.completion_tokens ?? usage.output_tokens)) || 0
+    await sql`
+      INSERT INTO usage_logs (license_code, device_id, call_type, input_tokens, output_tokens)
+      VALUES (${licenseCode || null}, ${deviceId}, ${callType}, ${inputTokens}, ${outputTokens})
+    `
+  } catch (e) {
+    console.error('usage log failed:', e && e.message)
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed' })
@@ -13,7 +50,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }
 
-  const { type, messages, maxTokens, imageBase64, mimeType, prompt } = req.body || {}
+  const { type, messages, maxTokens, imageBase64, mimeType, prompt, licenseCode, deviceId } = req.body || {}
 
   try {
     if (type === 'text' || type === 'health') {
@@ -26,6 +63,9 @@ export default async function handler(req, res) {
           : messages,
         maxTokens: type === 'health' ? 5 : maxTokens
       })
+      if (type === 'text' && result.success) {
+        await logUsage({ licenseCode, deviceId, callType: 'text', usage: result.usage })
+      }
       return res.status(200).json(result)
     }
 
@@ -51,6 +91,9 @@ export default async function handler(req, res) {
         messages: visionMessages,
         maxTokens: type === 'health_vision' ? 5 : maxTokens
       })
+      if (type === 'vision' && result.success) {
+        await logUsage({ licenseCode, deviceId, callType: 'vision', usage: result.usage })
+      }
       return res.status(200).json(result)
     }
 
