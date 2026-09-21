@@ -6,6 +6,21 @@ import { neon } from '@neondatabase/serverless'
 
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null
 
+async function ensureUsageTable() {
+  if (!sql) return
+  await sql`
+    CREATE TABLE IF NOT EXISTS usage_logs (
+      id BIGSERIAL PRIMARY KEY,
+      license_code TEXT,
+      device_id TEXT NOT NULL,
+      call_type TEXT NOT NULL,
+      input_tokens INTEGER DEFAULT 0,
+      output_tokens INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed' })
@@ -21,6 +36,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    await ensureUsageTable()
     const [totalsRows, userRows, feedback] = await Promise.all([
       sql`
         SELECT
