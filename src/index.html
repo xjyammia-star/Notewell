@@ -5830,6 +5830,7 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.1.6', items: ['复习备考的练习题生成优化：题量会根据资料内容的丰富程度自动增加，不再是固定的少量题目；出题会尽量覆盖资料里不同的知识点；重新生成时会尽量避免和上一次出现重复或高度相似的题目', '复习备考读取资料的长度上限大幅提高，资料较长时内容不容易被截断'] },
   { version: '1.1.5', items: ['设置页移除了一个内部测试用的调试窗口'] },
   { version: '1.1.4', items: ['修复首页"文件夹"和"文件列表"两栏宽度比例失常的问题：搜索结果内容较长时，文件列表栏会把文件夹栏挤压变窄，现在两栏严格按固定比例分配，不再受内容长度影响'] },
   { version: '1.1.3', items: ['Mac 安装包升级为 universal（通用）版本，原生支持 Apple 芯片（M1/M2/M3/M4），无需再通过 Rosetta 转译运行；Windows 端本次无代码改动', '修复 Mac 端"发现新版本"提示里下载链接指向错误仓库地址的问题（历史遗留），并改为点击后直接下载安装包，不用再跳转到发布页面找文件'] },
@@ -6620,7 +6621,8 @@ async function studyGenerateReview() {
       userRequirements,
       generateType,
       vaultPath,
-      outputLang: document.querySelector('input[name="study-output-lang"]:checked')?.value || '中文'
+      outputLang: document.querySelector('input[name="study-output-lang"]:checked')?.value || '中文',
+      previousResult: studyReviewResultContent || null
     })
 
     if (result.locked) {

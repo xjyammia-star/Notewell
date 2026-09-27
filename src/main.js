@@ -1409,7 +1409,7 @@ function logAICall(line) {
 }
 
 // ── AI 调用（火山引擎）──
-function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry) {
+function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry, temperature) {
   // apiKey/modelId/endpoint 参数保留只是为了不用改调用这个函数的几十处代码，
   // 实际已经不再使用——AI 请求现在统一发给 Vercel 中转服务，Key 由中转服务端保管。
   const timeoutMs = 120000
@@ -1423,6 +1423,7 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
       type: 'text',
       messages,
       maxTokens: maxTokens || 500,
+      temperature,
       deviceId: getDeviceId(),
       licenseCode: licenseInfo.activated ? licenseInfo.code : null
     })
@@ -1486,7 +1487,7 @@ function callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, _isRetry)
     // 重试仍失败或其他类型的错误（认证失败、格式错误等）不会重试，直接把原始错误抛出去
     if (err && err.message === 'STALLED_NO_RESPONSE' && !_isRetry) {
       logAICall(`[${callId}] 判定卡住，准备自动重试`)
-      return callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, true)
+      return callVolcanoAI(apiKey, modelId, endpoint, messages, maxTokens, true, temperature)
     }
     if (err && err.message === 'STALLED_NO_RESPONSE') {
       logAICall(`[${callId}] 重试后仍卡住，放弃`)
@@ -3678,7 +3679,7 @@ ${expandBoundaryInstruction}
   }
 })
 
-ipcMain.handle('study-generate-review', async (event, { filePaths, userRequirements, generateType, outputLang, vaultPath }) => {
+ipcMain.handle('study-generate-review', async (event, { filePaths, userRequirements, generateType, outputLang, vaultPath, previousResult }) => {
   const accessError = await checkAiAccessOrError()
   if (accessError) return accessError
   const settings = store.get('aiSettings', {})
@@ -3699,10 +3700,10 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
       const fileName = path.basename(filePath, ext)
       let body = ''
       if (ext === '.pdf') {
-        body = await extractPdfText(filePath, 3000)
+        body = await extractPdfText(filePath, 20000)
       } else {
         const raw = fs.readFileSync(filePath, 'utf-8')
-        body = raw.replace(/^---[\s\S]*?---\n?/, '').trim().slice(0, 3000)
+        body = raw.replace(/^---[\s\S]*?---\n?/, '').trim().slice(0, 20000)
       }
       if (body) fileSummaries.push({ fileName, body })
     } catch (_) {}
@@ -3718,11 +3719,11 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
   if (generateType === 'review') {
     typeInstruction = '请生成系统的复习资料，包括：核心知识点梳理、重要概念总结、知识框架（可用表格或层级结构）、易错点提醒。'
   } else if (generateType === 'quiz') {
-    typeInstruction = `请根据内容生成练习题。格式要求如下：
+    typeInstruction = `请根据内容生成练习题。出题量要根据资料实际包含的知识点数量来定——资料涵盖的知识点越多，题目就应该相应越多，下面给的是最低题量，资料信息丰富时可以适当超过；同时要尽量覆盖资料里不同的知识点，不要围着同一个小知识点反复出题、也不要出内容换汤不换药的重复题。格式要求如下：
 第一部分：题目（只显示题目，不显示答案）
-- 选择题（5-8题）：只列出题目和选项 A/B/C/D，不标注答案
-- 填空题（3-5题）：只列出题目，用"___"表示空格
-- 简答题（2-3题）：只列出题目
+- 选择题（至少8题，资料丰富可以更多）：只列出题目和选项 A/B/C/D，不标注答案
+- 填空题（至少5题，资料丰富可以更多）：只列出题目，用"___"表示空格
+- 简答题（至少3题，资料丰富可以更多）：只列出题目
 
 第二部分：答案与解析（放在所有题目之后，用分隔线隔开）
 - 对应每道题给出正确答案和详细解析`
@@ -3733,9 +3734,10 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
 - 核心知识点梳理、重要概念总结、知识框架、易错点提醒
 
 第二部分：练习题（题目部分）
-- 选择题（5题）：只列出题目和选项，不标注答案
-- 填空题（3题）：只列出题目，用"___"表示空格
-- 简答题（2题）：只列出题目
+出题量要根据资料实际包含的知识点数量来定，下面是最低题量，资料信息丰富时可以适当超过；同时要尽量覆盖资料里不同的知识点，不要围着同一个小知识点反复出题：
+- 选择题（至少6题）：只列出题目和选项，不标注答案
+- 填空题（至少4题）：只列出题目，用"___"表示空格
+- 简答题（至少2题）：只列出题目
 
 第三部分：答案与解析（用分隔线与题目部分分隔）
 - 对应每道题给出正确答案和详细解析`
@@ -3751,6 +3753,12 @@ ipcMain.handle('study-generate-review', async (event, { filePaths, userRequireme
 - 如果学生要求的产出是一份可以直接誊抄/提交的成品文本（比如带字数或篇幅要求的作文、文章、短文、报告、演讲稿等有明确体裁要求的完整文本），不管内容本身是客观史实还是主观观点，都不能直接生成这份成品——因为这很可能就是学生需要自己完成的作业本身。这种情况下，你可以提供：相关史实/知识点梳理、可以用到的写作结构提纲（比如"背景—经过—影响"式分段思路）、每一段可以写的方向和要点，但不要直接写出可以直接誊抄提交的完整成文。
 - 如果你判断学生的要求属于上面几类不该满足的情况（要求引入资料之外的知识点、要求生成主观内容、要求直接解题/给答案、或要求直接产出可提交的成品文本），在生成正文的最开头用一段话提醒："💡 提醒：你的部分要求可能是希望 AI 直接替你完成本该自己思考的内容，为了不影响学习效果，这部分本次没有按你的要求生成，请自己动脑完成这部分。"，然后完全忽略这部分不合理的要求，仍然按下面的任务说明正常生成内容。如果你判断学生的要求完全合规，不属于上面任何一类不该满足的情况，请不要输出这句提醒语，也不要额外解释你的判断过程，直接正常生成内容即可。`
 
+  // 如果学生点了"返回修改"后又重新生成（且这次包含练习题），把上次生成的内容带给 AI，
+  // 明确要求别再出一样/换汤不换药的题，尽量提高两次生成之间的差异度
+  const avoidRepeatInstruction = (previousResult && (generateType === 'quiz' || generateType === 'both'))
+    ? `\n特别注意：这不是第一次生成，学生之前已经生成过一批内容，具体如下。这次请换一批不一样的题目（可以是不同的知识点角度、不同的题型侧重、不同的具体问法），不要跟下面这批出现重复或高度相似的题目：\n---上次生成的内容（仅供参考，不要在这次输出里重复出现）---\n${(previousResult || '').slice(0, 4000)}\n---\n`
+    : ''
+
   const reviewPrompt = `你是一位专业的学习辅导老师。${langInstruction}${mathInstruction}
 请根据以下知识库资料，为学生生成学习辅助内容。
 
@@ -3758,7 +3766,7 @@ ${userRequirements ? `学生特别要求：${userRequirements}\n` : ''}
 ${userRequirements ? boundaryInstruction + '\n' : ''}
 任务说明：
 ${typeInstruction}
-
+${avoidRepeatInstruction}
 要求：
 - 内容要基于所提供的资料，不要凭空编造
 - 结构清晰，重点突出
@@ -3768,8 +3776,10 @@ ${typeInstruction}
 ${combinedContent}`
 
   try {
+    const reviewMaxTokens = generateType === 'review' ? 6000 : (generateType === 'quiz' ? 9000 : 11000)
+    const reviewTemperature = (generateType === 'quiz' || generateType === 'both') ? 0.8 : undefined
     const replyObj = await callVolcanoAI(settings.apiKey, settings.modelId, settings.endpoint,
-      [{ role: 'user', content: reviewPrompt }], 6000)
+      [{ role: 'user', content: reviewPrompt }], reviewMaxTokens, false, reviewTemperature)
     recordTokenUsage('study', 'text', replyObj.usage.prompt_tokens||0, replyObj.usage.completion_tokens||0)
 
     if (!replyObj.content) return { success: false, error: 'AI 返回内容为空' }

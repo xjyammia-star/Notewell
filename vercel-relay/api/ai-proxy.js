@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }
 
-  const { type, messages, maxTokens, imageBase64, mimeType, prompt, licenseCode, deviceId } = req.body || {}
+  const { type, messages, maxTokens, imageBase64, mimeType, prompt, licenseCode, deviceId, temperature } = req.body || {}
 
   try {
     if (type === 'text' || type === 'health') {
@@ -61,7 +61,8 @@ export default async function handler(req, res) {
         messages: type === 'health'
           ? [{ role: 'user', content: '你好，请回复 OK' }]
           : messages,
-        maxTokens: type === 'health' ? 5 : maxTokens
+        maxTokens: type === 'health' ? 5 : maxTokens,
+        temperature: type === 'health' ? undefined : temperature
       })
       if (type === 'text' && result.success) {
         await logUsage({ licenseCode, deviceId, callType: 'text', usage: result.usage })
@@ -103,23 +104,25 @@ export default async function handler(req, res) {
   }
 }
 
-async function callArk({ apiKey, modelId, endpoint, messages, maxTokens }) {
+async function callArk({ apiKey, modelId, endpoint, messages, maxTokens, temperature }) {
   if (!apiKey || !modelId) {
     return { success: false, error: '服务端未配置 API Key 或模型 ID（请检查 Vercel 环境变量）' }
   }
   const url = endpoint.replace(/\/+$/, '') + '/chat/completions'
+  const reqBody = {
+    model: modelId,
+    messages,
+    max_tokens: maxTokens || 500,
+    thinking: { type: 'disabled' }
+  }
+  if (typeof temperature === 'number') reqBody.temperature = temperature
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + apiKey
     },
-    body: JSON.stringify({
-      model: modelId,
-      messages,
-      max_tokens: maxTokens || 500,
-      thinking: { type: 'disabled' }
-    })
+    body: JSON.stringify(reqBody)
   })
   const data = await resp.json()
   if (!resp.ok) {
