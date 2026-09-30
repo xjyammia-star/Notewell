@@ -116,16 +116,31 @@ async function callArk({ apiKey, modelId, endpoint, messages, maxTokens, tempera
     thinking: { type: 'disabled' }
   }
   if (typeof temperature === 'number') reqBody.temperature = temperature
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey
-    },
-    body: JSON.stringify(reqBody)
-  })
-  const data = await resp.json()
+  let resp
+  try {
+    resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify(reqBody)
+    })
+  } catch (e) {
+    const cause = e && e.cause ? (e.cause.code || e.cause.message || String(e.cause)) : ''
+    console.error('ark fetch failed:', e && e.message, cause)
+    return { success: false, error: `连接火山引擎失败：${(e && e.message) || e}${cause ? '（' + cause + '）' : ''}` }
+  }
+  const rawText = await resp.text()
+  let data
+  try {
+    data = JSON.parse(rawText)
+  } catch (e) {
+    console.error('ark non-json response:', resp.status, rawText.slice(0, 300))
+    return { success: false, error: `火山引擎返回了无法解析的内容（状态码 ${resp.status}）：${rawText.slice(0, 200)}` }
+  }
   if (!resp.ok) {
+    console.error('ark error response:', resp.status, rawText.slice(0, 300))
     const msg = (data && data.error && data.error.message) || `请求失败（状态码 ${resp.status}）`
     return { success: false, error: msg }
   }
