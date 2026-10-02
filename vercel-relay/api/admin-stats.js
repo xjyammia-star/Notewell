@@ -65,7 +65,7 @@ export default async function handler(req, res) {
           ORDER BY day DESC
         `
 
-    const [totalsRows, userRows, dailyRows, feedback] = await Promise.all([
+    const [totalsRows, userRows, dailyRows, feedback, licenses] = await Promise.all([
       sql`
         SELECT
           COUNT(DISTINCT COALESCE(license_code, device_id)) AS total_users,
@@ -91,7 +91,8 @@ export default async function handler(req, res) {
         ORDER BY (SUM(input_tokens) + SUM(output_tokens)) DESC
       `,
       dailyPromise,
-      fetchFeedback()
+      fetchFeedback(),
+      fetchAfdianLicenses()
     ])
 
     return res.status(200).json({
@@ -99,10 +100,68 @@ export default async function handler(req, res) {
       totals: totalsRows[0] || { total_users: 0, total_calls: 0, total_input: 0, total_output: 0 },
       users: userRows,
       daily: dailyRows,
-      feedback
+      feedback,
+      licenses
     })
   } catch (e) {
     return res.status(500).json({ success: false, error: String((e && e.message) || e) })
+  }
+}
+
+function parseCodeList(envValue) {
+  return (envValue || '').split(',').map(c => c.trim()).filter(Boolean)
+}
+
+// 爱发电激活码使用情况：以环境变量里配置的码为准，对照数据库里的激活记录，
+// 看每个码是"未使用"还是"已激活"，以及激活日期、到期日、累计调用 AI 的次数。
+// 任何一步失败都只让这一块显示为空，不影响页面上其它统计。
+async function fetchAfdianLicenses() {
+  const annualCodes = parseCodeList(process.env.AFDIAN_ANNUAL_CODES)
+  const lifetimeCodes = parseCodeList(process.env.AFDIAN_LIFETIME_CODES)
+  const empty = { available: false, annual: { total: 0, used: 0, items: [] }, lifetime: { total: 0, used: 0, items: [] } }
+  if (!annualCodes.length && !lifetimeCodes.length) return empty
+
+  try {
+    await sql`ALTER TABLE license_devices ADD COLUMN IF NOT EXISTS first_activated_at TIMESTAMPTZ`
+    const bindRows = await sql`SELECT license_code, first_activated_at, updated_at FROM license_devices`
+    const usageRows = await sql`
+      SELECT license_code, COUNT(*) AS calls,
+             COALESCE(SUM(input_tokens), 0) + COALESCE(SUM(output_tokens), 0) AS tokens
+      FROM usage_logs WHERE license_code IS NOT NULL GROUP BY license_code
+    `
+    const bindMap = new Map(bindRows.map(r => [r.license_code, r]))
+    const usageMap = new Map(usageRows.map(r => [r.license_code, r]))
+
+    const build = (codes, isAnnual) => {
+      const items = codes.map(code => {
+        const b = bindMap.get(code)
+        const u = usageMap.get(code)
+        const activated = !!b
+        const firstAt = b && b.first_activated_at ? new Date(b.first_activated_at) : null
+        let expiresAt = null
+        let expired = false
+        if (isAnnual && firstAt) {
+          expiresAt = new Date(firstAt.getTime() + 365 * 24 * 60 * 60 * 1000)
+          expired = expiresAt.getTime() <= Date.now()
+        }
+        return {
+          code,
+          activated,
+          firstActivatedAt: firstAt ? firstAt.toISOString() : null,
+          expiresAt: expiresAt ? expiresAt.toISOString() : null,
+          expired,
+          lastBoundAt: b && b.updated_at ? new Date(b.updated_at).toISOString() : null,
+          calls: u ? Number(u.calls) : 0,
+          tokens: u ? Number(u.tokens) : 0
+        }
+      })
+      return { total: items.length, used: items.filter(i => i.activated).length, items }
+    }
+
+    return { available: true, annual: build(annualCodes, true), lifetime: build(lifetimeCodes, false) }
+  } catch (e) {
+    console.error('afdian license stats failed:', e && e.message)
+    return empty
   }
 }
 

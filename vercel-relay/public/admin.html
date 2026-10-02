@@ -57,6 +57,24 @@
 
   <div class="cards" id="cards"></div>
 
+  <div class="section-title">爱发电激活码使用情况</div>
+  <div class="cards" id="license-cards"></div>
+  <table id="license-table">
+    <thead>
+      <tr>
+        <th>激活码</th>
+        <th>类型</th>
+        <th>状态</th>
+        <th>首次激活</th>
+        <th>到期日</th>
+        <th>最近换设备/激活</th>
+        <th>AI 调用次数</th>
+        <th>token 合计</th>
+      </tr>
+    </thead>
+    <tbody id="license-tbody"></tbody>
+  </table>
+
   <div class="section-title" id="daily-title">按天统计（最近30天）</div>
   <div class="range-bar">
     <button class="range-btn" id="range-today" onclick="setDailyRange('today')">今天</button>
@@ -187,6 +205,45 @@
       <div class="card"><div class="num">${fmtNum(t.total_input)}</div><div class="label">总输入 token</div></div>
       <div class="card"><div class="num">${fmtNum(t.total_output)}</div><div class="label">总输出 token</div></div>
     `
+
+    const lic = data.licenses
+    const licCards = document.getElementById('license-cards')
+    const licTbody = document.getElementById('license-tbody')
+    if (!lic || !lic.available) {
+      licCards.innerHTML = ''
+      licTbody.innerHTML = '<tr><td colspan="8" class="empty">未配置爱发电激活码（AFDIAN_ANNUAL_CODES / AFDIAN_LIFETIME_CODES），或暂时读取失败</td></tr>'
+    } else {
+      const usedTotal = lic.annual.used + lic.lifetime.used
+      const allTotal = lic.annual.total + lic.lifetime.total
+      licCards.innerHTML = `
+        <div class="card"><div class="num">${fmtNum(usedTotal)} / ${fmtNum(allTotal)}</div><div class="label">已激活 / 全部码</div></div>
+        <div class="card"><div class="num">${fmtNum(lic.annual.used)} / ${fmtNum(lic.annual.total)}</div><div class="label">一年期 已激活 / 总数（剩余 ${fmtNum(lic.annual.total - lic.annual.used)}）</div></div>
+        <div class="card"><div class="num">${fmtNum(lic.lifetime.used)} / ${fmtNum(lic.lifetime.total)}</div><div class="label">终身 已激活 / 总数（剩余 ${fmtNum(lic.lifetime.total - lic.lifetime.used)}）</div></div>
+      `
+      const rows = [
+        ...lic.annual.items.map(i => ({ ...i, kind: '一年期' })),
+        ...lic.lifetime.items.map(i => ({ ...i, kind: '终身' }))
+      ].sort((a, b) => {
+        if (a.activated !== b.activated) return a.activated ? -1 : 1
+        return (b.firstActivatedAt || '').localeCompare(a.firstActivatedAt || '')
+      })
+      licTbody.innerHTML = rows.map(i => {
+        let status = '<span style="color:#b4b2a9">未使用</span>'
+        if (i.activated) status = i.expired ? '<span style="color:#c0392b">已过期</span>' : '<span style="color:#3b6d11">使用中</span>'
+        return `
+          <tr>
+            <td class="mono">${escapeHtml(i.code)}</td>
+            <td>${i.kind}</td>
+            <td>${status}</td>
+            <td>${fmtDate(i.firstActivatedAt)}</td>
+            <td>${i.kind === '终身' ? (i.activated ? '永久' : '—') : fmtDate(i.expiresAt)}</td>
+            <td>${fmtDate(i.lastBoundAt)}</td>
+            <td>${fmtNum(i.calls)}</td>
+            <td>${fmtNum(i.tokens)}</td>
+          </tr>
+        `
+      }).join('')
+    }
 
     const dailyTbody = document.getElementById('daily-tbody')
     if (!data.daily || !data.daily.length) {
