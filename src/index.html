@@ -1315,7 +1315,7 @@
     </div>
     <div id="license-msg" style="font-size:12px;margin-top:8px;display:none"></div>
     <div style="margin-top:10px">
-      <a href="javascript:void(0)" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" id="license-payhip-link" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？前往 Payhip 购买 →</a>
+      <a href="javascript:void(0)" onclick="nwShowPricingModal()" id="license-payhip-link" style="font-size:12px;color:var(--accent,#534ab7);text-decoration:none">🛒 还没有激活码？查看价格并购买 →</a>
     </div>
   </div>
 
@@ -1782,21 +1782,22 @@
       <div style="background:var(--st-input-bg);border-radius:10px;padding:12px;text-align:center;display:flex;flex-direction:column;">
         <div style="display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;margin-bottom:6px;visibility:hidden;">占位</div>
         <div id="nw-pricing-annual-label" style="font-size:12px;color:var(--st-text-muted);margin-bottom:4px;">年付版</div>
-        <div id="nw-pricing-annual-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥499</div>
-        <div id="nw-pricing-annual-sub" style="font-size:12px;color:var(--st-text-muted);">฿2,499 / 年</div>
+        <div id="nw-pricing-annual-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥199</div>
+        <div id="nw-pricing-annual-sub" style="font-size:12px;color:var(--st-text-muted);">฿999 / 年</div>
       </div>
       <div style="background:var(--st-input-bg);border-radius:10px;padding:12px;text-align:center;border:2px solid var(--accent,#534ab7);display:flex;flex-direction:column;">
         <div id="nw-pricing-lifetime-badge" style="display:inline-block;font-size:11px;font-weight:600;color:var(--accent-text,#3c3489);background:var(--accent-light,#eeedfe);padding:2px 8px;border-radius:8px;margin-bottom:6px;">更划算</div>
         <div id="nw-pricing-lifetime-label" style="font-size:12px;color:var(--st-text-muted);margin-bottom:4px;">终身版</div>
-        <div id="nw-pricing-lifetime-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥1,199</div>
-        <div id="nw-pricing-lifetime-sub" style="font-size:12px;color:var(--st-text-muted);">฿5,999 · 一次性</div>
+        <div id="nw-pricing-lifetime-price" style="font-size:19px;font-weight:600;color:var(--st-text);">¥499</div>
+        <div id="nw-pricing-lifetime-sub" style="font-size:12px;color:var(--st-text-muted);">฿2,499 · 一次性</div>
       </div>
     </div>
     <p id="nw-pricing-reason" style="font-size:13px;color:var(--st-text-muted);line-height:1.7;margin:0 0 12px;">AI笔记的每一次生成，都需要调用真实的AI模型进行处理，会产生实际的Token成本——尤其是图片识别和文件处理，消耗的Token远高于纯文字。这部分成本会持续产生，因此需要收取合理的使用费用来维持服务运转。</p>
     <div style="border-top:1px solid var(--st-border);padding-top:12px;">
       <p id="nw-pricing-closing" style="font-size:13px;color:var(--st-text);line-height:1.7;margin:0;font-weight:600;">相当于1-2次补课的费用，换来每天10分钟的持续积累——主动养成学习习惯，长期看性价比很高。</p>
     </div>
-    <button class="nw-modal-save" id="nw-pricing-subscribe-btn" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="width:100%;margin-top:16px;">🛒 前往订阅</button>
+    <button class="nw-modal-save" id="nw-pricing-subscribe-btn-rmb" onclick="window.api.openExternalUrl('https://afdian.com/item/940c2ea6af1f11f1be7a52540025c377')" style="width:100%;margin-top:16px;">🛒 人民币支付（爱发电）</button>
+    <button class="nw-modal-save" id="nw-pricing-subscribe-btn-thb" onclick="window.api.openExternalUrl('https://payhip.com/b/0qvnb')" style="width:100%;margin-top:8px;">🛒 泰铢支付（Payhip）</button>
     <div id="nw-pricing-subscribe-note" style="font-size:12px;color:var(--st-text-muted);text-align:center;margin-top:6px;">订阅后获取激活码</div>
     <div class="nw-modal-btns" style="margin-top:12px;">
       <button class="nw-modal-cancel" id="nw-pricing-ok-btn" onclick="nwClosePricingModal()">知道了</button>
@@ -5830,6 +5831,7 @@ async function loadTokenStats() {
 
 // ── 更新日志（每发一个新版本，在这里最上面加一条；新的排在前面） ──
 const NW_CHANGELOG = [
+  { version: '1.1.7', items: ['价格调整：年付版 ¥199 / ฿999，终身版 ¥499 / ฿2,499', '收费说明里的"前往订阅"拆分为两个入口：人民币支付走爱发电，泰铢支付走 Payhip'] },
   { version: '1.1.6', items: ['复习备考的练习题生成优化：题量会根据资料内容的丰富程度自动增加，不再是固定的少量题目；出题会尽量覆盖资料里不同的知识点；重新生成时会尽量避免和上一次出现重复或高度相似的题目', '复习备考读取资料的长度上限大幅提高，资料较长时内容不容易被截断'] },
   { version: '1.1.5', items: ['设置页移除了一个内部测试用的调试窗口'] },
   { version: '1.1.4', items: ['修复首页"文件夹"和"文件列表"两栏宽度比例失常的问题：搜索结果内容较长时，文件列表栏会把文件夹栏挤压变窄，现在两栏严格按固定比例分配，不再受内容长度影响'] },
@@ -8123,14 +8125,14 @@ const NW_STRINGS = {
     setVersionLabel:'Current version', viewChangelogLink:'View changelog', feedbackBtn:'💬 Feedback',
     setLicenseTitle:'Account & Subscription', licenseLoading:'Loading...',
     licenseChangeLink:'🔁 Change activation code →', licenseCodePlaceholder:'Enter activation code',
-    licenseActivateBtn:'Activate', licensePayhipLink:'🛒 No activation code yet? Buy on Payhip →',
+    licenseActivateBtn:'Activate', licensePayhipLink:'🛒 No activation code yet? See pricing & buy →',
     pricingInfoLink:'💰 Pricing details', pricingModalTitle:'💰 Pricing details',
-    pricingAnnualLabel:'Annual', pricingAnnualPrice:'¥499', pricingAnnualSub:'฿2,499 / year',
-    pricingLifetimeBadge:'Best value', pricingLifetimeLabel:'Lifetime', pricingLifetimePrice:'¥1,199', pricingLifetimeSub:'฿5,999 · one-time',
+    pricingAnnualLabel:'Annual', pricingAnnualPrice:'¥199', pricingAnnualSub:'฿999 / year',
+    pricingLifetimeBadge:'Best value', pricingLifetimeLabel:'Lifetime', pricingLifetimePrice:'¥499', pricingLifetimeSub:'฿2,499 · one-time',
     pricingReason:'Every AI note generation calls a real AI model, which has an actual token cost — image recognition and file processing use far more tokens than plain text. This cost is ongoing, so a reasonable usage fee helps keep the service running.',
     pricingClosing:'That\'s roughly the cost of 1-2 tutoring sessions, in exchange for 10 minutes a day of steady progress — building a real study habit at a very good value.',
     pricingOkBtn:'Got it',
-    pricingSubscribeBtn:'🛒 Subscribe now', pricingSubscribeNote:'Get your activation code after subscribing',
+    pricingSubscribeRmb:'🛒 Pay in RMB (Afdian)', pricingSubscribeThb:'🛒 Pay in THB (Payhip)', pricingSubscribeNote:'Get your activation code after subscribing',
     changelogOkBtn:'Got it',
     changelogUpdateNote:'💡 Windows can detect and install updates automatically; on Mac, the app can only detect a new version is available — you\'ll need to download and install it manually.', feedbackModalTitle:'💬 Feedback / Suggestions',
     feedbackModalDesc:'Found a bug, or have an idea for a new feature? Write it here. The developer reads every piece of feedback and will schedule improvements when needed.',
@@ -8310,14 +8312,14 @@ const NW_STRINGS = {
     setVersionLabel:'当前版本', viewChangelogLink:'查看更新日志', feedbackBtn:'💬 我要反馈',
     setLicenseTitle:'账户与订阅', licenseLoading:'加载中...',
     licenseChangeLink:'🔁 更换激活码 →', licenseCodePlaceholder:'请输入激活码',
-    licenseActivateBtn:'激活', licensePayhipLink:'🛒 还没有激活码？前往 Payhip 购买 →',
+    licenseActivateBtn:'激活', licensePayhipLink:'🛒 还没有激活码？查看价格并购买 →',
     pricingInfoLink:'💰 查看收费说明', pricingModalTitle:'💰 收费说明',
-    pricingAnnualLabel:'年付版', pricingAnnualPrice:'¥499', pricingAnnualSub:'฿2,499 / 年',
-    pricingLifetimeBadge:'更划算', pricingLifetimeLabel:'终身版', pricingLifetimePrice:'¥1,199', pricingLifetimeSub:'฿5,999 · 一次性',
+    pricingAnnualLabel:'年付版', pricingAnnualPrice:'¥199', pricingAnnualSub:'฿999 / 年',
+    pricingLifetimeBadge:'更划算', pricingLifetimeLabel:'终身版', pricingLifetimePrice:'¥499', pricingLifetimeSub:'฿2,499 · 一次性',
     pricingReason:'AI笔记的每一次生成，都需要调用真实的AI模型进行处理，会产生实际的Token成本——尤其是图片识别和文件处理，消耗的Token远高于纯文字。这部分成本会持续产生，因此需要收取合理的使用费用来维持服务运转。',
     pricingClosing:'相当于1-2次补课的费用，换来每天10分钟的持续积累——主动养成学习习惯，长期看性价比很高。',
     pricingOkBtn:'知道了',
-    pricingSubscribeBtn:'🛒 前往订阅', pricingSubscribeNote:'订阅后获取激活码',
+    pricingSubscribeRmb:'🛒 人民币支付（爱发电）', pricingSubscribeThb:'🛒 泰铢支付（Payhip）', pricingSubscribeNote:'订阅后获取激活码',
     changelogOkBtn:'知道了',
     changelogUpdateNote:'💡 Windows 端支持自动检测并更新；Mac 端仅能检测到新版本，需要手动重新下载安装包完成更新。', feedbackModalTitle:'💬 问题反馈 / 功能建议',
     feedbackModalDesc:'遇到 Bug，或者有什么想要的新功能，都可以写在这里。开发者会认真查看每一条反馈，综合评估后，如有必要会安排后续更新进行改进。',
@@ -8577,7 +8579,8 @@ function applyLanguage() {
   set('nw-pricing-reason', s.pricingReason)
   set('nw-pricing-closing', s.pricingClosing)
   set('nw-pricing-ok-btn', s.pricingOkBtn)
-  set('nw-pricing-subscribe-btn', s.pricingSubscribeBtn)
+  set('nw-pricing-subscribe-btn-rmb', s.pricingSubscribeRmb)
+  set('nw-pricing-subscribe-btn-thb', s.pricingSubscribeThb)
   set('nw-pricing-subscribe-note', s.pricingSubscribeNote)
   // license-status-display 有真实状态时由 refreshLicenseStatus() 自己按语言渲染，
   // 这里只兜底刚启动、还没请求到状态时的"加载中..."默认文字

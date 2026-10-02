@@ -11,13 +11,37 @@ import { neon } from '@neondatabase/serverless'
 
 const sql = neon(process.env.DATABASE_URL)
 
+// 记录每个激活码"第一次被激活"的时间（爱发电一年期码靠它计算到期日）。
+// 旧表里没有这一列，第一次用到时自动补上，不需要手动去数据库操作。
+let columnReady = false
+async function ensureFirstActivatedColumn() {
+  if (columnReady) return
+  await sql`ALTER TABLE license_devices ADD COLUMN IF NOT EXISTS first_activated_at TIMESTAMPTZ`
+  columnReady = true
+}
+
 async function bindDevice(licenseCode, deviceId) {
+  await ensureFirstActivatedColumn()
+  // first_activated_at 只在第一次写入时记录，之后换设备、重复激活都不会改变它
   await sql`
-    INSERT INTO license_devices (license_code, device_id, updated_at)
-    VALUES (${licenseCode}, ${deviceId}, now())
+    INSERT INTO license_devices (license_code, device_id, updated_at, first_activated_at)
+    VALUES (${licenseCode}, ${deviceId}, now(), now())
     ON CONFLICT (license_code)
-    DO UPDATE SET device_id = EXCLUDED.device_id, updated_at = now()
+    DO UPDATE SET
+      device_id = EXCLUDED.device_id,
+      updated_at = now(),
+      first_activated_at = COALESCE(license_devices.first_activated_at, EXCLUDED.first_activated_at)
   `
+}
+
+async function getFirstActivatedAt(licenseCode) {
+  await ensureFirstActivatedColumn()
+  const rows = await sql`SELECT first_activated_at FROM license_devices WHERE license_code = ${licenseCode}`
+  return rows.length && rows[0].first_activated_at ? new Date(rows[0].first_activated_at) : null
+}
+
+function parseCodeList(envValue) {
+  return (envValue || '').split(',').map(c => c.trim()).filter(Boolean)
 }
 
 async function checkDeviceBinding(licenseCode, deviceId) {
@@ -89,7 +113,33 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, valid: true, type: 'friend', expiresAt })
   }
 
-  // 第二步：不是好友码，尝试当作 Payhip 激活码验证
+  // 第二步：爱发电激活码（AFDIAN_LIFETIME_CODES 终身 / AFDIAN_ANNUAL_CODES 一年期，均为逗号分隔）
+  const afdianLifetimeCodes = parseCodeList(process.env.AFDIAN_LIFETIME_CODES)
+  const afdianAnnualCodes = parseCodeList(process.env.AFDIAN_ANNUAL_CODES)
+
+  if (afdianLifetimeCodes.includes(trimmedCode)) {
+    try { await bindDevice(trimmedCode, deviceId) } catch (e) { /* 绑定失败不影响本次激活成功 */ }
+    return res.status(200).json({ success: true, valid: true, type: 'lifetime', expiresAt: null })
+  }
+
+  if (afdianAnnualCodes.includes(trimmedCode)) {
+    // 一年期：到期日 = 这个码第一次被激活的时间 + 365 天。必须成功读写数据库，
+    // 否则无法保证"换设备/重复输入不会重新计算一年"，宁可让用户稍后再试。
+    try {
+      await bindDevice(trimmedCode, deviceId)
+      const firstAt = await getFirstActivatedAt(trimmedCode)
+      if (!firstAt) throw new Error('first_activated_at missing')
+      const expiresAtDate = new Date(firstAt.getTime() + 365 * 24 * 60 * 60 * 1000)
+      if (expiresAtDate.getTime() <= Date.now()) {
+        return res.status(200).json({ success: true, valid: false, error: '该激活码的有效期已结束，如需继续使用请重新购买' })
+      }
+      return res.status(200).json({ success: true, valid: true, type: 'annual', expiresAt: expiresAtDate.toISOString() })
+    } catch (e) {
+      return res.status(200).json({ success: true, valid: false, error: '验证服务暂时不可用，请稍后再试' })
+    }
+  }
+
+  // 第三步：都不是，尝试当作 Payhip 激活码验证
   if (!process.env.PAYHIP_PRODUCT_SECRET_KEY) {
     return res.status(200).json({ success: true, valid: false, error: '激活码无效，请检查输入是否正确' })
   }
